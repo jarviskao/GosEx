@@ -1,5 +1,5 @@
 local SkillOrders = {		
-	["Aatrox"]          =   {HK_W, HK_Q, HK_E, HK_W, HK_W, HK_R, HK_W, HK_Q, HK_W, HK_Q, HK_R, HK_Q, HK_Q, HK_E, HK_E, HK_R, HK_E, HK_E},
+		["Aatrox"]          =   {HK_W, HK_Q, HK_E, HK_W, HK_W, HK_R, HK_W, HK_Q, HK_W, HK_Q, HK_R, HK_Q, HK_Q, HK_E, HK_E, HK_R, HK_E, HK_E},
         ["AurelionSol"]     =   {HK_Q, HK_W, HK_E, HK_Q, HK_Q, HK_R, HK_Q, HK_W, HK_Q, HK_W, HK_R, HK_W, HK_W, HK_E, HK_E, HK_R, HK_E, HK_E},
         ["Ahri"]            =   {HK_Q, HK_E, HK_W, HK_Q, HK_Q, HK_R, HK_Q, HK_W, HK_Q, HK_W, HK_R, HK_W, HK_W, HK_E, HK_E, HK_R, HK_W, HK_W},
         ["Akali"]           =   {HK_Q, HK_E, HK_W, HK_Q, HK_Q, HK_R, HK_Q, HK_E, HK_Q, HK_E, HK_R, HK_E, HK_E, HK_W, HK_W, HK_R, HK_W, HK_W},
@@ -131,7 +131,7 @@ local SkillOrders = {
         ["Zyra"]            =   {HK_Q, HK_W, HK_E, HK_Q, HK_Q, HK_R, HK_Q, HK_E, HK_Q, HK_E, HK_R, HK_E, HK_E, HK_W, HK_W, HK_R, HK_W, HK_W},
         ["Yasuo"]           =   {HK_E, HK_Q, HK_W, HK_E, HK_E, HK_R, HK_E, HK_Q, HK_E, HK_Q, HK_R, HK_Q, HK_Q, HK_W, HK_W, HK_R, HK_W, HK_W}
     }
-
+ 
 local lol = 7.5
 local ver = 1.0
 local tickCount = 0
@@ -144,10 +144,28 @@ for key,value in pairs(SkillOrders) do
 	end
 end
 
- if not support then return end
+if not support then return end
  
-PrintChat ("[Auto Level Spell]  Loaded : "..myHero.charName.." || Version: "..ver," ", "|| LoL Support : "..LoL)
+PrintChat ("[Auto Level Spell]  Loaded : "..myHero.charName.." || Version: "..ver," ", "|| LoL Support : "..lol)
  
+ --[[
+local count = 0
+function Sequence()
+	for i, value in pairs(SkillOrders) do
+		count = count + 1
+		if SkillOrders[myHero.charName][count] ~= nil and count <= 18 then
+			PrintChat (SkillOrders[myHero.charName][2])
+			if skillOrders[myHero.charName][(i)] == 81 then
+				table.insert(spellSequence, HK_Q)
+			elseif skillOrders[myHero.charName][(i)] == 69 then
+				table.insert(spellSequence, HK_E)
+			end
+			PrintChat ("Q: "..spellSequence)
+		end
+	end
+end
+--]]
+
 local MenuIcons = "http://vignette1.wikia.nocookie.net/getsetgames/images/8/82/Level_up_icon.png"
 
  --Main Menu
@@ -156,9 +174,10 @@ AMenu:MenuElement({id = "Enabled", name = "Enabled", value = true})
 
 --Auto Menu
 AMenu:MenuElement({type = MENU, id = "Auto", name = myHero.charName})
-AMenu.Auto:MenuElement({type = SPACE, name = "Order: Max Q -> E -> W"})
+AMenu.Auto:MenuElement({type = SPACE, name = "Suggest: Max Q -> E -> W"})
 AMenu.Auto:MenuElement({id = "UseAutoLvSpell", name = "Use Auto Level Spell", value = false})
 AMenu.Auto:MenuElement({id = "UseHumanizer", name = "Humanizer", value = true})
+AMenu.Auto:MenuElement({id = "HotKey",name = "Piority: 1st spell max : ", key = string.byte("Q")})
 
 
 function OnTick()
@@ -179,6 +198,7 @@ function OnTick()
 					Control.CastSpell(SkillOrders[myHero.charName][(myHero.levelData.lvl + 1 - myHero.levelData.lvlPts)])
 					Control.KeyUp(HK_LUS)	
 				end
+
 			end
 		end
 	end
