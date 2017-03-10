@@ -131,7 +131,9 @@ local SkillOrders = {
         ["Zyra"]            =   {HK_Q, HK_W, HK_E, HK_Q, HK_Q, HK_R, HK_Q, HK_E, HK_Q, HK_E, HK_R, HK_E, HK_E, HK_W, HK_W, HK_R, HK_W, HK_W},
         ["Yasuo"]           =   {HK_E, HK_Q, HK_W, HK_E, HK_E, HK_R, HK_E, HK_Q, HK_E, HK_Q, HK_R, HK_Q, HK_Q, HK_W, HK_W, HK_R, HK_W, HK_W}
     }
- 
+
+local lol = 7.5
+local ver = 1.0
 local tickCount = 0
 local support = false
 local spellSequence = {}
@@ -144,7 +146,7 @@ end
 
  if not support then return end
  
- PrintChat ("[Auto Level Spell]  Loaded : "..myHero.charName)
+PrintChat ("[Auto Level Spell]  Loaded : "..myHero.charName.." || Version: "..ver," ", "|| LoL Support : "..LoL)
  
 local MenuIcons = "http://vignette1.wikia.nocookie.net/getsetgames/images/8/82/Level_up_icon.png"
 
