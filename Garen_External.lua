@@ -91,7 +91,9 @@ end
 function OnTick()
 	if myHero.dead then return end
 	OnCombo()
-	
+	OnClear()
+	OnHarass()
+	OnLastHit()
 	--AutoLvSpell()
 end
 
@@ -105,6 +107,12 @@ function OnCombo()
 		if Game.CanUseSpell(_E) == READY then
 			Control.CastSpell(HK_E)
 		end
+	end
+end
+
+function OnLasthit()
+	if GMenu.LastHit.LastHitHotKey:Value() then
+		Contorl.CastSpell(HK_Q)
 	end
 end
 
