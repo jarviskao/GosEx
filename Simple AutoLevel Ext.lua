@@ -1,5 +1,5 @@
 local SkillOrders = {		
-		["Aatrox"]          =   {HK_W, HK_Q, HK_E, HK_W, HK_W, HK_R, HK_W, HK_Q, HK_W, HK_Q, HK_R, HK_Q, HK_Q, HK_E, HK_E, HK_R, HK_E, HK_E},
+	["Aatrox"]          =   {HK_W, HK_Q, HK_E, HK_W, HK_W, HK_R, HK_W, HK_Q, HK_W, HK_Q, HK_R, HK_Q, HK_Q, HK_E, HK_E, HK_R, HK_E, HK_E},
         ["AurelionSol"]     =   {HK_Q, HK_W, HK_E, HK_Q, HK_Q, HK_R, HK_Q, HK_W, HK_Q, HK_W, HK_R, HK_W, HK_W, HK_E, HK_E, HK_R, HK_E, HK_E},
         ["Ahri"]            =   {HK_Q, HK_E, HK_W, HK_Q, HK_Q, HK_R, HK_Q, HK_W, HK_Q, HK_W, HK_R, HK_W, HK_W, HK_E, HK_E, HK_R, HK_W, HK_W},
         ["Akali"]           =   {HK_Q, HK_E, HK_W, HK_Q, HK_Q, HK_R, HK_Q, HK_E, HK_Q, HK_E, HK_R, HK_E, HK_E, HK_W, HK_W, HK_R, HK_W, HK_W},
@@ -146,24 +146,6 @@ end
  
  PrintChat ("[Auto Level Spell]  Loaded : "..myHero.charName)
  
- --[[
-local count = 0
-function Sequence()
-	for i, value in pairs(SkillOrders) do
-		count = count + 1
-		if SkillOrders[myHero.charName][count] ~= nil and count <= 18 then
-			PrintChat (SkillOrders[myHero.charName][2])
-			if skillOrders[myHero.charName][(i)] == 81 then
-				table.insert(spellSequence, HK_Q)
-			elseif skillOrders[myHero.charName][(i)] == 69 then
-				table.insert(spellSequence, HK_E)
-			end
-			PrintChat ("Q: "..spellSequence)
-		end
-	end
-end
---]]
-
 local MenuIcons = "http://vignette1.wikia.nocookie.net/getsetgames/images/8/82/Level_up_icon.png"
 
  --Main Menu
@@ -195,10 +177,8 @@ function OnTick()
 					Control.CastSpell(SkillOrders[myHero.charName][(myHero.levelData.lvl + 1 - myHero.levelData.lvlPts)])
 					Control.KeyUp(HK_LUS)	
 				end
-
 			end
 		end
 	end
-	--Sequence()
 end
 
