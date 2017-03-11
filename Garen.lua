@@ -42,8 +42,8 @@ GMenu:MenuElement({type = MENU, id = "Mode", name = "Mode Settings"})
 GMenu.Mode:MenuElement({type = MENU, id = "Combo", name = "Combo"})
 GMenu.Mode.Combo:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon = SpellIcons.Q})
 --GMenu.Mode.Combo:MenuElement({id = "Qrange", name = "Min. range for use Q", value = 300, min = 100, max = 500 , step = 10 , leftIcon = RangeIcons})
-GMenu.Mode.Combo:MenuElement({id = "E", name = "Use E", value = true, leftIcon = SpellIcons.E})
 GMenu.Mode.Combo:MenuElement({id = "W", name = "Use W", value = true, leftIcon = SpellIcons.W})
+GMenu.Mode.Combo:MenuElement({id = "E", name = "Use E", value = true, leftIcon = SpellIcons.E})
 GMenu.Mode.Combo:MenuElement({id = "HotKey",name = "Combo HotKey", key = 32})
 
 --LastHit Menu
@@ -96,7 +96,12 @@ GMenu:MenuElement({type = MENU, id = "Misc", name = "Misc Settings"})
 	GMenu.Misc.DrawSpells:MenuElement({id = "R", name = "Draw R Range", value = true})
 
 PrintChat("[Garen] Menu Loaded")
-
+--[[
+PrintChat("Q = "..myHero:GetSpellData(_Q).name)
+PrintChat("E = "..myHero:GetSpellData(_W).name)
+PrintChat("W = "..myHero:GetSpellData(_E).name)
+PrintChat("R = "..myHero:GetSpellData(_R).name)
+--]]
 function OnDraw()
 	--Draw Range
 	if myHero.dead then return end
@@ -108,10 +113,10 @@ end
 function OnTick()
 	if myHero.dead or  not GMenu.Enabled:Value() then return end
 	OnCombo()
-	OnHarass()
-	OnClear()
-	KillSteal()
-	AutoLvSpell()
+	--OnHarass()
+	--OnClear()
+	--KillSteal()
+	--AutoLvSpell()
 end
 
 function OnCombo(target)
@@ -121,16 +126,19 @@ function OnCombo(target)
 		if isReady(_Q) and IsValidTarget(target,GarenQ.range) and GMenu.Mode.Combo.Q:Value() then
 			Control.CastSpell(HK_Q)
 			--PrintChat ("Q use")
+			PrintChat("Q = "..myHero:GetSpellData(_Q).name)
 		end
-		--E
-		if isReady(_E) and IsValidTarget(target,GarenQ.range) and GMenu.Mode.Combo.E:Value() then
-			Control.CastSpell(HK_E)
-			--PrintChat ("E use")
-		end
-		--E
+		--W
 		if isReady(_W) and IsValidTarget(target,GarenQ.range) and GMenu.Mode.Combo.W:Value() then
 			Control.CastSpell(HK_W)
 			--PrintChat ("W use")
+			PrintChat("W = "..myHero:GetSpellData(_W).name)
+		end
+		--E
+		if isReady(_E) and IsValidTarget(target,GarenQ.range) and GMenu.Mode.Combo.E:Value() and myHero:GetSpellData(_E).name == "GarenE" then
+			Control.CastSpell(HK_E)
+			--PrintChat ("E use")
+			PrintChat("E = "..myHero:GetSpellData(_E).name)
 		end
 	end
 end
