@@ -143,7 +143,7 @@
 	
 	--local
 	local lol = 7.5
-	local ver = 0.1
+	local ver = 0.2
 	local tickCountA = 0
 	local sequence = 0
 	local spellMaxfirst = string.char(DefaultSpellsOrders[myHero.charName][1])
@@ -160,25 +160,28 @@ local SpellsSequence = {
     [6]= { HK_E,HK_Q,HK_W,HK_E,HK_E,HK_R,HK_E,HK_Q,HK_E,HK_Q,HK_R,HK_Q,HK_Q,HK_W,HK_W,HK_R,HK_W,HK_W},	-- EQW
 }
 
+--http://i65.tinypic.com/23w1jes.png
 local MenuIcons = "http://vignette1.wikia.nocookie.net/getsetgames/images/8/82/Level_up_icon.png"
 
  --Main Menu
-local AMenu = MenuElement({type = MENU, id = "AMenu", name = "Auto Level Spell: Customizer", leftIcon = MenuIcons})
+local AMenu = MenuElement({type = MENU, id = "AMenu", name = "Auto Level Spells: Customizer", leftIcon = MenuIcons})
 AMenu:MenuElement({id = "UseAutoLvSpell", name = "Enable", value = false})
 
 --Auto Menu
 AMenu:MenuElement({type = MENU, id = "Auto", name = myHero.charName, leftIcon = "http://ddragon.leagueoflegends.com/cdn/6.24.1/img/champion/"..myHero.charName..".png"})
 AMenu.Auto:MenuElement({type = MENU, id = "SpellsOrder", name = "Spells Sequence", leftIcon = "http://www.swiftpcoptimizer.com/wp-content/uploads/2016/10/workflow.png"})
-AMenu.Auto.SpellsOrder:MenuElement({type = SPACE, name = "Suggest: Max "..spellMaxfirst.." first"})
-AMenu.Auto.SpellsOrder:MenuElement({id = "spell1",name = "Piority: 1st spell max : ", key = string.byte("Q")})
-AMenu.Auto.SpellsOrder:MenuElement({id = "spell2",name = "Piority: 2nd spell max : ", key = string.byte("W")})
-AMenu.Auto:MenuElement({id = "Disablelvl1", name = "Disable on first level", value =true, leftIcon =  "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/1_green.svg/480px-1_green.svg.png"})
+AMenu.Auto.SpellsOrder:MenuElement({id = "spell1",name = "Priority : 1st Spell Max", key = string.byte("Q")})
+AMenu.Auto.SpellsOrder:MenuElement({id = "spell2",name = "Priority : 2nd Spell Max", key = string.byte("W")})
+AMenu.Auto.SpellsOrder:MenuElement({type = SPACE, name = "Suggestion: Max "..spellMaxfirst.." first"})
+AMenu.Auto:MenuElement({id = "lvROnly", name = "R Spell Only", value =true, leftIcon =  "https://az691558.vo.msecnd.net/themes/m15106_usaca_5c54bec2/rossignol_r2.png"})
+AMenu.Auto:MenuElement({id = "Disablelvl1", name = "Disable on First Level", value =true, leftIcon =  "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/1_green.svg/480px-1_green.svg.png"})
 AMenu.Auto:MenuElement({id = "UseHumanizer", name = "Humanizer", value = true, leftIcon = "http://www.freeiconspng.com/uploads/-human-male-man-people-person-profile-red-user-icon--icon--23.png"})
 
 ----Info Menu
 AMenu:MenuElement({type = MENU, id = "info", name = "Script Info", leftIcon = "http://www.freeiconspng.com/uploads/information-icon-5.png"})
-AMenu.info:MenuElement({type = SPACE, name = "Script Version: Beta "..ver})
+AMenu.info:MenuElement({type = SPACE, name = "Script Version: "..ver})
 AMenu.info:MenuElement({type = SPACE, name = "Support LoL: "..lol})
+AMenu.info:MenuElement({type = SPACE, name = "Author: JarKao"})
 
 function SpellsSelect()
 	if	Game.Timer() - ScriptLoadTime >= 240 then return end
@@ -213,24 +216,37 @@ function AutoLevelSpell()
 		if (myHero.levelData.lvl + 1 - myHero.levelData.lvlPts) then
 			if AMenu.Auto.UseHumanizer:Value() then
 				tickCountA = tickCountA + 1
-				--PrintChat (tickCountA)
 			end
 			if AMenu.Auto.UseHumanizer:Value() and tickCountA >= 35 then
-				LevelSpell()
 				tickCountA = 0
+				if AMenu.Auto.lvROnly:Value() and myHero.levelData.lvl == (6 or 11 or 16)  then 
+					LevelRSpell()
+				elseif not AMenu.Auto.lvROnly:Value() then 
+					LevelSpell() 
+				end
 			elseif not AMenu.Auto.UseHumanizer:Value() then
-				LevelSpell()
+				if AMenu.Auto.lvROnly:Value() and myHero.levelData.lvl == (6 or 11 or 16) then 
+					LevelRSpell()
+				elseif not AMenu.Auto.lvROnly:Value() then 
+					LevelSpell() 
+				end
 			end		
 		end
 	end
 end
 
 function LevelSpell()
-				Control.KeyDown(HK_LUS)
-				if sequence == 0 then
-					Control.CastSpell (DefaultSpellsOrders[myHero.charName][(myHero.levelData.lvl + 1 - myHero.levelData.lvlPts)])
-				else
-					Control.CastSpell(SpellsSequence[sequence][(myHero.levelData.lvl + 1 - myHero.levelData.lvlPts)])
-				end
-				Control.KeyUp(HK_LUS)	
+		Control.KeyDown(HK_LUS)
+		if sequence == 0 then
+			Control.CastSpell (DefaultSpellsOrders[myHero.charName][(myHero.levelData.lvl + 1 - myHero.levelData.lvlPts)])
+		else
+			Control.CastSpell(SpellsSequence[sequence][(myHero.levelData.lvl + 1 - myHero.levelData.lvlPts)])
+		end
+		Control.KeyUp(HK_LUS)	
+end
+
+function LevelRSpell()
+	Control.KeyDown(HK_LUS)
+	Control.CastSpell(HK_R)
+	Control.KeyUp(HK_LUS)	
 end
