@@ -1,5 +1,5 @@
 # GosEx
 
-[Release] Auto Level Spells Customizer Ext 
+[Release] Auto Level Spells Customizer
 
-[Work in progress] Garen Ext
+[Work in progress] Garen
