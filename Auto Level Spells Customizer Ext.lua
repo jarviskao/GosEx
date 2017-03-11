@@ -143,11 +143,12 @@
 	
 	--local
 	local lol = 7.5
-	local ver = 0.2
+	local ver = 0.3
 	local tickCountA = 0
 	local sequence = 0
 	local spellMaxfirst = string.char(DefaultSpellsOrders[myHero.charName][1])
-	local spellMaxSecond = string.char(DefaultSpellsOrders[myHero.charName][2])
+	local spellMaxSecond = string.char(DefaultSpellsOrders[myHero.charName][8])
+	local spellMaxThird = string.char(DefaultSpellsOrders[myHero.charName][18])
 	local ScriptLoadTime = Game.Timer()
 	
 	PrintChat ("[Auto Level Spell]  Loaded : "..myHero.charName.." || Version: "..ver," ", "|| LoL Support : "..lol)
@@ -173,7 +174,7 @@ AMenu:MenuElement({type = MENU, id = "Auto", name = myHero.charName, leftIcon = 
 AMenu.Auto:MenuElement({type = MENU, id = "SpellsOrder", name = "Spells Sequence", leftIcon = "http://www.swiftpcoptimizer.com/wp-content/uploads/2016/10/workflow.png"})
 AMenu.Auto.SpellsOrder:MenuElement({id = "spell1",name = "Priority : 1st Spells Max", key = string.byte("Q")})
 AMenu.Auto.SpellsOrder:MenuElement({id = "spell2",name = "Priority : 2nd Spells Max", key = string.byte("W")})
-AMenu.Auto.SpellsOrder:MenuElement({type = SPACE, name = "Recommend : Max "..spellMaxfirst.." > "..spellMaxSecond})
+AMenu.Auto.SpellsOrder:MenuElement({type = SPACE, name = "Recommend : Max "..spellMaxfirst.." > "..spellMaxSecond.." > "..spellMaxThird})
 AMenu.Auto:MenuElement({id = "lvROnly", name = "R Spells Only", value =true, leftIcon =  "https://az691558.vo.msecnd.net/themes/m15106_usaca_5c54bec2/rossignol_r2.png"})
 AMenu.Auto:MenuElement({id = "Disablelvl1", name = "Disable on First Level", value =true, leftIcon =  "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/1_green.svg/480px-1_green.svg.png"})
 AMenu.Auto:MenuElement({id = "UseHumanizer", name = "Humanizer", value = true, leftIcon = "http://www.freeiconspng.com/uploads/-human-male-man-people-person-profile-red-user-icon--icon--23.png"})
