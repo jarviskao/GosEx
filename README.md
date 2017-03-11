@@ -2,4 +2,4 @@
 
 [Release] Auto Level Spells Customizer Ext 
 
-[On progress] Garen Ext
+[Work in progress] Garen Ext
