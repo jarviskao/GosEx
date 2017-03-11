@@ -170,10 +170,10 @@ AMenu:MenuElement({id = "UseAutoLvSpell", name = "Enable", value = false})
 --Auto Menu
 AMenu:MenuElement({type = MENU, id = "Auto", name = myHero.charName, leftIcon = "http://ddragon.leagueoflegends.com/cdn/6.24.1/img/champion/"..myHero.charName..".png"})
 AMenu.Auto:MenuElement({type = MENU, id = "SpellsOrder", name = "Spells Sequence", leftIcon = "http://www.swiftpcoptimizer.com/wp-content/uploads/2016/10/workflow.png"})
-AMenu.Auto.SpellsOrder:MenuElement({id = "spell1",name = "Priority : 1st Spell Max", key = string.byte("Q")})
-AMenu.Auto.SpellsOrder:MenuElement({id = "spell2",name = "Priority : 2nd Spell Max", key = string.byte("W")})
+AMenu.Auto.SpellsOrder:MenuElement({id = "spell1",name = "Priority : 1st Spells Max", key = string.byte("Q")})
+AMenu.Auto.SpellsOrder:MenuElement({id = "spell2",name = "Priority : 2nd Spells Max", key = string.byte("W")})
 AMenu.Auto.SpellsOrder:MenuElement({type = SPACE, name = "Suggestion: Max "..spellMaxfirst.." first"})
-AMenu.Auto:MenuElement({id = "lvROnly", name = "R Spell Only", value =true, leftIcon =  "https://az691558.vo.msecnd.net/themes/m15106_usaca_5c54bec2/rossignol_r2.png"})
+AMenu.Auto:MenuElement({id = "lvROnly", name = "R Spells Only", value =true, leftIcon =  "https://az691558.vo.msecnd.net/themes/m15106_usaca_5c54bec2/rossignol_r2.png"})
 AMenu.Auto:MenuElement({id = "Disablelvl1", name = "Disable on First Level", value =true, leftIcon =  "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/1_green.svg/480px-1_green.svg.png"})
 AMenu.Auto:MenuElement({id = "UseHumanizer", name = "Humanizer", value = true, leftIcon = "http://www.freeiconspng.com/uploads/-human-male-man-people-person-profile-red-user-icon--icon--23.png"})
 
