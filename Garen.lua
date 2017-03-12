@@ -107,8 +107,8 @@ function OnTick()
 	if myHero.dead or  not GMenu.Enabled:Value() then return end
 	local target = GetTarget(800)
 	OnCombo(target)
-	OnHarass()
-	OnClear()
+	--OnHarass()
+	--OnClear()
 	KillSteal()
 	AutoLvSpell()
 end
