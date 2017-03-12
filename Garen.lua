@@ -182,7 +182,7 @@ function GetRdmg(hero)
 	local level = myHero:GetSpellData(_R).level
 	if level == (nil or 0) then level = 1 end
 	--PrintChat (level)
-	local Rdmg = ({175, 350, 525})[level] + ({27.5, 32.5, 39.5})[level] / 100 * (hero.maxHealth - hero.health)
+	local Rdmg = ({175, 350, 525})[level] + ({27, 32, 39})[level] / 100 * (hero.maxHealth - hero.health)
 	return Rdmg
 end
 
