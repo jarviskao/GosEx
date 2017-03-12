@@ -146,8 +146,8 @@
 	local ver = 0.3
 	local tickCountA = 0
 	local sequence = 0
-	local spellMaxfirst = string.char(DefaultSpellsOrders[myHero.charName][1])
-	local spellMaxSecond = string.char(DefaultSpellsOrders[myHero.charName][8])
+	local spellMaxfirst = string.char(DefaultSpellsOrders[myHero.charName][4])
+	local spellMaxSecond = string.char(DefaultSpellsOrders[myHero.charName][13])
 	local spellMaxThird = string.char(DefaultSpellsOrders[myHero.charName][18])
 	local ScriptLoadTime = Game.Timer()
 	
