@@ -168,9 +168,9 @@ function KillSteal()
 			local hero = Game.Hero(i)
 			if hero and IsValidTarget(hero, GarenR.range) and hero.team ~= myHero.team  then
 				if isReady(_R) and getdmg("R",hero,myHero) > hero.health then
-					if GMenu.KillSteal.black[hero.name]:Value() then
+					--if GMenu.KillSteal.black[hero.name]:Value() then
 						Control.CastSpell(HK_R, hero)
-					end
+					--end
 				end
 			end
 		end
