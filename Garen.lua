@@ -77,7 +77,7 @@ DelayAction(function()
 	for i = 1, Game.HeroCount() do
 		local hero = Game.Hero(i)
 		if hero.isEnemy then
-			GMenu.KillSteal.black:MenuElement({hero.name, name = "Use R On: "..hero.charName, value = true})
+			GMenu.KillSteal.black:MenuElement({id = i, name = "Use R On: "..hero.charName, value = true})
 		end
 	end
 end, 0.2)
@@ -118,14 +118,17 @@ function OnCombo(target)
 		--Q
 		if isReady(_Q) and target and IsValidTarget(target,GarenQ.range) and GMenu.Mode.Combo.Q:Value() then
 			Control.CastSpell(HK_Q)
+
 		end
 		--W
 		if isReady(_W) and target and IsValidTarget(target,GarenQ.range) and GMenu.Mode.Combo.W:Value() then
 			Control.CastSpell(HK_W)
+
 		end
 		--E
 		if isReady(_E) and target and IsValidTarget(target,GarenR.range) and GMenu.Mode.Combo.E:Value() and myHero:GetSpellData(_E).name == "GarenE" then
 			Control.CastSpell(HK_E)
+
 		end
 	end
 end
@@ -136,14 +139,17 @@ function OnHarass(target)
 		--Q
 		if isReady(_Q) and target and IsValidTarget(target,GarenQ.range) and GMenu.Mode.Harass.Q:Value() then
 			Control.CastSpell(HK_Q)
+	
 		end
 		--W
 		if isReady(_W) and target and IsValidTarget(target,GarenQ.range) and GMenu.Mode.Harass.W:Value() then
 			Control.CastSpell(HK_W)
+	
 		end
 		--E
 		if isReady(_E) and target and IsValidTarget(target,GarenR.range) and GMenu.Mode.Harass.E:Value() and myHero:GetSpellData(_E).name == "GarenE"then
 			Control.CastSpell(HK_E)
+
 		end
 	end
 end
@@ -154,11 +160,14 @@ function OnClear()
 		--Q
 		if isReady(_Q) and minion then
 			Control.CastSpell(HK_Q)
+
 		end
 		--E
 		if isReady(_E) and minion then
 			Control.CastSpell(HK_E)
+
 		end
+
 	end
 end
 
@@ -168,9 +177,9 @@ function KillSteal()
 			local hero = Game.Hero(i)
 			if hero and IsValidTarget(hero, GarenR.range) and hero.team ~= myHero.team  then
 				if isReady(_R) and getdmg("R",hero,myHero) > hero.health then
-					--if GMenu.KillSteal.black[hero.name]:Value() then
+					if GMenu.KillSteal.black[i]:Value() then
 						Control.CastSpell(HK_R, hero)
-					--end
+					end
 				end
 			end
 		end
