@@ -8,7 +8,7 @@ if myHero.charName ~= "Garen" then return end
 
 --Locals
 local LoL = "7.5"
-local ver = "1.0"
+local ver = "1.1"
 local tickCount = 0
 
 --Spells
@@ -75,7 +75,7 @@ DelayAction(function()
 	for i = 1, Game.HeroCount() do
 		local hero = Game.Hero(i)
 		if hero.isEnemy then
-			GMenu.KillSteal.black:MenuElement({id = i, name = "Use R On: "..hero.charName, value = true})
+			GMenu.KillSteal.black:MenuElement({id = hero.networkID, name = "Use R On: "..hero.charName, value = true})
 		end
 	end
 end, 0.2)
@@ -147,28 +147,30 @@ function OnHarass(target)
 end
 
 function OnClear()
+	--Lane Clear
 	if GMenu.Mode.Clear.LaneClear.HotKey:Value() then
 		local minion = GetMinion(GarenQ.range)
 		--Q
-		if isReady(_Q) and minion then
+		if isReady(_Q) and minion and GMenu.Mode.Clear.LaneClear.Q:Value() then
 			Control.CastSpell(HK_Q)
 		end
 		--E
-		if isReady(_E) and minion and myHero:GetSpellData(_E).name == "GarenE" then
+		if isReady(_E) and minion and myHero:GetSpellData(_E).name == "GarenE" and GMenu.Mode.Clear.LaneClear.E:Value() then
 			Control.CastSpell(HK_E)
 		end
 	end
+	--Jungle Clear
+	
 end
-
 
 function KillSteal()
 	if GMenu.KillSteal.R:Value() then
 	  for i=1,Game.HeroCount() do
 			local hero = Game.Hero(i)
-			if hero and IsValidTarget(hero, 1000) and hero.team ~= myHero.team  then
+			if hero and IsValidTarget(hero, GarenR.range) and hero.team ~= myHero.team  then
 				local Rdmg = (GetRdmg(hero))
 				--PrintChat(hero.charName.." : R Dmg = "..Rdmg.."   current health = "..hero.health)
-				if isReady(_R) and Rdmg > hero.health  and GMenu.KillSteal.black[i]:Value()then
+				if isReady(_R) and Rdmg > hero.health  and GMenu.KillSteal.black[hero.networkID]:Value()then
 						Control.CastSpell(HK_R, hero)
 				end
 			end
@@ -178,9 +180,9 @@ end
 
 function GetRdmg(hero)
 	local level = myHero:GetSpellData(_R).level
-	if level == (nil or 0) then return 1 end
+	if level == (nil or 0) then level = 1 end
 	--PrintChat (level)
-	local Rdmg = ({175, 350, 525})[level] + ({28, 33, 40})[level] / 100 * (hero.maxHealth - hero.health)
+	local Rdmg = ({175, 350, 525})[level] + ({27.5, 32.5, 39.5})[level] / 100 * (hero.maxHealth - hero.health)
 	return Rdmg
 end
 
@@ -223,7 +225,7 @@ function AutoLvSpell()
 			if GMenu.Misc.LvUpSpell.UseHumanizer:Value() then
 				tickCount = tickCount + 1
 			end
-			if GMenu.Misc.LvUpSpell.UseHumanizer:Value() and tickCount >= 35 then
+			if GMenu.Misc.LvUpSpell.UseHumanizer:Value() and tickCount >= 30 then
 				LevelSpell()
 				tickCount = 0
 			elseif not GMenu.Misc.LvUpSpell.UseHumanizer:Value() then
