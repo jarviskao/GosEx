@@ -96,12 +96,7 @@ GMenu:MenuElement({type = MENU, id = "Misc", name = "Misc Settings"})
 	GMenu.Misc.DrawSpells:MenuElement({id = "R", name = "Draw R Range", value = true})
 
 PrintChat("[Garen] Menu Loaded")
---[[
-PrintChat("Q = "..myHero:GetSpellData(_Q).name)
-PrintChat("E = "..myHero:GetSpellData(_W).name)
-PrintChat("W = "..myHero:GetSpellData(_E).name)
-PrintChat("R = "..myHero:GetSpellData(_R).name)
---]]
+
 function OnDraw()
 	--Draw Range
 	if myHero.dead then return end
@@ -112,33 +107,27 @@ end
 --Start
 function OnTick()
 	if myHero.dead or  not GMenu.Enabled:Value() then return end
-	OnCombo()
-	--OnHarass()
-	--OnClear()
-	--KillSteal()
-	--AutoLvSpell()
+	local target = GetTarget(800)
+	OnCombo(target)
+	OnHarass()
+	OnClear()
+	KillSteal()
+	AutoLvSpell()
 end
 
 function OnCombo(target)
 	if GMenu.Mode.Combo.HotKey:Value() then
-		local target = GetTarget(GarenQ.range)
 		--Q
-		if isReady(_Q) and IsValidTarget(target,GarenQ.range) and GMenu.Mode.Combo.Q:Value() then
+		if isReady(_Q) and target and IsValidTarget(target,GarenQ.range) and GMenu.Mode.Combo.Q:Value() then
 			Control.CastSpell(HK_Q)
-			--PrintChat ("Q use")
-			PrintChat("Q = "..myHero:GetSpellData(_Q).name)
 		end
 		--W
-		if isReady(_W) and IsValidTarget(target,GarenQ.range) and GMenu.Mode.Combo.W:Value() then
+		if isReady(_W) and target and IsValidTarget(target,GarenQ.range) and GMenu.Mode.Combo.W:Value() then
 			Control.CastSpell(HK_W)
-			--PrintChat ("W use")
-			PrintChat("W = "..myHero:GetSpellData(_W).name)
 		end
 		--E
-		if isReady(_E) and IsValidTarget(target,GarenQ.range) and GMenu.Mode.Combo.E:Value() and myHero:GetSpellData(_E).name == "GarenE" then
+		if isReady(_E) and target and IsValidTarget(target,GarenR.range) and GMenu.Mode.Combo.E:Value() and myHero:GetSpellData(_E).name == "GarenE" then
 			Control.CastSpell(HK_E)
-			--PrintChat ("E use")
-			PrintChat("E = "..myHero:GetSpellData(_E).name)
 		end
 	end
 end
@@ -147,19 +136,16 @@ function OnHarass(target)
 	if GMenu.Mode.Combo.HotKey:Value() then
 		local target = GetTarget(GarenQ.range)
 		--Q
-		if isReady(_Q) and target then
+		if isReady(_Q) and target and IsValidTarget(target,GarenQ.range) and GMenu.Mode.Harass.Q:Value() then
 			Control.CastSpell(HK_Q)
-			--PrintChat ("Q use")
 		end
-		--E
-		if isReady(_E) and target then
-			Control.CastSpell(HK_E)
-			--PrintChat ("E use")
-		end
-		--E
-		if isReady(_W) and target then
+		--W
+		if isReady(_W) and target and IsValidTarget(target,GarenQ.range) and GMenu.Mode.Harass.W:Value() then
 			Control.CastSpell(HK_W)
-			--PrintChat ("W use")
+		end
+		--E
+		if isReady(_E) and target and IsValidTarget(target,GarenR.range) and GMenu.Mode.Harass.E:Value() and myHero:GetSpellData(_E).name == "GarenE"then
+			Control.CastSpell(HK_E)
 		end
 	end
 end
@@ -170,20 +156,11 @@ function OnClear()
 		--Q
 		if isReady(_Q) and minion then
 			Control.CastSpell(HK_Q)
-			--PrintChat ("Q use")
 		end
 		--E
 		if isReady(_E) and minion then
 			Control.CastSpell(HK_E)
-			--PrintChat ("E use")
 		end
-		--[[
-		--W
-		if isReady(_W) and minion then
-			Control.CastSpell(HK_W)
-			--PrintChat ("W use")
-		end
-		--]]
 	end
 end
 
@@ -192,9 +169,10 @@ function KillSteal()
 	  for i=1,Game.HeroCount() do
 			local hero = Game.Hero(i)
 			if hero and IsValidTarget(hero, GarenR.range) and hero.team ~= myHero.team  then
-				if isReady(_R) then
-					Control.CastSpell(HK_R, hero)
-					PrintChat(getdmg("R",hero,myHero))
+				if isReady(_R) and getdmg("R",hero,myHero) > hero.health then
+					if GMenu.KillSteal.black[hero.name]:Value() then
+						Control.CastSpell(HK_R, hero)
+					end
 				end
 			end
 		end
