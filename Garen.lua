@@ -6,8 +6,6 @@ source: https://github.com/jarviskao/Gos/blob/master/Garen_External.lua
 --Hero
 if myHero.charName ~= "Garen" then return end
 
-require "DamageLib"
-
 --Locals
 local LoL = "7.5"
 local ver = "1.0"
@@ -85,7 +83,7 @@ end, 0.2)
 GMenu:MenuElement({type = MENU, id = "Misc", name = "Misc Settings"})
 	--Auto Level Up Spell Menu
 	GMenu.Misc:MenuElement({type = MENU, id = "LvUpSpell", name = "Auto Level Spell"})
-	GMenu.Misc.LvUpSpell:MenuElement({type = SPACE, name = "Sequence: Max Q -> E -> W"})
+	GMenu.Misc.LvUpSpell:MenuElement({type = SPACE, name = "Sequence: Q > E > W > Q > Q (Max Q First)"})
 	GMenu.Misc.LvUpSpell:MenuElement({id = "UseAutoLvSpell", name = "Use Auto Level Spell", value = false})
 	GMenu.Misc.LvUpSpell:MenuElement({id = "UseHumanizer", name = "Humanizer", value = true })
 	--Draw Spells Menu
@@ -107,8 +105,8 @@ function OnTick()
 	if myHero.dead or  not GMenu.Enabled:Value() then return end
 	local target = GetTarget(800)
 	OnCombo(target)
-	--OnHarass()
-	--OnClear()
+	OnHarass(target)
+	OnClear()
 	KillSteal()
 	AutoLvSpell()
 end
@@ -118,38 +116,32 @@ function OnCombo(target)
 		--Q
 		if isReady(_Q) and target and IsValidTarget(target,GarenQ.range) and GMenu.Mode.Combo.Q:Value() then
 			Control.CastSpell(HK_Q)
-
 		end
 		--W
 		if isReady(_W) and target and IsValidTarget(target,GarenQ.range) and GMenu.Mode.Combo.W:Value() then
 			Control.CastSpell(HK_W)
-
 		end
 		--E
 		if isReady(_E) and target and IsValidTarget(target,GarenR.range) and GMenu.Mode.Combo.E:Value() and myHero:GetSpellData(_E).name == "GarenE" then
 			Control.CastSpell(HK_E)
-
 		end
 	end
 end
 
 function OnHarass(target)
-	if GMenu.Mode.Combo.HotKey:Value() then
+	if GMenu.Mode.Harass.HotKey:Value() then
 		local target = GetTarget(GarenQ.range)
 		--Q
 		if isReady(_Q) and target and IsValidTarget(target,GarenQ.range) and GMenu.Mode.Harass.Q:Value() then
 			Control.CastSpell(HK_Q)
-	
 		end
 		--W
 		if isReady(_W) and target and IsValidTarget(target,GarenQ.range) and GMenu.Mode.Harass.W:Value() then
 			Control.CastSpell(HK_W)
-	
 		end
 		--E
 		if isReady(_E) and target and IsValidTarget(target,GarenR.range) and GMenu.Mode.Harass.E:Value() and myHero:GetSpellData(_E).name == "GarenE"then
 			Control.CastSpell(HK_E)
-
 		end
 	end
 end
@@ -160,31 +152,38 @@ function OnClear()
 		--Q
 		if isReady(_Q) and minion then
 			Control.CastSpell(HK_Q)
-
 		end
 		--E
-		if isReady(_E) and minion then
+		if isReady(_E) and minion and myHero:GetSpellData(_E).name == "GarenE" then
 			Control.CastSpell(HK_E)
-
 		end
-
 	end
 end
+
 
 function KillSteal()
 	if GMenu.KillSteal.R:Value() then
 	  for i=1,Game.HeroCount() do
 			local hero = Game.Hero(i)
-			if hero and IsValidTarget(hero, GarenR.range) and hero.team ~= myHero.team  then
-				if isReady(_R) and getdmg("R",hero,myHero) > hero.health then
-					if GMenu.KillSteal.black[i]:Value() then
+			if hero and IsValidTarget(hero, 1000) and hero.team ~= myHero.team  then
+				local Rdmg = (GetRdmg(hero))
+				PrintChat(hero.charName.." : R Dmg = "..Rdmg.."   current health = "..hero.health)
+				if isReady(_R) and Rdmg > hero.health  and GMenu.KillSteal.black[i]:Value()then
 						Control.CastSpell(HK_R, hero)
-					end
 				end
 			end
 		end
 	end
 end
+
+function GetRdmg(hero)
+	local level = myHero:GetSpellData(_R).level
+	if level == (nil or 0) then return 1 end
+	--PrintChat (level)
+	local Rdmg = ({175, 350, 525})[level] + ({28, 33, 40})[level] / 100 * (hero.maxHealth - hero.health)
+	return Rdmg
+end
+
 
 function isReady (spell)
 	return Game.CanUseSpell(spell) == READY and myHero:GetSpellData(spell).currentCd == 0  and myHero:GetSpellData(spell).level > 0
