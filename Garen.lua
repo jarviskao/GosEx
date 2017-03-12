@@ -9,7 +9,7 @@ if myHero.charName ~= "Garen" then return end
 require "DamageLib"
 
 --Auto Update
-local ver = "0.1"
+local ver = "1.0"
 
 --Locals
 local LoL = "7.5"
