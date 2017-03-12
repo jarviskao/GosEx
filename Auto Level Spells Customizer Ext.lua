@@ -219,7 +219,7 @@ function AutoLevelSpell()
 			if AMenu.Auto.UseHumanizer:Value() then
 				tickCountA = tickCountA + 1
 			end
-			if AMenu.Auto.UseHumanizer:Value() and tickCountA >= 35 then
+			if AMenu.Auto.UseHumanizer:Value() and tickCountA >= 30 then
 				tickCountA = 0
 				if AMenu.Auto.lvROnly:Value() and myHero.levelData.lvl == (6 or 11 or 16)  then 
 					LevelRSpell()
