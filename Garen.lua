@@ -8,7 +8,7 @@ if myHero.charName ~= "Garen" then return end
 
 --Locals
 local LoL = "7.5"
-local ver = "1.1"
+local ver = "1.01"
 local tickCount = 0
 
 --Spells
