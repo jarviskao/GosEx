@@ -79,7 +79,7 @@ local clearW = GMenu.Mode.Clear.E:Value()
 local lastHitQ = GMenu.Mode.Harass.Q:Value()
 local killStealR = GMenu.KillSteal.R:Value()
 
-local GarenQ = { range = 380 }
+local GarenQ = { range = 400 }
 local GarenW = { range = 200 }
 local GarenE = { range = 300 }
 local GarenR = { range = 400 }
