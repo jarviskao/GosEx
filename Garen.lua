@@ -221,7 +221,7 @@ function KillSteal(target)
 		local target = Game.Hero(i)
 		local Rdmg = (GetRdmg())
 		--PrintChat (" "..target.charName.." HP "..target.health.."R damage= "..Rdmg)
-		if killStealR and isReady(_R) and IsValidTarget(target, GarenR.range) and Rdmg > target.health then 
+		if killStealR and isReady(_R) and IsValidTarget(target, GarenR.range) and Rdmg > target.health  and GMenu.KillSteal.black[hero.networkID]:Value() then 
 			castR(target)
 		end
 	end
