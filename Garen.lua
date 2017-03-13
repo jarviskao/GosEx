@@ -79,7 +79,7 @@ local clearW = GMenu.Mode.Clear.E:Value()
 local lastHitQ = GMenu.Mode.Harass.Q:Value()
 local killStealR = GMenu.KillSteal.R:Value()
 
-local GarenQ = { range = 400 }
+local GarenQ = { range = 500 }
 local GarenW = { range = 200 }
 local GarenE = { range = 300 }
 local GarenR = { range = 400 }
@@ -116,7 +116,7 @@ function isCasting(spell)
 	end
 end
 
-function GetTarget(range)
+function getTarget(range)
     local target
     for i = 1,Game.HeroCount() do
         local hero = Game.Hero(i)
@@ -140,6 +140,18 @@ local function getMode()
     return ""
 end
 
+function getEnemyMinions(range)
+	local target
+    for i = 1,Game.MinionCount() do
+        local minion = Game.Minion(i)
+        if  IsValidTarget(minion, range) and minion.team ~= myHero.team then
+            target = minion
+            break
+        end
+    end
+    return target
+end
+
 function OnDraw()
 	--Draw Range
 	if myHero.dead then return end
@@ -151,7 +163,7 @@ end
 function OnTick()
 	if not GMenu.Enabled:Value() then return end
 	if myHero.dead then return end
-	local target = GetTarget(600)
+	--local target = getTarget(600)
 	if getMode() == "Combo" then
 		OnCombo(target)
 	elseif getMode() == "Harass" then
@@ -159,13 +171,13 @@ function OnTick()
 	elseif getMode() == "Clear" then
 		--OnClear()
 	elseif getMode() == "LastHit" then
-		--OnLastHit()
+		OnLastHit()
 	end	
 	KillSteal(target)
 end
 
 function OnCombo(target)
-	local target = GetTarget(600)
+	local target = getTarget(650)
 	if target == nil then return end
 
 	--PrintChat (target.health)
@@ -184,7 +196,7 @@ function OnCombo(target)
 		--PrintChat("E Cast")
 	end
 
-	if comboR and isReady(_R) and IsValidTarget(target,GarenR.range) and GetRdmg() > target.health  then
+	if comboR and isReady(_R) and IsValidTarget(target,GarenR.range) and GetRdmg() >= target.health  then
 		castR(target)
 		--PrintChat("R Cast")
 	end
@@ -192,8 +204,7 @@ function OnCombo(target)
 end
 
 function onHarass(target)
-
-	local target = GetTarget(600)
+	local target = getTarget(650)
 	if target == nil then return end
 
 	--PrintChat (target.health)
@@ -214,14 +225,27 @@ function onHarass(target)
 
 end
 
+function OnLastHit()
+	local minion = getEnemyMinions(200)
+	if minion == nil then return end
+	--PrintChat(GetQdmg())
+	if lastHitQ and isReady(_Q) and not isCasting(_E) and IsValidTarget(minion, 200) and GetQdmg() >= minion.health then
+		--PrintChat("Q Cast")
+		castQ()
+		DelayAction(function()
+			Control.Attack(minion)
+		end, 0.05)
+	end
+end
+
 function KillSteal(target)
-	local target = GetTarget(600)
+	local target = getTarget(650)
 	if target == nil then return end
 	for i = 1, Game.HeroCount() do
 		local target = Game.Hero(i)
 		local Rdmg = (GetRdmg())
 		--PrintChat (" "..target.charName.." HP "..target.health.."R damage= "..Rdmg)
-		if killStealR and isReady(_R) and IsValidTarget(target, GarenR.range) and Rdmg > target.health  and GMenu.KillSteal.black[hero.networkID]:Value() then 
+		if killStealR and isReady(_R) and IsValidTarget(target, GarenR.range) and Rdmg > target.health and GMenu.KillSteal.black[target.networkID]:Value() then 
 			castR(target)
 		end
 	end
@@ -229,12 +253,23 @@ function KillSteal(target)
 end
 
 function GetRdmg()
-	local target = GetTarget(600)
+	local target = getTarget(650)
 	if target == nil then return end
 	local level = myHero:GetSpellData(_R).level
-	if level == nil or 0 then level = 1 end
+	if level == nil or level == 0 then level = 1 end
 	--PrintChat(level)
 	local Rdmg = ({175, 350, 525})[level] + ({8, 13, 20})[level] / 100 * (target.maxHealth - target.health)
 	return Rdmg
+end
+
+function GetQdmg()
+	local minion = getEnemyMinions(200)
+	if minion == nil then return end
+	local level = myHero:GetSpellData(_Q).level
+	if level == nil or level == 0 then level = 1 end
+	--PrintChat (1.4 * myHero.totalDamage)
+	--PrintChat (level)
+	local Qdmg = ({30, 55, 80, 105, 130})[level] + (1.4 * myHero.totalDamage)
+	return Qdmg
 end
 
