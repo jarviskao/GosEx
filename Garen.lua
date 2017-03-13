@@ -165,18 +165,18 @@ function OnTick()
 	if myHero.dead then return end
 	--local target = getTarget(600)
 	if getMode() == "Combo" then
-		OnCombo(target)
+		OnCombo()
 	elseif getMode() == "Harass" then
-		onHarass(target)
+		onHarass()
 	elseif getMode() == "Clear" then
 		--OnClear()
 	elseif getMode() == "LastHit" then
 		OnLastHit()
 	end	
-	KillSteal(target)
+	KillSteal()
 end
 
-function OnCombo(target)
+function OnCombo()
 	local target = getTarget(650)
 	if target == nil then return end
 
@@ -203,7 +203,7 @@ function OnCombo(target)
 	
 end
 
-function onHarass(target)
+function onHarass()
 	local target = getTarget(650)
 	if target == nil then return end
 
@@ -238,7 +238,7 @@ function OnLastHit()
 	end
 end
 
-function KillSteal(target)
+function KillSteal()
 	local target = getTarget(650)
 	if target == nil then return end
 	for i = 1, Game.HeroCount() do
