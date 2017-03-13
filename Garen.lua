@@ -1,21 +1,9 @@
---[[
-made by Jarviskao
-source: https://github.com/jarviskao/Gos/blob/master/Garen_External.lua
-]]
-
 --Hero
 if myHero.charName ~= "Garen" then return end
 
 --Locals
 local LoL = "7.5"
-local ver = "1.01"
-local tickCount = 0
-
---Spells
-local GarenQ = { range = 300 }
-local GarenE = { range = 300 }
-local GarenR = { range = 400 }
-local SkillOrders = {HK_Q, HK_E, HK_W, HK_Q, HK_Q, HK_R, HK_Q, HK_E, HK_Q, HK_E, HK_R, HK_E, HK_E, HK_W, HK_W, HK_R, HK_W, HK_W}
+local ver = "2.0"
 
 --icon
 local MenuIcons = "http://static.lolskill.net/img/champions/64/garen.png"
@@ -31,46 +19,39 @@ local RangeIcons = "http://wfarm2.dataknet.com/static/resources/icons/set51/4004
 local GMenu = MenuElement({type = MENU, id = "GMenu", name = "Garen", leftIcon = MenuIcons})
 GMenu:MenuElement({id = "Enabled", name = "Enabled", value = true})
 
---Combo Menu
-GMenu:MenuElement({type = MENU, id = "Mode", name = "Mode Settings"})
+--Main Menu-- Key Setting
+GMenu:MenuElement({type = MENU, id = "Key", name = "Key Settings"})
+GMenu.Key:MenuElement({id = "Combo",name = "Combo HotKey", key = 32})
+GMenu.Key:MenuElement({id = "Harass",name = "Harass HotKey", key = string.byte("C")})
+GMenu.Key:MenuElement({id = "Clear",name = "Clear HotKey", key = string.byte("V")})
+GMenu.Key:MenuElement({id = "LastHit",name = "Last Hit HotKey", key = string.byte("X")})
 
---Combo Menu
+--Main Menu-- Mode Setting
+GMenu:MenuElement({type = MENU, id = "Mode", name = "Mode Settings"})
+--Main Menu-- Mode Setting-- Combo
 GMenu.Mode:MenuElement({type = MENU, id = "Combo", name = "Combo"})
 GMenu.Mode.Combo:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon = SpellIcons.Q})
---GMenu.Mode.Combo:MenuElement({id = "Qrange", name = "Min. range for use Q", value = 300, min = 100, max = 500 , step = 10 , leftIcon = RangeIcons})
 GMenu.Mode.Combo:MenuElement({id = "W", name = "Use W", value = true, leftIcon = SpellIcons.W})
 GMenu.Mode.Combo:MenuElement({id = "E", name = "Use E", value = true, leftIcon = SpellIcons.E})
-GMenu.Mode.Combo:MenuElement({id = "HotKey",name = "Combo HotKey", key = 32})
-
---LastHit Menu
-GMenu.Mode:MenuElement({type = MENU, id = "LastHit", name = "Last Hit"})
-GMenu.Mode.LastHit:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon = SpellIcons.Q})
-GMenu.Mode.LastHit:MenuElement({id = "HotKey",name = "Last Hit HotKey", key = string.byte("X")})
-
---Harass Menu
+GMenu.Mode.Combo:MenuElement({id = "R", name = "Use R", value = true, leftIcon = SpellIcons.R})
+--Main Menu-- Mode Setting-- Harass
 GMenu.Mode:MenuElement({type = MENU, id = "Harass", name = "Harass"})
 GMenu.Mode.Harass:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon = SpellIcons.Q})
---GMenu.Mode.Harass:MenuElement({id = "Qrange", name = "Min. range for use Q", value = 300, min = 100, max = 500, step = 10, leftIcon = RangeIcons})
+GMenu.Mode.Harass:MenuElement({id = "W", name = "Use W", value = true, leftIcon = SpellIcons.W})
 GMenu.Mode.Harass:MenuElement({id = "E", name = "Use E", value = true, leftIcon = SpellIcons.E})
-GMenu.Mode.Harass:MenuElement({id = "HotKey",name = "Harass HotKey", key = string.byte("C")})
-
---Clear Menu
+--Main Menu-- Mode Setting-- Clear 
 GMenu.Mode:MenuElement({type = MENU, id = "Clear", name = "Clear"})
-	--LaneClear Menu
-	GMenu.Mode.Clear:MenuElement({type = MENU, id = "LaneClear", name = "Lane Clear"})
-	GMenu.Mode.Clear.LaneClear:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon = SpellIcons.Q})
-	GMenu.Mode.Clear.LaneClear:MenuElement({id = "E", name = "Use E", value = true, leftIcon = SpellIcons.E})
-	GMenu.Mode.Clear.LaneClear:MenuElement({id = "HotKey",name = "Lane Clear HotKey", key = string.byte("V")})
-	--JungleClear Menu
-	GMenu.Mode.Clear:MenuElement({type = MENU, id = "JungleClear", name = "Jungle Clear"})
-	GMenu.Mode.Clear.JungleClear:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon = SpellIcons.Q})
-	GMenu.Mode.Clear.JungleClear:MenuElement({id = "E", name = "Use E", value = true, leftIcon = SpellIcons.E})
-	GMenu.Mode.Clear.JungleClear:MenuElement({id = "HotKey",name = "Jungle Clear HotKey", key = string.byte("V")})
-	
---KillSteal Menu
-GMenu:MenuElement({type = MENU, id = "KillSteal", name = "KS Settings"})
-GMenu.KillSteal:MenuElement({id = "R", name = "Use R", value = true, leftIcon = SpellIcons.R})
-GMenu.KillSteal:MenuElement({type = MENU, id = "black", name = "KillSteal White List", leftIcon = BlockIcons})
+GMenu.Mode.Clear:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon = SpellIcons.Q})
+GMenu.Mode.Clear:MenuElement({id = "E", name = "Use E", value = true, leftIcon = SpellIcons.E})
+--Main Menu-- Mode Setting-- LastHit
+GMenu.Mode:MenuElement({type = MENU, id = "LastHit", name = "Last Hit"})
+GMenu.Mode.LastHit:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon = SpellIcons.Q})
+
+--Main Menu-- KillSteal Setting
+GMenu:MenuElement({type = MENU, id = "KillSteal", name = "KillSteal Settings"})
+GMenu.KillSteal:MenuElement({id = "R", name = "Use R to KS", value = true})
+GMenu.KillSteal:MenuElement({id = "ksUnder", name = "KS unter enemy Turret", value = true})
+GMenu.KillSteal:MenuElement({type = MENU, id = "black", name = "KillSteal White List"})
 DelayAction(function()
 	for i = 1, Game.HeroCount() do
 		local hero = Game.Hero(i)
@@ -78,118 +59,63 @@ DelayAction(function()
 			GMenu.KillSteal.black:MenuElement({id = hero.networkID, name = "Use R On: "..hero.charName, value = true})
 		end
 	end
-end, 0.2)
---Miscellaneous Menu 
-GMenu:MenuElement({type = MENU, id = "Misc", name = "Misc Settings"})
-	--Auto Level Up Spell Menu
-	GMenu.Misc:MenuElement({type = MENU, id = "LvUpSpell", name = "Auto Level Spell"})
-	GMenu.Misc.LvUpSpell:MenuElement({type = SPACE, name = "Sequence: Q > E > W > Q > Q (Max Q First)"})
-	GMenu.Misc.LvUpSpell:MenuElement({id = "UseAutoLvSpell", name = "Use Auto Level Spell", value = false})
-	GMenu.Misc.LvUpSpell:MenuElement({id = "UseHumanizer", name = "Humanizer", value = true })
-	--Draw Spells Menu
-	GMenu.Misc:MenuElement({type = MENU, id = "DrawSpells", name = "Draw Spells"})
-	GMenu.Misc.DrawSpells:MenuElement({id = "E", name = "Draw E Range", value = true})
-	GMenu.Misc.DrawSpells:MenuElement({id = "R", name = "Draw R Range", value = true})
+end, 1)
 
-PrintChat("[Garen] Menu Loaded")
+--Main Menu-- Drawing 
+GMenu:MenuElement({type = MENU, id = "Drawing", name = "Drawing"})
+GMenu.Drawing:MenuElement({id = "E", name = "Draw E Range", value = true})
+GMenu.Drawing:MenuElement({id = "R", name = "Draw R Range", value = true})
 
-function OnDraw()
-	--Draw Range
-	if myHero.dead then return end
-	if GMenu.Misc.DrawSpells.E:Value() then Draw.Circle(myHero.pos,GarenE.range,1,Draw.Color(255, 255, 255, 255)) end			
-	if GMenu.Misc.DrawSpells.R:Value() then Draw.Circle(myHero.pos,GarenR.range,1,Draw.Color(255, 255, 255, 255)) end	
+
+local comboQ = GMenu.Mode.Combo.Q:Value()
+local comboW = GMenu.Mode.Combo.W:Value()
+local comboE = GMenu.Mode.Combo.E:Value()
+local comboR = GMenu.Mode.Combo.R:Value()
+local harassQ = GMenu.Mode.Harass.Q:Value()
+local harassW = GMenu.Mode.Harass.W:Value()
+local harassE = GMenu.Mode.Harass.E:Value()
+local clearQ = GMenu.Mode.Clear.Q:Value()
+local clearW = GMenu.Mode.Clear.E:Value()
+local lastHitQ = GMenu.Mode.Harass.Q:Value()
+local killStealR = GMenu.KillSteal.R:Value()
+
+local GarenQ = { range = 380 }
+local GarenW = { range = 200 }
+local GarenE = { range = 300 }
+local GarenR = { range = 400 }
+
+function castQ()
+	Control.CastSpell(HK_Q)
 end
 
---Start
-function OnTick()
-	if myHero.dead or  not GMenu.Enabled:Value() then return end
-	local target = GetTarget(800)
-	OnCombo(target)
-	OnHarass(target)
-	OnClear()
-	KillSteal()
-	AutoLvSpell()
+function castW()
+	Control.CastSpell(HK_W)
 end
 
-function OnCombo(target)
-	if GMenu.Mode.Combo.HotKey:Value() then
-		--Q
-		if isReady(_Q) and target and IsValidTarget(target,GarenQ.range) and GMenu.Mode.Combo.Q:Value() then
-			Control.CastSpell(HK_Q)
-		end
-		--W
-		if isReady(_W) and target and IsValidTarget(target,GarenQ.range) and GMenu.Mode.Combo.W:Value() then
-			Control.CastSpell(HK_W)
-		end
-		--E
-		if isReady(_E) and target and IsValidTarget(target,GarenR.range) and GMenu.Mode.Combo.E:Value() and myHero:GetSpellData(_E).name == "GarenE" then
-			Control.CastSpell(HK_E)
-		end
-	end
+function castE()
+	Control.CastSpell(HK_E)
 end
 
-function OnHarass(target)
-	if GMenu.Mode.Harass.HotKey:Value() then
-		local target = GetTarget(GarenQ.range)
-		--Q
-		if isReady(_Q) and target and IsValidTarget(target,GarenQ.range) and GMenu.Mode.Harass.Q:Value() then
-			Control.CastSpell(HK_Q)
-		end
-		--W
-		if isReady(_W) and target and IsValidTarget(target,GarenQ.range) and GMenu.Mode.Harass.W:Value() then
-			Control.CastSpell(HK_W)
-		end
-		--E
-		if isReady(_E) and target and IsValidTarget(target,GarenR.range) and GMenu.Mode.Harass.E:Value() and myHero:GetSpellData(_E).name == "GarenE"then
-			Control.CastSpell(HK_E)
-		end
-	end
+function castR(target)
+	Control.CastSpell(HK_R,target)
 end
-
-function OnClear()
-	--Lane Clear
-	if GMenu.Mode.Clear.LaneClear.HotKey:Value() then
-		local minion = GetMinion(GarenQ.range)
-		--Q
-		if isReady(_Q) and minion and GMenu.Mode.Clear.LaneClear.Q:Value() then
-			Control.CastSpell(HK_Q)
-		end
-		--E
-		if isReady(_E) and minion and myHero:GetSpellData(_E).name == "GarenE" and GMenu.Mode.Clear.LaneClear.E:Value() then
-			Control.CastSpell(HK_E)
-		end
-	end
-	--Jungle Clear
-	
-end
-
-function KillSteal()
-	if GMenu.KillSteal.R:Value() then
-	  for i=1,Game.HeroCount() do
-			local hero = Game.Hero(i)
-			if hero and IsValidTarget(hero, GarenR.range) and hero.team ~= myHero.team  then
-				local Rdmg = (GetRdmg(hero))
-				--PrintChat(hero.charName.." : R Dmg = "..Rdmg.."   current health = "..hero.health)
-				if isReady(_R) and Rdmg > hero.health  and GMenu.KillSteal.black[hero.networkID]:Value()then
-						Control.CastSpell(HK_R, hero)
-				end
-			end
-		end
-	end
-end
-
-function GetRdmg(hero)
-	local level = myHero:GetSpellData(_R).level
-	if level == (nil or 0) then level = 1 end
-	--PrintChat (level)
-	local Rdmg = ({175, 350, 525})[level] + ({18, 23, 30})[level] / 100 * (hero.maxHealth - hero.health)
-	return Rdmg
-end
-
 
 function isReady (spell)
-	return Game.CanUseSpell(spell) == READY and myHero:GetSpellData(spell).currentCd == 0  and myHero:GetSpellData(spell).level > 0
+	return Game.CanUseSpell(spell) == 0 
 end
+
+function canCast(spell)
+	return  myHero:GetSpellData(spell).mana <= myHero.mana
+end
+
+function isCasting(spell)
+	if Game.CanUseSpell(spell) == 8 or myHero:GetSpellData(_E).name == "GarenECancel" then
+		return  true
+	else
+		return false
+	end
+end
+
 
 function GetTarget(range)
     local target
@@ -203,40 +129,113 @@ function GetTarget(range)
     return target
 end
 
-function GetMinion(range)
-	local target
-		for i = 1,Game.MinionCount() do
-			local minion = Game.Minion(i)
-			if IsValidTarget(minion, range) and not minion.isAlly then
-				target = minion
-				break
-			end
-		end
-		return target
+function IsValidTarget(unit, range)
+    return unit ~= nil and unit.valid and unit.visible and not unit.dead and unit.isTargetable and not unit.isImmortal and unit.distance <= range
 end
 
-function IsValidTarget(obj, range)
-    return obj ~= nil and obj.valid and obj.visible and not obj.dead and obj.isTargetable and obj.distance <= range
+local function getMode()
+	if GMenu.Key.Combo:Value() then return "Combo" end
+	if GMenu.Key.Harass:Value() then return "Harass" end
+	if GMenu.Key.Clear:Value() then return "Clear" end
+	if GMenu.Key.LastHit:Value() then return "LastHit" end
+    return ""
 end
 
-function AutoLvSpell()
-	if myHero.levelData.lvl > 0 and myHero.levelData.lvlPts > 0 and GMenu.Misc.LvUpSpell.UseAutoLvSpell:Value() then
-		if (myHero.levelData.lvl + 1 - myHero.levelData.lvlPts) then
-			if GMenu.Misc.LvUpSpell.UseHumanizer:Value() then
-				tickCount = tickCount + 1
-			end
-			if GMenu.Misc.LvUpSpell.UseHumanizer:Value() and tickCount >= 30 then
-				LevelSpell()
-				tickCount = 0
-			elseif not GMenu.Misc.LvUpSpell.UseHumanizer:Value() then
-				LevelSpell()
-			end		
+function OnDraw()
+	--Draw Range
+	if myHero.dead then return end
+	if GMenu.Drawing.E:Value() then Draw.Circle(myHero.pos,325,1,Draw.Color(255, 255, 255, 255)) end			
+	if GMenu.Drawing.R:Value() then Draw.Circle(myHero.pos,400,1,Draw.Color(255, 255, 255, 255)) end	
+end
+
+--Start
+function OnTick()
+	if not GMenu.Enabled:Value() then return end
+	if myHero.dead then return end
+	local target = GetTarget(600)
+	if getMode() == "Combo" then
+		OnCombo(target)
+	elseif getMode() == "Harass" then
+		onHarass()
+	elseif getMode() == "Clear" then
+		--OnClear()
+	elseif getMode() == "LastHit" then
+		--OnLastHit()
+	end	
+	KillSteal()
+end
+
+function OnCombo(target)
+	local target = GetTarget(600)
+	if target == nil then return end
+
+	--PrintChat (target.health)
+	if comboQ and isReady(_Q) and not isCasting(_E) and IsValidTarget(target,GarenQ.range)  then
+		--PrintChat("Q Cast")
+		castQ()
+	end
+
+	if comboW and isReady(_W) and (isCasting(_Q) or isCasting(_E)) and IsValidTarget(target,GarenW.range) then
+		castW()
+		--PrintChat("W Cast")
+	end
+
+	if comboE and isReady(_E) and not isCasting(_Q) and myHero:GetSpellData(_E).name == "GarenE" and IsValidTarget(target,GarenE.range) then
+		castE()
+		--PrintChat("E Cast")
+	end
+
+	if comboR and isReady(_R) and IsValidTarget(target,GarenR.range) and GetRdmg() > target.health  then
+		castR(target)
+		--PrintChat("R Cast")
+	end
+	
+end
+
+function onHarass(target)
+
+	local target = GetTarget(600)
+	if target == nil then return end
+
+	--PrintChat (target.health)
+	if harassQ and isReady(_Q) and not isCasting(_E) and IsValidTarget(target,GarenQ.range)  then
+		--PrintChat("Q Cast")
+		castQ()
+	end
+
+	if harassW and isReady(_W) and (isCasting(_Q) or isCasting(_E)) and IsValidTarget(target,GarenW.range) then
+		castW()
+		--PrintChat("W Cast")
+	end
+
+	if harassE and isReady(_E) and not isCasting(_Q) and myHero:GetSpellData(_E).name == "GarenE" and IsValidTarget(target,GarenE.range) then
+		castE()
+		--PrintChat("E Cast")
+	end
+
+end
+
+function KillSteal()
+	local target = GetTarget(600)
+	if target == nil then return end
+	for i = 1, Game.HeroCount() do
+		local target = Game.Hero(i)
+		local Rdmg = (GetRdmg())
+		--PrintChat (" "..target.charName.." HP "..target.health.."R damage= "..Rdmg)
+		if killStealR and isReady(_R) and IsValidTarget(target, GarenR.range) and Rdmg > target.health then 
+			castR(target)
 		end
 	end
+
 end
 
-function LevelSpell()
-				Control.KeyDown(HK_LUS)
-				Control.CastSpell(SkillOrders[(myHero.levelData.lvl + 1 - myHero.levelData.lvlPts)])
-				Control.KeyUp(HK_LUS)	
+function GetRdmg()
+	local target = GetTarget(600)
+	if target == nil then return end
+	local level = myHero:GetSpellData(_R).level
+	if level == nil then return 0 end
+	--PrintChat(level)
+	local Rdmg = ({175, 350, 525})[level] + ({8, 13, 20})[level] / 100 * (target.maxHealth - target.health)
+	return Rdmg
 end
+
