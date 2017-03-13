@@ -116,7 +116,6 @@ function isCasting(spell)
 	end
 end
 
-
 function GetTarget(range)
     local target
     for i = 1,Game.HeroCount() do
@@ -156,13 +155,13 @@ function OnTick()
 	if getMode() == "Combo" then
 		OnCombo(target)
 	elseif getMode() == "Harass" then
-		onHarass()
+		onHarass(target)
 	elseif getMode() == "Clear" then
 		--OnClear()
 	elseif getMode() == "LastHit" then
 		--OnLastHit()
 	end	
-	KillSteal()
+	KillSteal(target)
 end
 
 function OnCombo(target)
@@ -215,7 +214,7 @@ function onHarass(target)
 
 end
 
-function KillSteal()
+function KillSteal(target)
 	local target = GetTarget(600)
 	if target == nil then return end
 	for i = 1, Game.HeroCount() do
@@ -233,7 +232,7 @@ function GetRdmg()
 	local target = GetTarget(600)
 	if target == nil then return end
 	local level = myHero:GetSpellData(_R).level
-	if level == nil then return 0 end
+	if level == nil or 0 then level = 1 end
 	--PrintChat(level)
 	local Rdmg = ({175, 350, 525})[level] + ({8, 13, 20})[level] / 100 * (target.maxHealth - target.health)
 	return Rdmg
