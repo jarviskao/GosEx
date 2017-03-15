@@ -55,22 +55,6 @@ PMenu.Drawing:MenuElement({id = "Q", name = "Draw Q Range", value = true})
 PMenu.Drawing:MenuElement({id = "W", name = "Draw W Range", value = true})
 PMenu.Drawing:MenuElement({id = "E", name = "Draw E Range", value = true})
 
-
-local comboQ = PMenu.Mode.Combo.Q:Value()
-local comboW = PMenu.Mode.Combo.W:Value()
-local comboE = PMenu.Mode.Combo.E:Value()
-
-local harassQ = PMenu.Mode.Harass.Q:Value()
-local harassW = PMenu.Mode.Harass.W:Value()
-local harassE = PMenu.Mode.Harass.E:Value()
-
-local clearQ = PMenu.Mode.Clear.Q:Value()
-local clearW = PMenu.Mode.Clear.E:Value()
-
-local lastHitQ = PMenu.Mode.Harass.Q:Value()
-
-local killStealQ = PMenu.KillSteal.Q:Value()
-
 local PantheonQ = { range = 600 }
 local PantheonW = { range = 600 }
 local PantheonE = { range = 400 }
@@ -165,6 +149,9 @@ function OnTick()
 end
 
 function OnCombo()
+	local comboQ = PMenu.Mode.Combo.Q:Value()
+	local comboW = PMenu.Mode.Combo.W:Value()
+	local comboE = PMenu.Mode.Combo.E:Value()
 	local target = getTarget(800)
 	if target == nil then return end
 
@@ -190,6 +177,9 @@ function OnCombo()
 end
 
 function onHarass()
+	local harassQ = PMenu.Mode.Harass.Q:Value()
+	local harassW = PMenu.Mode.Harass.W:Value()
+	local harassE = PMenu.Mode.Harass.E:Value()
 	local target = getTarget(800)
 	if target == nil then return end
 
@@ -204,6 +194,7 @@ function onHarass()
 end
 
 function OnLastHit()
+	local lastHitQ = PMenu.Mode.Harass.Q:Value()
 	local minion = getEnemyMinions(800)
 	if minion == nil then return end
 	
@@ -223,6 +214,7 @@ function OnLastHit()
 end
 
 function KillSteal()
+	local killStealQ = PMenu.KillSteal.Q:Value()
 	local target = getTarget(800)
 	if target == nil then return end
 	
