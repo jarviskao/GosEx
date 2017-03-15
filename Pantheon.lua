@@ -47,7 +47,7 @@ PMenu.Mode.LastHit:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon
 --Main Menu-- KillSteal Setting
 PMenu:MenuElement({type = MENU, id = "KillSteal", name = "KillSteal Settings"})
 PMenu.KillSteal:MenuElement({id = "Q", name = "Use Q to KS", value = true})
-PMenu.KillSteal:MenuElement({id = "ksUnder", name = "KS unter enemy Turret", value = true})
+--PMenu.KillSteal:MenuElement({id = "ksUnder", name = "KS unter enemy Turret", value = true})
 
 --Main Menu-- Drawing 
 PMenu:MenuElement({type = MENU, id = "Drawing", name = "Drawing"})
@@ -93,13 +93,12 @@ function isReady (spell)
 end
 
 function canCast(spell)
-	return  myHero:GetSpellData(spell).mana <= myHero.mana
+	return  myHero.mana > myHero:GetSpellData(spell).mana
 end
 
 function isCasting(spell)
 	if Game.CanUseSpell(spell) == 8  then
 		return  true
-		--or myHero:GetSpellData(_E).name == "PantheonECancel"
 	else
 		return false
 	end
@@ -156,7 +155,7 @@ function OnTick()
 	if getMode() == "Combo" then
 		OnCombo()
 	elseif getMode() == "Harass" then
-		--onHarass()
+		onHarass()
 	elseif getMode() == "Clear" then
 		--OnClear()
 	elseif getMode() == "LastHit" then
@@ -170,10 +169,12 @@ function OnCombo()
 	if target == nil then return end
 
 	if IsValidTarget(target,PantheonQ.range) and comboQ and isReady(_Q) then
-			castQ(target)
+		PrintChat("use Q")
+		castQ(target)
 	end
 
 	if IsValidTarget(target,PantheonW.range) and comboW and isReady(_W) then
+		PrintChat("use Q")
 		castW(target)
 	end
 
@@ -189,23 +190,15 @@ function OnCombo()
 end
 
 function onHarass()
-	local target = getTarget(650)
+	local target = getTarget(800)
 	if target == nil then return end
 
-	--PrintChat (target.health)
-	if harassQ and isReady(_Q) and not isCasting(_E) and IsValidTarget(target,GarenQ.range)  then
-		--PrintChat("Q Cast")
-		castQ()
+	if IsValidTarget(target,PantheonQ.range) and harassQ and isReady(_Q) then
+			castQ(target)
 	end
 
-	if harassW and isReady(_W) and (isCasting(_Q) or isCasting(_E)) and IsValidTarget(target,GarenW.range) then
-		castW()
-		--PrintChat("W Cast")
-	end
-
-	if harassE and isReady(_E) and not isCasting(_Q) and myHero:GetSpellData(_E).name == "GarenE" and IsValidTarget(target,GarenE.range) then
-		castE()
-		--PrintChat("E Cast")
+	if IsValidTarget(target,PantheonW.range) and harassW and isReady(_W) then
+		castW(target)
 	end
 
 end
@@ -213,26 +206,31 @@ end
 function OnLastHit()
 	local minion = getEnemyMinions(800)
 	if minion == nil then return end
+	
+	local level = myHero:GetSpellData(_Q).level
+	if level == nil or level == 0 then return end
+	
 	for i = 1, Game.MinionCount() do
-		local target = Game.Minion(i)
-		 if  target.team ~= myHero.team and IsValidTarget(target, PantheonQ.range) then
-			local level = myHero:GetSpellData(_Q).level
-			if level == nil or level == 0 then level = 1 end
-			local Qdmg = (({65, 105, 145, 185, 225})[level] + 1.4 * target.totalDamage) * ((target.health / target.maxHealth < 0.15) and 2 or 1)
-			if Qdmg >= target.health and lastHitQ and isReady(_Q) then
-				castQ(target)
+		local minion = Game.Minion(i)
+		local Qdmg = (({65, 105, 145, 185, 225})[level] + 1.4 * minion.totalDamage) * ((minion.health / minion.maxHealth < 0.15) and 2 or 1)
+		 if  minion.team ~= myHero.team and IsValidTarget(minion, PantheonQ.range) then
+			if Qdmg >= minion.health and lastHitQ and isReady(_Q) then
+				castQ(minion)
 			end
 		end
 	end
+	
 end
 
 function KillSteal()
 	local target = getTarget(800)
 	if target == nil then return end
+	
+	local level = myHero:GetSpellData(_R).level
+	if level == nil or level == 0 then return end
+	
 	for i = 1, Game.HeroCount() do
 		local target = Game.Hero(i)
-		local level = myHero:GetSpellData(_Q).level
-		if level == nil or level == 0 then level = 1 end
 		local Qdmg = (({65, 105, 145, 185, 225})[level] + 1.4 * target.totalDamage) * ((target.health / target.maxHealth < 0.15) and 2 or 1)
 		if target.team ~= myHero.team and IsValidTarget(target, PantheonQ.range) then
 			if Qdmg >= target.health and killStealQ and isReady(_Q) then 
