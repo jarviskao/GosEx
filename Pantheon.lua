@@ -169,12 +169,12 @@ function OnCombo()
 	if target == nil then return end
 
 	if IsValidTarget(target,PantheonQ.range) and comboQ and isReady(_Q) then
-		PrintChat("use Q")
+		--PrintChat("use Q")
 		castQ(target)
 	end
 
 	if IsValidTarget(target,PantheonW.range) and comboW and isReady(_W) then
-		PrintChat("use Q")
+		--PrintChat("use W")
 		castW(target)
 	end
 
