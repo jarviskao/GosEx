@@ -66,19 +66,6 @@ GMenu:MenuElement({type = MENU, id = "Drawing", name = "Drawing"})
 GMenu.Drawing:MenuElement({id = "E", name = "Draw E Range", value = true})
 GMenu.Drawing:MenuElement({id = "R", name = "Draw R Range", value = true})
 
-
-local comboQ = GMenu.Mode.Combo.Q:Value()
-local comboW = GMenu.Mode.Combo.W:Value()
-local comboE = GMenu.Mode.Combo.E:Value()
-local comboR = GMenu.Mode.Combo.R:Value()
-local harassQ = GMenu.Mode.Harass.Q:Value()
-local harassW = GMenu.Mode.Harass.W:Value()
-local harassE = GMenu.Mode.Harass.E:Value()
-local clearQ = GMenu.Mode.Clear.Q:Value()
-local clearE = GMenu.Mode.Clear.E:Value()
-local lastHitQ = GMenu.Mode.Harass.Q:Value()
-local killStealR = GMenu.KillSteal.R:Value()
-
 local GarenQ = { range = 600 }
 local GarenW = { range = 250 }
 local GarenE = { range = 300 }
@@ -189,6 +176,10 @@ function OnTick()
 end
 
 function OnCombo()
+	local comboQ = GMenu.Mode.Combo.Q:Value()
+	local comboW = GMenu.Mode.Combo.W:Value()
+	local comboE = GMenu.Mode.Combo.E:Value()
+	local comboR = GMenu.Mode.Combo.R:Value()
 	local target = getTarget(800)
 	if target == nil then return end
 
@@ -215,9 +206,11 @@ function OnCombo()
 end
 
 function onHarass()
+	local harassQ = GMenu.Mode.Harass.Q:Value()
+	local harassW = GMenu.Mode.Harass.W:Value()
+	local harassE = GMenu.Mode.Harass.E:Value()
 	local target = getTarget(800)
 	if target == nil then return end
-
 
 	if IsValidTarget(target,GarenQ.range) and harassQ and isReady(_Q) and not isCasting(_E) then
 		castQ()
@@ -234,6 +227,9 @@ function onHarass()
 end
 
 function OnClear()
+	local clearQ = GMenu.Mode.Clear.Q:Value()
+	local clearE = GMenu.Mode.Clear.E:Value()
+
 	local minion = getEnemyMinions(300)
 	if minion == nil then return end
 	
@@ -249,6 +245,7 @@ function OnClear()
 end
 
 function OnLastHit()
+	local lastHitQ = GMenu.Mode.Harass.Q:Value()
 	local minion = getEnemyMinions(300)
 	if minion == nil then return end
 	
@@ -269,6 +266,7 @@ function OnLastHit()
 end
 
 function KillSteal()
+	local killStealR = GMenu.KillSteal.R:Value()
 	local target = getTarget(800)
 	if target == nil then return end
 	
