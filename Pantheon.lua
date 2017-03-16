@@ -230,7 +230,7 @@ function OnCombo()
 			ticker = GetTickCount()
 	end
 
-	if GetTickCount() >= ticker + 700 then
+	if GetTickCount() >= ticker + 750 then
 		if GOS then
 			_G.Orbwalker.Enabled:Value(true)
 			isCastingE = false
