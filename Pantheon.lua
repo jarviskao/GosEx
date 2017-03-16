@@ -184,7 +184,7 @@ function OnTick()
 	--PrintChat ("Gime Time : "..Game.Timer().." cast : "..(myHero:GetSpellData(_E).castTime - myHero:GetSpellData(_E).cd + 1))
 	if not PMenu.Enabled:Value() then return end
 	if myHero.dead then return end
-	
+	check()
 	if getMode() == "Combo" then
 		OnCombo()
 	elseif getMode() == "Harass" then
@@ -195,6 +195,29 @@ function OnTick()
 		OnLastHit()
 	end	
 	KillSteal()
+end
+
+function check()
+	if isCastingE then
+		if GOS then
+			_G.Orbwalker.Enabled:Value(false)
+		elseif EOW then
+			_G.EOW:MovementsEnabled(false)
+			_G.EOW:AttacksEnabled(false)
+		end
+	end
+	
+	if GetTickCount() >= ticker + 800 then
+		if GOS then
+			_G.Orbwalker.Enabled:Value(true)
+			isCastingE = false
+		elseif EOW then
+			_G.EOW:MovementsEnabled(true)
+			_G.EOW:AttacksEnabled(true)
+			isCastingE = false
+		end
+	end		
+	
 end
 
 function OnCombo()
@@ -221,26 +244,9 @@ function OnCombo()
 			Control.SetCursorPos(Epos)
 			castE()
 			isCastingE = true
-			if GOS then
-				_G.Orbwalker.Enabled:Value(false)
-			elseif EOW then
-				_G.EOW:MovementsEnabled(false)
-				_G.EOW:AttacksEnabled(false)
-			end
 			ticker = GetTickCount()
 	end
-
-	if GetTickCount() >= ticker + 750 then
-		if GOS then
-			_G.Orbwalker.Enabled:Value(true)
-			isCastingE = false
-		elseif EOW then
-			_G.EOW:MovementsEnabled(true)
-			_G.EOW:AttacksEnabled(true)
-			isCastingE = false
-		end
-	end		
-
+	
 end
 
 function onHarass()
