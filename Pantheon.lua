@@ -67,6 +67,7 @@ local PantheonE = { range = 400 ,  channels = 0.75}
 local EOW = false
 local IC = false
 local GOS = false
+local StopOrbWalking = false
 local isCastingE = false
 local ticker = 0
 
@@ -198,6 +199,7 @@ function OnTick()
 end
 
 function check()
+
 	if isCastingE then
 		if GOS then
 			_G.Orbwalker.Enabled:Value(false)
@@ -207,17 +209,19 @@ function check()
 		end
 	end
 	
-	if GetTickCount() >= ticker + 800 then
-		if GOS then
-			_G.Orbwalker.Enabled:Value(true)
-			isCastingE = false
-		elseif EOW then
-			_G.EOW:MovementsEnabled(true)
-			_G.EOW:AttacksEnabled(true)
-			isCastingE = false
+	if GetTickCount() >= ticker + 900 then
+		if GOS and StopOrbWalking then
+				_G.Orbwalker.Enabled:Value(true)
+				isCastingE = false
+				StopOrbWalking = false
+		elseif EOW and StopOrbWalking then
+				_G.EOW:MovementsEnabled(true)
+				_G.EOW:AttacksEnabled(true)
+				isCastingE = false
+				StopOrbWalking = false
 		end
 	end		
-	
+
 end
 
 function OnCombo()
@@ -244,6 +248,7 @@ function OnCombo()
 			Control.SetCursorPos(Epos)
 			castE()
 			isCastingE = true
+			StopOrbWalking = true
 			ticker = GetTickCount()
 	end
 	
