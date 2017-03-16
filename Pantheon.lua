@@ -3,7 +3,7 @@ if myHero.charName ~= "Pantheon" then return end
 
 --Locals
 local LoL = "7.5"
-local ver = "1.0"
+local ver = "1.1"
 
 --icon
 local MenuIcons = "http://static.lolskill.net/img/champions/64/pantheon.png"
@@ -49,6 +49,12 @@ PMenu:MenuElement({type = MENU, id = "KillSteal", name = "KillSteal Settings"})
 PMenu.KillSteal:MenuElement({id = "Q", name = "Use Q to KS", value = true})
 --PMenu.KillSteal:MenuElement({id = "ksUnder", name = "KS unter enemy Turret", value = true})
 
+--Main Menu-- Auto Setting
+PMenu:MenuElement({type = MENU, id = "Auto", name = "Auto Settings"})
+PMenu.Auto:MenuElement({id = "Q", name = "Auto Q When Target in Range", value = true})
+PMenu.Auto:MenuElement({id = "MinManaAutoQ", name = "Min Mana % for Auto Q", value = 80,min = 0, max = 100, step = 1})
+--PMenu.Auto:MenuElement({id = "DonQ", name = "Don't Auto Q in Enemy Turret Range" , value = true})
+
 --Main Menu-- Drawing 
 PMenu:MenuElement({type = MENU, id = "Drawing", name = "Drawing"})
 PMenu.Drawing:MenuElement({id = "Q", name = "Draw Q Range", value = true})
@@ -57,14 +63,36 @@ PMenu.Drawing:MenuElement({id = "E", name = "Draw E Range", value = true})
 
 local PantheonQ = { range = 600 }
 local PantheonW = { range = 600 }
-local PantheonE = { range = 400 }
+local PantheonE = { range = 400 ,  channels = 0.75}
+local EOW = false
+local IC = false
+local GOS = false
+local isCastingE = false
+local ticker = 0
+
+DelayAction(function()
+	if _G.EOW then 
+		PrintChat ("[Info] Garen Script is intergreted with the eXternal Orbwalker")
+		EOW = true
+		if _G.Orbwalker then
+			_G.Orbwalker.Enabled:Value(false)
+			_G.Orbwalker.Drawings.Enabled:Value(false)
+		end
+	elseif _G.SDK then
+		PrintChat ("[Info] Garen Script is intergreted with the IC's Orbwalker")
+		IC = true
+	elseif _G.Orbwalker then
+		PrintChat ("[Info] Garen Script is intergreted with the in-built GOS Orbwalker")
+		GOS = true
+	end
+end, 1)
 
 function castQ(target)
 	Control.CastSpell(HK_Q,target.pos)
 end
 
-function castW()
-	Control.CastSpell(HK_W)
+function castW(target)
+	Control.CastSpell(HK_W,target.pos)
 end
 
 function castE() 
@@ -88,6 +116,14 @@ function isCasting(spell)
 	end
 end
 
+function isCD(spell)
+	if Game.CanUseSpell(spell) == 32  then
+		return  true
+	else
+		return false
+	end
+end
+
 function getTarget(range)
     local target
     for i = 1,Game.HeroCount() do
@@ -105,11 +141,23 @@ function IsValidTarget(unit, range)
 end
 
 local function getMode()
-	if PMenu.Key.Combo:Value() then return "Combo" end
-	if PMenu.Key.Harass:Value() then return "Harass" end
-	if PMenu.Key.Clear:Value() then return "Clear" end
-	if PMenu.Key.LastHit:Value() then return "LastHit" end
-    return ""
+	if _G.EOW then 
+		if PMenu.Key.Combo:Value() then return "Combo" end
+		if PMenu.Key.Harass:Value() then return "Harass" end
+		if PMenu.Key.Clear:Value() then return "Clear" end
+		if PMenu.Key.LastHit:Value() then return "LastHit" end
+	elseif _G.SDK then
+		if _G.SDK.Orbwalker.Modes[_G.SDK.ORBWALKER_MODE_COMBO] then return "Combo" end
+		if _G.SDK.Orbwalker.Modes[_G.SDK.ORBWALKER_MODE_HARASS] then return "Harass" end
+		if _G.SDK.Orbwalker.Modes[_G.SDK.ORBWALKER_MODE_LANECLEAR] then return "Clear" end
+		if _G.SDK.Orbwalker.Modes[_G.SDK.ORBWALKER_MODE_LASTHIT] then return "LastHit" end
+	elseif _G.Orbwalker then
+		if PMenu.Key.Combo:Value() then return "Combo" end
+		if PMenu.Key.Harass:Value() then return "Harass" end
+		if PMenu.Key.Clear:Value() then return "Clear" end
+		if PMenu.Key.LastHit:Value() then return "LastHit" end
+	end
+	return ""
 end
 
 function getEnemyMinions(range)
@@ -133,9 +181,10 @@ end
 
 --Start
 function OnTick()
+	--PrintChat ("Gime Time : "..Game.Timer().." cast : "..(myHero:GetSpellData(_E).castTime - myHero:GetSpellData(_E).cd + 1))
 	if not PMenu.Enabled:Value() then return end
 	if myHero.dead then return end
-
+	
 	if getMode() == "Combo" then
 		OnCombo()
 	elseif getMode() == "Harass" then
@@ -155,24 +204,42 @@ function OnCombo()
 	local target = getTarget(800)
 	if target == nil then return end
 
-	if IsValidTarget(target,PantheonQ.range) and comboQ and isReady(_Q) then
-		--PrintChat("use Q")
+	if IC then
+		target = _G.SDK.TargetSelector:GetTarget(800)
+	end
+
+	if IsValidTarget(target,PantheonQ.range) and comboQ and isReady(_Q) and not myHero.isChanneling and not isCastingE then
 		castQ(target)
 	end
 
-	if IsValidTarget(target,PantheonW.range) and comboW and isReady(_W) then
-		--PrintChat("use W")
+	if IsValidTarget(target,PantheonW.range) and comboW and isReady(_W)  and not myHero.isChanneling and not isCastingE then
 		castW(target)
 	end
 
---[[
-	if IsValidTarget(target,PantheonE.range) and comboE and isReady(_E) then
-		Control.SetCursorPos (target)
-		castE()
-		Control.SetCursorPos (myHero)
-		--PrintChat("E Cast")
+	if IsValidTarget(target,PantheonE.range) and comboE and isReady(_E) and not myHero.isChanneling then
+			local Epos = target:GetPrediction(myHero:GetSpellData(_E).speed,myHero:GetSpellData(_E).delay)
+			Control.SetCursorPos(Epos)
+			castE()
+			isCastingE = true
+			if GOS then
+				_G.Orbwalker.Enabled:Value(false)
+			elseif EOW then
+				_G.EOW:MovementsEnabled(false)
+				_G.EOW:AttacksEnabled(false)
+			end
+			ticker = GetTickCount()
 	end
-	--]]
+
+	if GetTickCount() >= ticker + 700 then
+		if GOS then
+			_G.Orbwalker.Enabled:Value(true)
+			isCastingE = false
+		elseif EOW then
+			_G.EOW:MovementsEnabled(true)
+			_G.EOW:AttacksEnabled(true)
+			isCastingE = false
+		end
+	end		
 
 end
 
@@ -182,6 +249,10 @@ function onHarass()
 	local harassE = PMenu.Mode.Harass.E:Value()
 	local target = getTarget(800)
 	if target == nil then return end
+
+	if IC then
+		target = _G.SDK.TargetSelector:GetTarget(800)
+	end
 
 	if IsValidTarget(target,PantheonQ.range) and harassQ and isReady(_Q) then
 			castQ(target)
