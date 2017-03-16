@@ -72,17 +72,17 @@ local ticker = 0
 
 DelayAction(function()
 	if _G.EOW then 
-		PrintChat ("[Info] Garen Script is intergreted with the eXternal Orbwalker")
+		PrintChat ("[Info] Pantheon Script is intergreted with the eXternal Orbwalker")
 		EOW = true
 		if _G.Orbwalker then
 			_G.Orbwalker.Enabled:Value(false)
 			_G.Orbwalker.Drawings.Enabled:Value(false)
 		end
 	elseif _G.SDK then
-		PrintChat ("[Info] Garen Script is intergreted with the IC's Orbwalker")
+		PrintChat ("[Info] Pantheon Script is intergreted with the IC's Orbwalker")
 		IC = true
 	elseif _G.Orbwalker then
-		PrintChat ("[Info] Garen Script is intergreted with the in-built GOS Orbwalker")
+		PrintChat ("[Info] Pantheon Script is intergreted with the in-built GOS Orbwalker")
 		GOS = true
 	end
 end, 1)
