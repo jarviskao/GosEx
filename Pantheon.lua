@@ -3,7 +3,7 @@ if myHero.charName ~= "Pantheon" then return end
 
 --Locals
 local LoL = "7.5"
-local ver = "1.1"
+local ver = "1.2"
 
 --icon
 local MenuIcons = "http://static.lolskill.net/img/champions/64/pantheon.png"
@@ -64,27 +64,27 @@ PMenu.Drawing:MenuElement({id = "E", name = "Draw E Range", value = true})
 local PantheonQ = { range = 600 }
 local PantheonW = { range = 600 }
 local PantheonE = { range = 400 ,  channels = 0.75}
-local EOW = false
-local IC = false
-local GOS = false
+local EOrbWalking = false
+local ICOrbWalking = false
+local GOSOrbWalking = false
 local StopOrbWalking = false
 local isCastingE = false
 local ticker = 0
 
 DelayAction(function()
-	if _G.EOW then 
+	if EOW then 
 		PrintChat ("[Info] Pantheon Script is intergreted with the eXternal Orbwalker")
-		EOW = true
+		EOrbWalking = true
 		if _G.Orbwalker then
 			_G.Orbwalker.Enabled:Value(false)
 			_G.Orbwalker.Drawings.Enabled:Value(false)
 		end
 	elseif _G.SDK then
 		PrintChat ("[Info] Pantheon Script is intergreted with the IC's Orbwalker")
-		IC = true
+		ICOrbWalking = true
 	elseif _G.Orbwalker then
 		PrintChat ("[Info] Pantheon Script is intergreted with the in-built GOS Orbwalker")
-		GOS = true
+		GOSOrbWalking = true
 	end
 end, 1)
 
@@ -142,7 +142,7 @@ function IsValidTarget(unit, range)
 end
 
 local function getMode()
-	if _G.EOW then 
+	if EOW then 
 		if PMenu.Key.Combo:Value() then return "Combo" end
 		if PMenu.Key.Harass:Value() then return "Harass" end
 		if PMenu.Key.Clear:Value() then return "Clear" end
@@ -201,20 +201,20 @@ end
 function check()
 
 	if isCastingE then
-		if GOS then
+		if GOSOrbWalking then
 			_G.Orbwalker.Enabled:Value(false)
-		elseif EOW then
+		elseif EOrbWalking then
 			_G.EOW:MovementsEnabled(false)
 			_G.EOW:AttacksEnabled(false)
 		end
 	end
 	
 	if GetTickCount() >= ticker + 900 then
-		if GOS and StopOrbWalking then
+		if GOSOrbWalking and StopOrbWalking then
 				_G.Orbwalker.Enabled:Value(true)
 				isCastingE = false
 				StopOrbWalking = false
-		elseif EOW and StopOrbWalking then
+		elseif EOrbWalking and StopOrbWalking then
 				_G.EOW:MovementsEnabled(true)
 				_G.EOW:AttacksEnabled(true)
 				isCastingE = false
@@ -231,25 +231,25 @@ function OnCombo()
 	local target = getTarget(800)
 	if target == nil then return end
 
-	if IC then
+	if ICOrbWalking then
 		target = _G.SDK.TargetSelector:GetTarget(800)
 	end
-
-	if IsValidTarget(target,PantheonQ.range) and comboQ and isReady(_Q) and not myHero.isChanneling and not isCastingE then
+	
+	if IsValidTarget(target,PantheonQ.range) and comboQ and isReady(_Q) and not myHero.isChanneling then
 		castQ(target)
 	end
 
-	if IsValidTarget(target,PantheonW.range) and comboW and isReady(_W)  and not myHero.isChanneling and not isCastingE then
+	if IsValidTarget(target,PantheonW.range) and comboW and isReady(_W)  and not myHero.isChanneling and not isReady(_Q) then
 		castW(target)
 	end
 
 	if IsValidTarget(target,PantheonE.range) and comboE and isReady(_E) and not myHero.isChanneling then
-			local Epos = target:GetPrediction(myHero:GetSpellData(_E).speed,myHero:GetSpellData(_E).delay)
-			Control.SetCursorPos(Epos)
-			castE()
-			isCastingE = true
-			StopOrbWalking = true
-			ticker = GetTickCount()
+		local Epos = target:GetPrediction(myHero:GetSpellData(_E).speed,myHero:GetSpellData(_E).delay)
+		Control.SetCursorPos(Epos)
+		castE()
+		isCastingE = true
+		StopOrbWalking = true
+		ticker = GetTickCount()
 	end
 	
 end
@@ -261,12 +261,12 @@ function onHarass()
 	local target = getTarget(800)
 	if target == nil then return end
 
-	if IC then
+	if ICOrbWalking then
 		target = _G.SDK.TargetSelector:GetTarget(800)
 	end
 
 	if IsValidTarget(target,PantheonQ.range) and harassQ and isReady(_Q) then
-			castQ(target)
+		castQ(target)
 	end
 
 	if IsValidTarget(target,PantheonW.range) and harassW and isReady(_W) then
