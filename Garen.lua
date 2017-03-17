@@ -3,7 +3,7 @@ if myHero.charName ~= "Garen" then return end
 
 --Locals
 local LoL = "7.5"
-local ver = "2.2"
+local ver = "2.3"
 
 --icon
 local MenuIcons = "http://static.lolskill.net/img/champions/64/garen.png"
@@ -39,10 +39,16 @@ GMenu.Mode:MenuElement({type = MENU, id = "Harass", name = "Harass"})
 GMenu.Mode.Harass:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon = SpellIcons.Q})
 GMenu.Mode.Harass:MenuElement({id = "W", name = "Use W", value = true, leftIcon = SpellIcons.W})
 GMenu.Mode.Harass:MenuElement({id = "E", name = "Use E", value = true, leftIcon = SpellIcons.E})
---Main Menu-- Mode Setting-- Clear 
-GMenu.Mode:MenuElement({type = MENU, id = "Clear", name = "Clear"})
-GMenu.Mode.Clear:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon = SpellIcons.Q})
-GMenu.Mode.Clear:MenuElement({id = "E", name = "Use E", value = true, leftIcon = SpellIcons.E})
+--Main Menu-- Mode Setting-- LandClear 
+GMenu.Mode:MenuElement({type = MENU, id = "LaneClear", name = "Lane Clear"})
+GMenu.Mode.LaneClear:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon = SpellIcons.Q})
+GMenu.Mode.LaneClear:MenuElement({id = "E", name = "Use E", value = true, leftIcon = SpellIcons.E})
+GMenu.Mode.LaneClear:MenuElement({id = "EKillMinion", name = "Use E when X minions", value = 3,min = 0, max = 5, step = 1})
+--Main Menu-- Mode Setting-- Jungle 
+GMenu.Mode:MenuElement({type = MENU, id = "JungleClear", name = "Jungle Clear"})
+GMenu.Mode.JungleClear:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon = SpellIcons.Q})
+GMenu.Mode.JungleClear:MenuElement({id = "W", name = "Use W", value = true, leftIcon = SpellIcons.W})
+GMenu.Mode.JungleClear:MenuElement({id = "E", name = "Use E", value = true, leftIcon = SpellIcons.E})
 --Main Menu-- Mode Setting-- LastHit
 GMenu.Mode:MenuElement({type = MENU, id = "LastHit", name = "Last Hit"})
 GMenu.Mode.LastHit:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon = SpellIcons.Q})
@@ -50,7 +56,6 @@ GMenu.Mode.LastHit:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon
 --Main Menu-- KillSteal Setting
 GMenu:MenuElement({type = MENU, id = "KillSteal", name = "KillSteal Settings"})
 GMenu.KillSteal:MenuElement({id = "R", name = "Use R to KS", value = true})
---GMenu.KillSteal:MenuElement({id = "ksUnder", name = "KS unter enemy Turret", value = true})
 GMenu.KillSteal:MenuElement({type = MENU, id = "black", name = "KillSteal White List"})
 DelayAction(function()
 	for i = 1, Game.HeroCount() do
@@ -70,6 +75,26 @@ local GarenQ = { range = 600 }
 local GarenW = { range = 250 }
 local GarenE = { range = 300 }
 local GarenR = { range = 400 }
+local EOrbWalking = false
+local ICOrbWalking = false
+local GOSOrbWalking = false
+
+DelayAction(function()
+	if EOW then 
+		PrintChat ("[Info] Garen Script is intergreted with the eXternal Orbwalker")
+		EOrbWalking = true
+		if _G.Orbwalker then
+			_G.Orbwalker.Enabled:Value(false)
+			_G.Orbwalker.Drawings.Enabled:Value(false)
+		end
+	elseif _G.SDK then
+		PrintChat ("[Info] Garen Script is intergreted with the IC's Orbwalker")
+		ICOrbWalking = true
+	elseif _G.Orbwalker then
+		PrintChat ("[Info] Garen Script is intergreted with the in-built GOS Orbwalker")
+		GOSOrbWalking = true
+	end
+end, 1)
 
 function castQ()
 	Control.CastSpell(HK_Q)
@@ -120,11 +145,23 @@ function IsValidTarget(unit, range)
 end
 
 local function getMode()
-	if GMenu.Key.Combo:Value() then return "Combo" end
-	if GMenu.Key.Harass:Value() then return "Harass" end
-	if GMenu.Key.Clear:Value() then return "Clear" end
-	if GMenu.Key.LastHit:Value() then return "LastHit" end
-    return ""
+	if EOW then 
+		if EOW:Mode() == "Combo"  then return "Combo" end
+		if EOW:Mode() == "Harass" then return "Harass" end
+		if EOW:Mode() == "LaneClear" then return "Clear" end
+		if EOW:Mode() == "LastHit" then return "LastHit" end
+	elseif _G.SDK then
+		if _G.SDK.Orbwalker.Modes[_G.SDK.ORBWALKER_MODE_COMBO] then return "Combo" end
+		if _G.SDK.Orbwalker.Modes[_G.SDK.ORBWALKER_MODE_HARASS] then return "Harass" end
+		if _G.SDK.Orbwalker.Modes[_G.SDK.ORBWALKER_MODE_LANECLEAR] then return "Clear" end
+		if _G.SDK.Orbwalker.Modes[_G.SDK.ORBWALKER_MODE_LASTHIT] then return "LastHit" end
+	elseif _G.Orbwalker then
+		if GMenu.Key.Combo:Value() then return "Combo" end
+		if GMenu.Key.Harass:Value() then return "Harass" end
+		if GMenu.Key.Clear:Value() then return "Clear" end
+		if GMenu.Key.LastHit:Value() then return "LastHit" end
+	end
+	return ""
 end
 
 function getEnemyMinions(range)
@@ -147,22 +184,22 @@ function CountEnemyMinions(range)
             minionsCount = minionsCount + 1
         end
     end
-    PrintChat (minionsCount)
+    --PrintChat (minionsCount)
     return minionsCount
 end
 
 function OnDraw()
 	--Draw Range
 	if myHero.dead then return end
-	if GMenu.Drawing.E:Value() then Draw.Circle(myHero.pos,325,1,Draw.Color(255, 255, 255, 255)) end			
-	if GMenu.Drawing.R:Value() then Draw.Circle(myHero.pos,400,1,Draw.Color(255, 255, 255, 255)) end	
+	if GMenu.Drawing.E:Value() then Draw.Circle(myHero.pos,325,1,Draw.Color(255, 0, 0, 220)) end			
+	if GMenu.Drawing.R:Value() then Draw.Circle(myHero.pos,400,1,Draw.Color(220,255,0,0)) end	
 end
 
 --Start
 function OnTick()
 	if not GMenu.Enabled:Value() then return end
 	if myHero.dead then return end
-
+	
 	if getMode() == "Combo" then
 		OnCombo()
 	elseif getMode() == "Harass" then
@@ -182,7 +219,11 @@ function OnCombo()
 	local comboR = GMenu.Mode.Combo.R:Value()
 	local target = getTarget(800)
 	if target == nil then return end
-
+	
+	if ICOrbWalking then
+		target = _G.SDK.TargetSelector:GetTarget(800)
+	end
+	
 	if IsValidTarget(target,GarenQ.range) and comboQ and isReady(_Q) and not isCasting(_E) then
 		castQ()
 	end
@@ -212,6 +253,10 @@ function onHarass()
 	local target = getTarget(800)
 	if target == nil then return end
 
+	if ICOrbWalking then
+		target = _G.SDK.TargetSelector:GetTarget(800)
+	end
+	
 	if IsValidTarget(target,GarenQ.range) and harassQ and isReady(_Q) and not isCasting(_E) then
 		castQ()
 	end
@@ -227,25 +272,46 @@ function onHarass()
 end
 
 function OnClear()
-	local clearQ = GMenu.Mode.Clear.Q:Value()
-	local clearE = GMenu.Mode.Clear.E:Value()
+	local LaneClearQ = GMenu.Mode.LaneClear.Q:Value()
+	local LaneClearE = GMenu.Mode.LaneClear.E:Value()
+	local LaneClearEminion = GMenu.Mode.LaneClear.EKillMinion:Value()
+	local JungleClearQ = GMenu.Mode.JungleClear.Q:Value()
+	local JungleClearW = GMenu.Mode.JungleClear.W:Value()
+	local JungleClearE = GMenu.Mode.JungleClear.E:Value()
 
-	local minion = getEnemyMinions(300)
+	local minion = getEnemyMinions(350)
 	if minion == nil then return end
 	
-	if IsValidTarget(minion,200) and clearQ and isReady(_Q) and not isCasting(_E) then
-		castQ()
-		Control.Attack(minion)
+	for i = 1, Game.MinionCount() do
+		local minion = Game.Minion(i)
+		if  minion.team == 200 then
+			if IsValidTarget(minion,200) and LaneClearQ and isReady(_Q) and not isCasting(_E) then
+				castQ()
+				Control.Attack(minion)
+			end
+			
+			if IsValidTarget(minion,GarenE.range) and LaneClearE and isReady(_E) and not isCasting(_Q) and myHero:GetSpellData(_E).name == "GarenE" and  CountEnemyMinions(GarenE.range) >= LaneClearEminion then
+				castE()
+			end
+		elseif minion.team == 300 then
+			if IsValidTarget(minion,320) and JungleClearQ and isReady(_Q) and not isCasting(_E) then
+				castQ()
+				Control.Attack(minion)
+			end
+			
+			if IsValidTarget(minion,320) and JungleClearW and isReady(_W) then
+				castW()
+			end
+			
+			if IsValidTarget(minion,GarenE.range) and JungleClearE and isReady(_E) and not isCasting(_Q) and myHero:GetSpellData(_E).name == "GarenE" then
+				castE()
+			end
+		end
 	end
-	
-	if IsValidTarget(minion,GarenE.range) and clearE and isReady(_E) and not isCasting(_Q) and myHero:GetSpellData(_E).name == "GarenE" then
-		castE()
-	end
-	
 end
 
 function OnLastHit()
-	local lastHitQ = GMenu.Mode.Harass.Q:Value()
+	local lastHitQ = GMenu.Mode.LastHit.Q:Value()
 	local minion = getEnemyMinions(300)
 	if minion == nil then return end
 	
