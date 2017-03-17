@@ -143,10 +143,10 @@ end
 
 local function getMode()
 	if EOW then 
-		if PMenu.Key.Combo:Value() then return "Combo" end
-		if PMenu.Key.Harass:Value() then return "Harass" end
-		if PMenu.Key.Clear:Value() then return "Clear" end
-		if PMenu.Key.LastHit:Value() then return "LastHit" end
+		if EOW:Mode() == "Combo"  then return "Combo" end
+		if EOW:Mode() == "Harass" then return "Harass" end
+		if EOW:Mode() == "LaneClear" then return "Clear" end
+		if EOW:Mode() == "Harass" then return "LastHit" end
 	elseif _G.SDK then
 		if _G.SDK.Orbwalker.Modes[_G.SDK.ORBWALKER_MODE_COMBO] then return "Combo" end
 		if _G.SDK.Orbwalker.Modes[_G.SDK.ORBWALKER_MODE_HARASS] then return "Harass" end
