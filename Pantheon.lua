@@ -305,6 +305,9 @@ function OnClear()
 	local JungleClearQ = PMenu.Mode.JungleClear.Q:Value()
 	local JungleClearW = PMenu.Mode.JungleClear.W:Value()
 	local JungleClearE = PMenu.Mode.JungleClear.E:Value()
+	local JungleClearQMana = PMenu.Mode.JungleClear.QMana:Value()
+	local JungleClearWMana = PMenu.Mode.JungleClear.WMana:Value()
+	local JungleClearEMana = PMenu.Mode.JungleClear.EMana:Value()
 
 	local minion = getEnemyMinions(600)
 	if minion == nil then return end
@@ -330,19 +333,19 @@ function OnClear()
 			end
 		elseif minion.team == 300 then
 			--Q
-			if IsValidTarget(minion,550) and JungleClearQ and isReady(_Q) and not myHero.isChanneling then
+			if IsValidTarget(minion,550) and JungleClearQ and isReady(_Q) and not myHero.isChanneling and myHero.mana > JungleClearQMana then
 				Control.SetCursorPos(minion)
 				Control.KeyDown(HK_Q)
 				Control.KeyUp(HK_Q)
 			end
 			--W
-			if IsValidTarget(minion,500) and JungleClearW and isReady(_W) and not myHero.isChanneling then
+			if IsValidTarget(minion,500) and JungleClearW and isReady(_W) and not myHero.isChanneling and myHero.mana > JungleClearEMana then
 				Control.SetCursorPos(minion)
 				Control.KeyDown(HK_W)
 				Control.KeyUp(HK_W)
 			end
 			--E
-			if IsValidTarget(minion,350) and JungleClearE and isReady(_E) and not myHero.isChanneling then
+			if IsValidTarget(minion,350) and JungleClearE and isReady(_E) and not myHero.isChanneling and myHero.mana > JungleClearWMana then
 				local Epos = minion:GetPrediction(myHero:GetSpellData(_E).speed, myHero:GetSpellData(_E).delay)
 				Control.SetCursorPos(Epos)
 				Control.KeyDown(HK_E)
