@@ -3,7 +3,7 @@ if myHero.charName ~= "Pantheon" then return end
 
 --Locals
 local LoL = "7.5"
-local ver = "1.2"
+local ver = "1.3"
 
 --icon
 local MenuIcons = "http://static.lolskill.net/img/champions/64/pantheon.png"
@@ -30,16 +30,26 @@ PMenu.Mode:MenuElement({type = MENU, id = "Combo", name = "Combo"})
 PMenu.Mode.Combo:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon = SpellIcons.Q})
 PMenu.Mode.Combo:MenuElement({id = "W", name = "Use W", value = true, leftIcon = SpellIcons.W})
 PMenu.Mode.Combo:MenuElement({id = "E", name = "Use E", value = true, leftIcon = SpellIcons.E})
-
 --Main Menu-- Mode Setting-- Harass
 PMenu.Mode:MenuElement({type = MENU, id = "Harass", name = "Harass"})
 PMenu.Mode.Harass:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon = SpellIcons.Q})
 PMenu.Mode.Harass:MenuElement({id = "W", name = "Use W", value = true, leftIcon = SpellIcons.W})
 PMenu.Mode.Harass:MenuElement({id = "E", name = "Use E", value = true, leftIcon = SpellIcons.E})
---Main Menu-- Mode Setting-- Clear 
-PMenu.Mode:MenuElement({type = MENU, id = "Clear", name = "Clear"})
-PMenu.Mode.Clear:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon = SpellIcons.Q})
-PMenu.Mode.Clear:MenuElement({id = "E", name = "Use E", value = true, leftIcon = SpellIcons.E})
+--Main Menu-- Mode Setting-- LandClear 
+PMenu.Mode:MenuElement({type = MENU, id = "LaneClear", name = "Lane Clear"})
+PMenu.Mode.LaneClear:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon = SpellIcons.Q})
+PMenu.Mode.LaneClear:MenuElement({id = "QMana", name = "Min Mana to use Q (%)", value = 80, min = 0, max = 100, step = 1})
+PMenu.Mode.LaneClear:MenuElement({id = "E", name = "Use E", value = true, leftIcon = SpellIcons.E})
+PMenu.Mode.LaneClear:MenuElement({id = "EMana", name = "Min Mana to use E (%)", value = 80, min = 0, max = 100, step = 1})
+PMenu.Mode.LaneClear:MenuElement({id = "EKillMinion", name = "Use E when X minions", value = 3,min = 0, max = 5, step = 1})
+--Main Menu-- Mode Setting-- Jungle 
+PMenu.Mode:MenuElement({type = MENU, id = "JungleClear", name = "Jungle Clear"})
+PMenu.Mode.JungleClear:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon = SpellIcons.Q})
+PMenu.Mode.JungleClear:MenuElement({id = "QMana", name = "Min Mana to use Q (%)", value = 80, min = 0, max = 100, step = 1})
+PMenu.Mode.JungleClear:MenuElement({id = "W", name = "Use W", value = true, leftIcon = SpellIcons.W})
+PMenu.Mode.JungleClear:MenuElement({id = "WMana", name = "Min Mana to use W (%)", value = 80, min = 0, max = 100, step = 1})
+PMenu.Mode.JungleClear:MenuElement({id = "E", name = "Use E", value = true, leftIcon = SpellIcons.E})
+PMenu.Mode.JungleClear:MenuElement({id = "EMana", name = "Min Mana to use E (%)", value = 80, min = 0, max = 100, step = 1})
 --Main Menu-- Mode Setting-- LastHit
 PMenu.Mode:MenuElement({type = MENU, id = "LastHit", name = "Last Hit"})
 PMenu.Mode.LastHit:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon = SpellIcons.Q})
@@ -52,7 +62,7 @@ PMenu.KillSteal:MenuElement({id = "Q", name = "Use Q to KS", value = true})
 --Main Menu-- Auto Setting
 PMenu:MenuElement({type = MENU, id = "Auto", name = "Auto Settings"})
 PMenu.Auto:MenuElement({id = "Q", name = "Auto Q When Target in Range", value = true})
-PMenu.Auto:MenuElement({id = "MinManaAutoQ", name = "Min Mana % for Auto Q", value = 80,min = 0, max = 100, step = 1})
+PMenu.Auto:MenuElement({id = "QMana", name = "Min Mana to auto Q (%)", value = 80,min = 0, max = 100, step = 1})
 --PMenu.Auto:MenuElement({id = "DonQ", name = "Don't Auto Q in Enemy Turret Range" , value = true})
 
 --Main Menu-- Drawing 
@@ -173,6 +183,18 @@ function getEnemyMinions(range)
     return target
 end
 
+function CountEnemyMinions(range)
+	local minionsCount = 0
+    for i = 1,Game.MinionCount() do
+        local minion = Game.Minion(i)
+        if  minion.team ~= myHero.team and IsValidTarget(minion, range) then
+            minionsCount = minionsCount + 1
+        end
+    end
+    --PrintChat (minionsCount)
+    return minionsCount
+end
+
 function OnDraw()
 	--Draw Range
 	if myHero.dead then return end
@@ -191,7 +213,7 @@ function OnTick()
 	elseif getMode() == "Harass" then
 		onHarass()
 	elseif getMode() == "Clear" then
-		--OnClear()
+		OnClear()
 	elseif getMode() == "LastHit" then
 		OnLastHit()
 	end	
@@ -239,14 +261,15 @@ function OnCombo()
 		castQ(target)
 	end
 
-	if IsValidTarget(target,PantheonW.range) and comboW and isReady(_W)  and not myHero.isChanneling and not isReady(_Q) then
+	if IsValidTarget(target,PantheonW.range) and comboW and isReady(_W) and not myHero.isChanneling and not isReady(_Q) then
 		castW(target)
 	end
 
 	if IsValidTarget(target,PantheonE.range) and comboE and isReady(_E) and not myHero.isChanneling then
-		local Epos = target:GetPrediction(myHero:GetSpellData(_E).speed,myHero:GetSpellData(_E).delay)
+		local Epos = target:GetPrediction(myHero:GetSpellData(_E).speed, myHero:GetSpellData(_E).delay)
 		Control.SetCursorPos(Epos)
-		castE()
+		Control.KeyDown(HK_E)
+		Control.KeyUp(HK_E)
 		isCastingE = true
 		StopOrbWalking = true
 		ticker = GetTickCount()
@@ -273,6 +296,63 @@ function onHarass()
 		castW(target)
 	end
 
+end
+
+function OnClear()
+	local LaneClearQ = PMenu.Mode.LaneClear.Q:Value()
+	local LaneClearE = PMenu.Mode.LaneClear.E:Value()
+	local LaneClearEminion = PMenu.Mode.LaneClear.EKillMinion:Value()
+	local JungleClearQ = PMenu.Mode.JungleClear.Q:Value()
+	local JungleClearW = PMenu.Mode.JungleClear.W:Value()
+	local JungleClearE = PMenu.Mode.JungleClear.E:Value()
+
+	local minion = getEnemyMinions(600)
+	if minion == nil then return end
+	
+	for i = 1, Game.MinionCount() do
+		local minion = Game.Minion(i)
+		if  minion.team == 200 then
+			--Q
+			if IsValidTarget(minion,550) and LaneClearQ and isReady(_Q) and not myHero.isChanneling then
+				Control.SetCursorPos(minion)
+				Control.KeyDown(HK_Q)
+				Control.KeyUp(HK_Q)
+			end
+			--E
+			if IsValidTarget(minion,350) and LaneClearE and isReady(_E) and not myHero.isChanneling and CountEnemyMinions(350) >= LaneClearEminion then
+				local Epos = minion:GetPrediction(myHero:GetSpellData(_E).speed, myHero:GetSpellData(_E).delay)
+				Control.SetCursorPos(Epos)
+				Control.KeyDown(HK_E)
+				Control.KeyUp(HK_E)
+				isCastingE = true
+				StopOrbWalking = true
+				ticker = GetTickCount()
+			end
+		elseif minion.team == 300 then
+			--Q
+			if IsValidTarget(minion,550) and JungleClearQ and isReady(_Q) and not myHero.isChanneling then
+				Control.SetCursorPos(minion)
+				Control.KeyDown(HK_Q)
+				Control.KeyUp(HK_Q)
+			end
+			--W
+			if IsValidTarget(minion,500) and JungleClearW and isReady(_W) and not myHero.isChanneling then
+				Control.SetCursorPos(minion)
+				Control.KeyDown(HK_W)
+				Control.KeyUp(HK_W)
+			end
+			--E
+			if IsValidTarget(minion,350) and JungleClearE and isReady(_E) and not myHero.isChanneling then
+				local Epos = minion:GetPrediction(myHero:GetSpellData(_E).speed, myHero:GetSpellData(_E).delay)
+				Control.SetCursorPos(Epos)
+				Control.KeyDown(HK_E)
+				Control.KeyUp(HK_E)
+				isCastingE = true
+				StopOrbWalking = true
+				ticker = GetTickCount()
+			end
+		end
+	end
 end
 
 function OnLastHit()
