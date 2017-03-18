@@ -302,6 +302,8 @@ function OnClear()
 	local LaneClearQ = PMenu.Mode.LaneClear.Q:Value()
 	local LaneClearE = PMenu.Mode.LaneClear.E:Value()
 	local LaneClearEminion = PMenu.Mode.LaneClear.EKillMinion:Value()
+	local LaneClearQMana = PMenu.Mode.LaneClear.QMana:Value() * myHero.mana / myHero.mana
+	local LaneClearEMana = PMenu.Mode.LaneClear.EMana:Value()
 	local JungleClearQ = PMenu.Mode.JungleClear.Q:Value()
 	local JungleClearW = PMenu.Mode.JungleClear.W:Value()
 	local JungleClearE = PMenu.Mode.JungleClear.E:Value()
@@ -316,13 +318,13 @@ function OnClear()
 		local minion = Game.Minion(i)
 		if  minion.team == 200 then
 			--Q
-			if IsValidTarget(minion,550) and LaneClearQ and isReady(_Q) and not myHero.isChanneling then
+			if IsValidTarget(minion,550) and LaneClearQ and isReady(_Q) and not myHero.isChanneling and (myHero.mana/myHero.maxMana > LaneClearQMana / 100) then
 				Control.SetCursorPos(minion)
 				Control.KeyDown(HK_Q)
 				Control.KeyUp(HK_Q)
 			end
 			--E
-			if IsValidTarget(minion,350) and LaneClearE and isReady(_E) and not myHero.isChanneling and CountEnemyMinions(350) >= LaneClearEminion then
+			if IsValidTarget(minion,350) and LaneClearE and isReady(_E) and not myHero.isChanneling and CountEnemyMinions(350) >= LaneClearEminion and (myHero.mana / myHero.maxMana > LaneClearEMana / 100) then
 				local Epos = minion:GetPrediction(myHero:GetSpellData(_E).speed, myHero:GetSpellData(_E).delay)
 				Control.SetCursorPos(Epos)
 				Control.KeyDown(HK_E)
@@ -333,19 +335,19 @@ function OnClear()
 			end
 		elseif minion.team == 300 then
 			--Q
-			if IsValidTarget(minion,550) and JungleClearQ and isReady(_Q) and not myHero.isChanneling and myHero.mana > JungleClearQMana then
+			if IsValidTarget(minion,550) and JungleClearQ and isReady(_Q) and not myHero.isChanneling and (myHero.mana/myHero.maxMana > JungleClearQMana / 100) then
 				Control.SetCursorPos(minion)
 				Control.KeyDown(HK_Q)
 				Control.KeyUp(HK_Q)
 			end
 			--W
-			if IsValidTarget(minion,500) and JungleClearW and isReady(_W) and not myHero.isChanneling and myHero.mana > JungleClearEMana then
+			if IsValidTarget(minion,500) and JungleClearW and isReady(_W) and not myHero.isChanneling and (myHero.mana/myHero.maxMana > JungleClearWMana / 100) then
 				Control.SetCursorPos(minion)
 				Control.KeyDown(HK_W)
 				Control.KeyUp(HK_W)
 			end
 			--E
-			if IsValidTarget(minion,350) and JungleClearE and isReady(_E) and not myHero.isChanneling and myHero.mana > JungleClearWMana then
+			if IsValidTarget(minion,350) and JungleClearE and isReady(_E) and not myHero.isChanneling and (myHero.mana/myHero.maxMana > JungleClearEMana / 100) then
 				local Epos = minion:GetPrediction(myHero:GetSpellData(_E).speed, myHero:GetSpellData(_E).delay)
 				Control.SetCursorPos(Epos)
 				Control.KeyDown(HK_E)
