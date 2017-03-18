@@ -41,7 +41,7 @@ PMenu.Mode.LaneClear:MenuElement({id = "Q", name = "Use Q", value = true, leftIc
 PMenu.Mode.LaneClear:MenuElement({id = "QMana", name = "Min Mana to use Q (%)", value = 80, min = 0, max = 100, step = 1})
 PMenu.Mode.LaneClear:MenuElement({id = "E", name = "Use E", value = true, leftIcon = SpellIcons.E})
 PMenu.Mode.LaneClear:MenuElement({id = "EMana", name = "Min Mana to use E (%)", value = 80, min = 0, max = 100, step = 1})
-PMenu.Mode.LaneClear:MenuElement({id = "EKillMinion", name = "Use E when X minions", value = 3,min = 0, max = 5, step = 1})
+--PMenu.Mode.LaneClear:MenuElement({id = "EKillMinion", name = "Use E when X minions", value = 3,min = 0, max = 5, step = 1})
 --Main Menu-- Mode Setting-- Jungle 
 PMenu.Mode:MenuElement({type = MENU, id = "JungleClear", name = "Jungle Clear"})
 PMenu.Mode.JungleClear:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon = SpellIcons.Q})
@@ -93,7 +93,7 @@ DelayAction(function()
 		PrintChat ("[Info] Pantheon Script is intergreted with the IC's Orbwalker")
 		ICOrbWalking = true
 	elseif _G.Orbwalker then
-		PrintChat ("[Info] Pantheon Script is intergreted with the in-built GOS Orbwalker")
+		PrintChat ("[Info] Pantheon Script is intergreted with the built-in GOS Orbwalker")
 		GOSOrbWalking = true
 	end
 end, 1)
@@ -301,7 +301,7 @@ end
 function OnClear()
 	local LaneClearQ = PMenu.Mode.LaneClear.Q:Value()
 	local LaneClearE = PMenu.Mode.LaneClear.E:Value()
-	local LaneClearEminion = PMenu.Mode.LaneClear.EKillMinion:Value()
+	--local LaneClearEminion = PMenu.Mode.LaneClear.EKillMinion:Value()
 	local LaneClearQMana = PMenu.Mode.LaneClear.QMana:Value() * myHero.mana / myHero.mana
 	local LaneClearEMana = PMenu.Mode.LaneClear.EMana:Value()
 	local JungleClearQ = PMenu.Mode.JungleClear.Q:Value()
@@ -324,7 +324,7 @@ function OnClear()
 				Control.KeyUp(HK_Q)
 			end
 			--E
-			if IsValidTarget(minion,350) and LaneClearE and isReady(_E) and not myHero.isChanneling and CountEnemyMinions(350) >= LaneClearEminion and (myHero.mana / myHero.maxMana > LaneClearEMana / 100) then
+			if IsValidTarget(minion,350) and LaneClearE and isReady(_E) and not myHero.isChanneling and (myHero.mana / myHero.maxMana > LaneClearEMana / 100) then
 				local Epos = minion:GetPrediction(myHero:GetSpellData(_E).speed, myHero:GetSpellData(_E).delay)
 				Control.SetCursorPos(Epos)
 				Control.KeyDown(HK_E)
