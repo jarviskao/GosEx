@@ -91,7 +91,7 @@ DelayAction(function()
 		PrintChat ("[Info] Garen Script is intergreted with the IC's Orbwalker")
 		ICOrbWalking = true
 	elseif _G.Orbwalker then
-		PrintChat ("[Info] Garen Script is intergreted with the in-built GOS Orbwalker")
+		PrintChat ("[Info] Garen Script is intergreted with the built-in GOS Orbwalker")
 		GOSOrbWalking = true
 	end
 end, 1)
@@ -221,7 +221,7 @@ function OnCombo()
 	if target == nil then return end
 	
 	if ICOrbWalking then
-		target = _G.SDK.TargetSelector:GetTarget(800)
+		local target = _G.SDK.TargetSelector:GetTarget(800)
 	end
 	
 	if IsValidTarget(target,GarenQ.range) and comboQ and isReady(_Q) and not isCasting(_E) then
