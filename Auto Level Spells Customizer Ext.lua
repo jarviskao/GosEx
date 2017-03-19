@@ -144,13 +144,11 @@
 	--local
 	local lol = 7.5
 	local ver = 0.4
-	local tickCountA = 0
 	local sequence = 0
 	local spellMaxfirst = string.char(DefaultSpellsOrders[myHero.charName][4])
 	local spellMaxSecond = string.char(DefaultSpellsOrders[myHero.charName][13])
 	local spellMaxThird = string.char(DefaultSpellsOrders[myHero.charName][18])
-	local ScriptLoadTime = Game.Timer()
-	
+
 	PrintChat ("[Auto Level Spell]  Loaded : "..myHero.charName.." || Version: "..ver," ", "|| LoL Support : "..lol)
 
 local SpellsSequence = {
@@ -188,8 +186,7 @@ AMenu.info:MenuElement({type = SPACE, name = "Support LoL: "..lol})
 AMenu.info:MenuElement({type = SPACE, name = "Author: JarKao"})
 
 function SpellsSelect()
-	if	Game.Timer() - ScriptLoadTime >= 240 then return end
-	--PrintChat (Game.Timer() - ScriptLoadTime )
+
 	if string.byte("Q") == AMenu.Auto.SpellsOrder.spell1:Key()  and string.byte("E") == AMenu.Auto.SpellsOrder.spell2:Key() then
 		sequence = 1
 	elseif string.byte("Q") == AMenu.Auto.SpellsOrder.spell1:Key()  and string.byte("W") == AMenu.Auto.SpellsOrder.spell2:Key() then
