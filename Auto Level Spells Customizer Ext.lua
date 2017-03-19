@@ -177,7 +177,7 @@ AMenu.Auto.SpellsOrder:MenuElement({id = "Recommend", name = "Use Recommend Spel
 AMenu.Auto:MenuElement({id = "Disablelvl1", name = "Disable on First Level", value =true, leftIcon = "https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Circle-icons-arrow-up.svg/600px-Circle-icons-arrow-up.svg.png"})
 AMenu.Auto:MenuElement({id = "lvROnly", name = "Level R Spell Only", value =true, leftIcon =  "https://lh5.ggpht.com/PA3Hy0O1KPzWA4nnWgI5MKfunyNGR66iTO8kugvNir-n1Zdfzlxm_fYOX6_beQPq=w170"})
 AMenu.Auto:MenuElement({id = "UseHumanizer", name = "Humanizer", value = true, leftIcon = "https://www.leasevillenocredit.com/skin/frontend/rwd/shine/images/ppc-pay-per-click-icon.png"})
-AMenu.Auto:MenuElement({id = "Delay", name = "Adjust Humanizer for X second", value = 1, min = 0, max = 2.5, step = 0.1})
+AMenu.Auto:MenuElement({id = "Delay", name = "Adjust Level Spell for X second", value = 1, min = 0, max = 2.5, step = 0.1})
 
 ----Info Menu
 AMenu:MenuElement({type = MENU, id = "info", name = "Script Info", leftIcon = "https://i.stack.imgur.com/qOXqp.png"})
