@@ -244,8 +244,8 @@ function LevelSpell()
 		local levelpts = myHero.levelData.lvlPts
 		Control.KeyDown(HK_LUS)
 		if sequence == 0 or AMenu.Auto.SpellsOrder.Recommend:Value() then
-			Control.KeyDown(Control.CastSpell (DefaultSpellsOrders[myHero.charName][(level + 1 - levelpts)]))
-			Control.KeyUp(Control.CastSpell (DefaultSpellsOrders[myHero.charName][(level + 1 - levelpts)]))
+			Control.KeyDown(DefaultSpellsOrders[myHero.charName][(level + 1 - levelpts)])
+			Control.KeyUp(DefaultSpellsOrders[myHero.charName][(level + 1 - levelpts)])
 		else
 			Control.KeyDown(SpellsSequence[sequence][(level + 1 - levelpts)])
 			Control.KeyUp(SpellsSequence[sequence][(level + 1 - levelpts)])
