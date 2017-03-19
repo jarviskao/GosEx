@@ -212,13 +212,15 @@ if not AMenu.UseAutoLvSpell:Value() then return end
 end
 
 function AutoLevelSpell()
-	if AMenu.Auto.Disablelvl1:Value() and myHero.levelData.lvl == 1 then return end
-	if myHero.levelData.lvl > 0 and myHero.levelData.lvlPts > 0 and AMenu.UseAutoLvSpell:Value() then
-		if (myHero.levelData.lvl + 1 - myHero.levelData.lvlPts) then
+	local level = level
+	local levelpts = level
+	if AMenu.Auto.Disablelvl1:Value() and  level <= 1 then return end
+	if level >= 1 and levelpts >= 1 and AMenu.UseAutoLvSpell:Value() then
+		if (level + 1 - levelpts) then
 			if AMenu.Auto.UseHumanizer:Value() then
 				DelayAction(function()
-					if (myHero.levelData.lvl + 1 - myHero.levelData.lvlPts) then
-						if AMenu.Auto.lvROnly:Value() and (myHero.levelData.lvl == 6 or myHero.levelData.lvl == 11 or myHero.levelData.lvl == 16) then 
+					if (level + 1 - levelpts) then
+						if AMenu.Auto.lvROnly:Value() and (level == 6 or level == 11 or level == 16) then 
 							LevelRSpell()
 						elseif not AMenu.Auto.lvROnly:Value() then 
 							LevelSpell() 
@@ -226,7 +228,7 @@ function AutoLevelSpell()
 					end
 				end, AMenu.Auto.Delay: Value())
 			elseif not AMenu.Auto.UseHumanizer:Value() then
-				if AMenu.Auto.lvROnly:Value() and (myHero.levelData.lvl == 6 or myHero.levelData.lvl == 11 or myHero.levelData.lvl == 16) then 
+				if AMenu.Auto.lvROnly:Value() and (level == 6 or level == 11 or level == 16) then 
 					LevelRSpell()
 				elseif not AMenu.Auto.lvROnly:Value() then 
 					LevelSpell() 
@@ -239,9 +241,9 @@ end
 function LevelSpell()
 		Control.KeyDown(HK_LUS)
 		if sequence == 0 or AMenu.Auto.SpellsOrder.Recommend:Value() then
-			Control.CastSpell (DefaultSpellsOrders[myHero.charName][(myHero.levelData.lvl + 1 - myHero.levelData.lvlPts)])
+			Control.CastSpell (DefaultSpellsOrders[myHero.charName][(level + 1 - levelpts)])
 		else
-			Control.CastSpell(SpellsSequence[sequence][(myHero.levelData.lvl + 1 - myHero.levelData.lvlPts)])
+			Control.CastSpell(SpellsSequence[sequence][(level + 1 - levelpts)])
 		end
 		Control.KeyUp(HK_LUS)	
 end
