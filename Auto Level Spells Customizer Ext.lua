@@ -143,7 +143,7 @@
 	
 	--local
 	local lol = 7.5
-	local ver = 0.4
+	local ver = 0.5
 	local sequence = 0
 	local spellMaxfirst = string.char(DefaultSpellsOrders[myHero.charName][4])
 	local spellMaxSecond = string.char(DefaultSpellsOrders[myHero.charName][13])
@@ -187,17 +187,17 @@ AMenu.info:MenuElement({type = SPACE, name = "Author: JarKao"})
 
 function SpellsSelect()
 
-	if string.byte("Q") == AMenu.Auto.SpellsOrder.spell1:Key()  and string.byte("E") == AMenu.Auto.SpellsOrder.spell2:Key() then
+	if string.byte("Q") == AMenu.Auto.SpellsOrder.spell1:Key() and string.byte("W") == AMenu.Auto.SpellsOrder.spell2:Key() then
 		sequence = 1
-	elseif string.byte("Q") == AMenu.Auto.SpellsOrder.spell1:Key()  and string.byte("W") == AMenu.Auto.SpellsOrder.spell2:Key() then
+	elseif string.byte("Q") == AMenu.Auto.SpellsOrder.spell1:Key() and string.byte("E") == AMenu.Auto.SpellsOrder.spell2:Key() then
 		sequence = 2
-	elseif string.byte("W") == AMenu.Auto.SpellsOrder.spell1:Key()  and string.byte("E") == AMenu.Auto.SpellsOrder.spell2:Key() then
+	elseif string.byte("W") == AMenu.Auto.SpellsOrder.spell1:Key() and string.byte("Q") == AMenu.Auto.SpellsOrder.spell2:Key() then
 		sequence = 3
-	elseif string.byte("W") == AMenu.Auto.SpellsOrder.spell1:Key()  and string.byte("Q") == AMenu.Auto.SpellsOrder.spell2:Key() then
+	elseif string.byte("W") == AMenu.Auto.SpellsOrder.spell1:Key() and string.byte("E") == AMenu.Auto.SpellsOrder.spell2:Key() then
 		sequence = 4
-	elseif string.byte("E") == AMenu.Auto.SpellsOrder.spell1:Key()  and string.byte("Q") == AMenu.Auto.SpellsOrder.spell2:Key() then
+	elseif string.byte("E") == AMenu.Auto.SpellsOrder.spell1:Key() and string.byte("W") == AMenu.Auto.SpellsOrder.spell2:Key() then
 		sequence = 5
-	elseif string.byte("E") == AMenu.Auto.SpellsOrder.spell1:Key()  and string.byte("W") == AMenu.Auto.SpellsOrder.spell2:Key() then
+	elseif string.byte("E") == AMenu.Auto.SpellsOrder.spell1:Key() and string.byte("Q") == AMenu.Auto.SpellsOrder.spell2:Key() then
 		sequence = 6
 	else
 		sequence = 0
@@ -237,6 +237,7 @@ function AutoLevelSpell()
 end
 
 function LevelSpell()
+	PrintChat(sequence)
 		Control.KeyDown(HK_LUS)
 		if sequence == 0 or AMenu.Auto.SpellsOrder.Recommend:Value() then
 			Control.CastSpell (DefaultSpellsOrders[myHero.charName][(myHero.levelData.lvl + 1 - myHero.levelData.lvlPts)])
