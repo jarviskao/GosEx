@@ -239,19 +239,23 @@ function AutoLevelSpell()
 end
 
 function LevelSpell()
+		--PrintChat (sequence)
 		local level = myHero.levelData.lvl
 		local levelpts = myHero.levelData.lvlPts
 		Control.KeyDown(HK_LUS)
 		if sequence == 0 or AMenu.Auto.SpellsOrder.Recommend:Value() then
-			Control.CastSpell (DefaultSpellsOrders[myHero.charName][(level + 1 - levelpts)])
+			Control.KeyDown(Control.CastSpell (DefaultSpellsOrders[myHero.charName][(level + 1 - levelpts)]))
+			Control.KeyUp(Control.CastSpell (DefaultSpellsOrders[myHero.charName][(level + 1 - levelpts)]))
 		else
-			Control.CastSpell(SpellsSequence[sequence][(level + 1 - levelpts)])
+			Control.KeyDown(SpellsSequence[sequence][(level + 1 - levelpts)])
+			Control.KeyUp(SpellsSequence[sequence][(level + 1 - levelpts)])
 		end
 		Control.KeyUp(HK_LUS)	
 end
 
 function LevelRSpell()
 	Control.KeyDown(HK_LUS)
-	Control.CastSpell(HK_R)
+	Control.KeyDown(HK_R)
+	Control.KeyUp(HK_R)
 	Control.KeyUp(HK_LUS)	
 end
