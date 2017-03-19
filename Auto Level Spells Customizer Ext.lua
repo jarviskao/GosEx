@@ -152,12 +152,12 @@
 	PrintChat ("[Auto Level Spell]  Loaded : "..myHero.charName.." || Version: "..ver," ", "|| LoL Support : "..lol)
 
 local SpellsSequence = {
-    [1]= { HK_Q,HK_W,HK_E,HK_Q,HK_Q,HK_R,HK_Q,HK_W,HK_Q,HK_W,HK_R,HK_W,HK_W,HK_E,HK_E,HK_R,HK_E,HK_E},  -- QWE
-    [2]= { HK_Q,HK_W,HK_E,HK_Q,HK_Q,HK_R,HK_Q,HK_E,HK_Q,HK_E,HK_R,HK_E,HK_E,HK_W,HK_W,HK_R,HK_W,HK_W},	-- QEW
-    [3]= { HK_W,HK_E,HK_Q,HK_W,HK_W,HK_R,HK_W,HK_Q,HK_W,HK_Q,HK_R,HK_Q,HK_Q,HK_E,HK_E,HK_R,HK_E,HK_E},	-- WQE
-    [4]= { HK_W,HK_E,HK_Q,HK_W,HK_W,HK_R,HK_W,HK_E,HK_W,HK_E,HK_R,HK_E,HK_E,HK_Q,HK_Q,HK_R,HK_Q,HK_Q},	-- WEQ
-    [5]= { HK_E,HK_Q,HK_W,HK_E,HK_E,HK_R,HK_E,HK_W,HK_E,HK_W,HK_R,HK_W,HK_W,HK_Q,HK_Q,HK_R,HK_Q,HK_Q},	-- EWQ
-    [6]= { HK_E,HK_Q,HK_W,HK_E,HK_E,HK_R,HK_E,HK_Q,HK_E,HK_Q,HK_R,HK_Q,HK_Q,HK_W,HK_W,HK_R,HK_W,HK_W},	-- EQW
+    [1]= {HK_Q, HK_W, HK_E, HK_Q, HK_Q, HK_R, HK_Q, HK_W, HK_Q, HK_W, HK_R, HK_W, HK_W, HK_E, HK_E, HK_R, HK_E, HK_E},  -- QWE
+    [2]= {HK_Q, HK_E, HK_W, HK_Q, HK_Q, HK_R, HK_Q, HK_E, HK_Q, HK_E, HK_R, HK_E, HK_E, HK_W, HK_W, HK_R, HK_W, HK_W},	-- QEW
+    [3]= {HK_W, HK_Q, HK_E, HK_W, HK_W, HK_R, HK_W, HK_Q, HK_W, HK_Q, HK_R, HK_Q, HK_Q, HK_E, HK_E, HK_R, HK_E, HK_E},	-- WQE
+    [4]= {HK_W, HK_E, HK_Q, HK_W, HK_W, HK_R, HK_W, HK_E, HK_W, HK_E, HK_R, HK_E, HK_E, HK_Q, HK_Q, HK_R, HK_Q, HK_Q},	-- WEQ
+    [5]= {HK_E, HK_W, HK_Q, HK_E, HK_E, HK_R, HK_E, HK_W, HK_E, HK_W, HK_R, HK_W, HK_W, HK_Q, HK_Q, HK_R, HK_Q, HK_Q},	-- EWQ
+    [6]= {HK_E, HK_Q, HK_W, HK_E, HK_E, HK_R, HK_E, HK_Q, HK_E, HK_Q, HK_R, HK_Q, HK_Q, HK_W, HK_W, HK_R, HK_W, HK_W},	-- EQW
 }
 
 --http://i65.tinypic.com/23w1jes.png
@@ -188,11 +188,11 @@ AMenu.info:MenuElement({type = SPACE, name = "Author: JarKao"})
 function SpellsSelect()
 
 	if string.byte("Q") == AMenu.Auto.SpellsOrder.spell1:Key() and string.byte("W") == AMenu.Auto.SpellsOrder.spell2:Key() then
-		sequence = 1
+		sequence = 1 -- QWE
 	elseif string.byte("Q") == AMenu.Auto.SpellsOrder.spell1:Key() and string.byte("E") == AMenu.Auto.SpellsOrder.spell2:Key() then
-		sequence = 2
+		sequence = 2 -- QEW
 	elseif string.byte("W") == AMenu.Auto.SpellsOrder.spell1:Key() and string.byte("Q") == AMenu.Auto.SpellsOrder.spell2:Key() then
-		sequence = 3
+		sequence = 3 -- WQE
 	elseif string.byte("W") == AMenu.Auto.SpellsOrder.spell1:Key() and string.byte("E") == AMenu.Auto.SpellsOrder.spell2:Key() then
 		sequence = 4
 	elseif string.byte("E") == AMenu.Auto.SpellsOrder.spell1:Key() and string.byte("W") == AMenu.Auto.SpellsOrder.spell2:Key() then
