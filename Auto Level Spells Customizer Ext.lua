@@ -237,7 +237,6 @@ function AutoLevelSpell()
 end
 
 function LevelSpell()
-	PrintChat(sequence)
 		Control.KeyDown(HK_LUS)
 		if sequence == 0 or AMenu.Auto.SpellsOrder.Recommend:Value() then
 			Control.CastSpell (DefaultSpellsOrders[myHero.charName][(myHero.levelData.lvl + 1 - myHero.levelData.lvlPts)])
