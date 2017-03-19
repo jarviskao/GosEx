@@ -170,8 +170,8 @@ AMenu:MenuElement({id = "UseAutoLvSpell", name = "Enable", value = false , leftI
 --Auto Menu
 AMenu:MenuElement({type = MENU, id = "Auto", name = myHero.charName, leftIcon = "http://ddragon.leagueoflegends.com/cdn/6.24.1/img/champion/"..myHero.charName..".png"})
 AMenu.Auto:MenuElement({type = MENU, id = "SpellsOrder", name = "Spells Sequence", leftIcon = "http://www.swiftpcoptimizer.com/wp-content/uploads/2016/10/workflow.png"})
-AMenu.Auto.SpellsOrder:MenuElement({id = "spell1",name = "Priority Max 1st : ", key = string.byte("Q")})
-AMenu.Auto.SpellsOrder:MenuElement({id = "spell2",name = "Priority Max 2nd : ", key = string.byte("W")})
+AMenu.Auto.SpellsOrder:MenuElement({id = "spell1",name = "Priority 1st Max : ", key = string.byte("Q")})
+AMenu.Auto.SpellsOrder:MenuElement({id = "spell2",name = "Priority 2nd Max : ", key = string.byte("W")})
 AMenu.Auto.SpellsOrder:MenuElement({type = SPACE, name = "Recommend : Max "..spellMaxfirst.." > "..spellMaxSecond.." > "..spellMaxThird})
 AMenu.Auto.SpellsOrder:MenuElement({id = "Recommend", name = "Use Recommend Spells Sequence", value = false})
 AMenu.Auto:MenuElement({id = "Disablelvl1", name = "Disable on First Level", value =true, leftIcon = "https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Circle-icons-arrow-up.svg/600px-Circle-icons-arrow-up.svg.png"})
