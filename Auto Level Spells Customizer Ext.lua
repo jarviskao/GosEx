@@ -145,7 +145,7 @@
 	local lol = 7.5
 	local ver = 0.5
 	local sequence = 0
-	local spellMaxfirst = string.char(DefaultSpellsOrders[myHero.charName][4])
+	local spellMaxfirst = string.char(DefaultSpellsOrders[myHero.charName][7])
 	local spellMaxSecond = string.char(DefaultSpellsOrders[myHero.charName][13])
 	local spellMaxThird = string.char(DefaultSpellsOrders[myHero.charName][18])
 
