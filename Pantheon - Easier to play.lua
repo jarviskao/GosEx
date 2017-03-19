@@ -243,6 +243,9 @@ function check()
 				_G.EOW:AttacksEnabled(true)
 				isCastingE = false
 				StopOrbWalking = false
+		elseif ICOrbWalking then
+				isCastingE = false
+				StopOrbWalking = false
 		end
 	end		
 
