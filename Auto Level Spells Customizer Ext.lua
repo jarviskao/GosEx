@@ -212,9 +212,9 @@ if not AMenu.UseAutoLvSpell:Value() then return end
 end
 
 function AutoLevelSpell()
-	local level = level
-	local levelpts = level
-	if AMenu.Auto.Disablelvl1:Value() and  level <= 1 then return end
+	local level = myHero.levelData.lvl
+	local levelpts = myHero.levelData.lvlPts
+	if AMenu.Auto.Disablelvl1:Value() and level <= 1 then return end
 	if level >= 1 and levelpts >= 1 and AMenu.UseAutoLvSpell:Value() then
 		if (level + 1 - levelpts) then
 			if AMenu.Auto.UseHumanizer:Value() then
