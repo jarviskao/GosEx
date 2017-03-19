@@ -143,7 +143,7 @@
 	
 	--local
 	local lol = 7.5
-	local ver = 0.3
+	local ver = 0.4
 	local tickCountA = 0
 	local sequence = 0
 	local spellMaxfirst = string.char(DefaultSpellsOrders[myHero.charName][4])
@@ -167,7 +167,7 @@ local MenuIcons = "http://vignette1.wikia.nocookie.net/getsetgames/images/8/82/L
 
  --Main Menu
 local AMenu = MenuElement({type = MENU, id = "AMenu", name = "Auto Level Spells: Customizer", leftIcon = MenuIcons})
-AMenu:MenuElement({id = "UseAutoLvSpell", name = "Enable", value = false})
+AMenu:MenuElement({id = "UseAutoLvSpell", name = "Enable", value = false , leftIcon = "http://www.myiconfinder.com/uploads/iconsets/256-256-da4555b24380d442df41fc883fbe3411.png"})
 
 --Auto Menu
 AMenu:MenuElement({type = MENU, id = "Auto", name = myHero.charName, leftIcon = "http://ddragon.leagueoflegends.com/cdn/6.24.1/img/champion/"..myHero.charName..".png"})
@@ -175,12 +175,14 @@ AMenu.Auto:MenuElement({type = MENU, id = "SpellsOrder", name = "Spells Sequence
 AMenu.Auto.SpellsOrder:MenuElement({id = "spell1",name = "Priority : 1st Spells Max", key = string.byte("Q")})
 AMenu.Auto.SpellsOrder:MenuElement({id = "spell2",name = "Priority : 2nd Spells Max", key = string.byte("W")})
 AMenu.Auto.SpellsOrder:MenuElement({type = SPACE, name = "Recommend : Max "..spellMaxfirst.." > "..spellMaxSecond.." > "..spellMaxThird})
-AMenu.Auto:MenuElement({id = "lvROnly", name = "R Spells Only", value =true, leftIcon =  "https://az691558.vo.msecnd.net/themes/m15106_usaca_5c54bec2/rossignol_r2.png"})
-AMenu.Auto:MenuElement({id = "Disablelvl1", name = "Disable on First Level", value =true, leftIcon =  "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/1_green.svg/480px-1_green.svg.png"})
-AMenu.Auto:MenuElement({id = "UseHumanizer", name = "Humanizer", value = true, leftIcon = "http://www.freeiconspng.com/uploads/-human-male-man-people-person-profile-red-user-icon--icon--23.png"})
+AMenu.Auto.SpellsOrder:MenuElement({id = "Recommend", name = "Use Recommend Spells Sequence", value = false})
+AMenu.Auto:MenuElement({id = "Disablelvl1", name = "Disable on First Level", value =true, leftIcon = "https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Circle-icons-arrow-up.svg/600px-Circle-icons-arrow-up.svg.png"})
+AMenu.Auto:MenuElement({id = "lvROnly", name = "Level R Spell Only", value =true, leftIcon =  "https://lh5.ggpht.com/PA3Hy0O1KPzWA4nnWgI5MKfunyNGR66iTO8kugvNir-n1Zdfzlxm_fYOX6_beQPq=w170"})
+AMenu.Auto:MenuElement({id = "UseHumanizer", name = "Humanizer", value = true, leftIcon = "https://www.leasevillenocredit.com/skin/frontend/rwd/shine/images/ppc-pay-per-click-icon.png"})
+AMenu.Auto:MenuElement({id = "Delay", name = "Adjust Humanizer for X second", value = 1, min = 0, max = 2.5, step = 0.1})
 
 ----Info Menu
-AMenu:MenuElement({type = MENU, id = "info", name = "Script Info", leftIcon = "http://www.freeiconspng.com/uploads/information-icon-5.png"})
+AMenu:MenuElement({type = MENU, id = "info", name = "Script Info", leftIcon = "https://i.stack.imgur.com/qOXqp.png"})
 AMenu.info:MenuElement({type = SPACE, name = "Script Version: "..ver})
 AMenu.info:MenuElement({type = SPACE, name = "Support LoL: "..lol})
 AMenu.info:MenuElement({type = SPACE, name = "Author: JarKao"})
@@ -217,17 +219,17 @@ function AutoLevelSpell()
 	if myHero.levelData.lvl > 0 and myHero.levelData.lvlPts > 0 and AMenu.UseAutoLvSpell:Value() then
 		if (myHero.levelData.lvl + 1 - myHero.levelData.lvlPts) then
 			if AMenu.Auto.UseHumanizer:Value() then
-				tickCountA = tickCountA + 1
-			end
-			if AMenu.Auto.UseHumanizer:Value() and tickCountA >= 30 then
-				tickCountA = 0
-				if AMenu.Auto.lvROnly:Value() and myHero.levelData.lvl == (6 or 11 or 16)  then 
-					LevelRSpell()
-				elseif not AMenu.Auto.lvROnly:Value() then 
-					LevelSpell() 
-				end
+				DelayAction(function()
+					if (myHero.levelData.lvl + 1 - myHero.levelData.lvlPts) then
+						if AMenu.Auto.lvROnly:Value() and (myHero.levelData.lvl == 6 or myHero.levelData.lvl == 11 or myHero.levelData.lvl == 16) then 
+							LevelRSpell()
+						elseif not AMenu.Auto.lvROnly:Value() then 
+							LevelSpell() 
+						end
+					end
+				end, AMenu.Auto.Delay: Value())
 			elseif not AMenu.Auto.UseHumanizer:Value() then
-				if AMenu.Auto.lvROnly:Value() and myHero.levelData.lvl == (6 or 11 or 16) then 
+				if AMenu.Auto.lvROnly:Value() and (myHero.levelData.lvl == 6 or myHero.levelData.lvl == 11 or myHero.levelData.lvl == 16) then 
 					LevelRSpell()
 				elseif not AMenu.Auto.lvROnly:Value() then 
 					LevelSpell() 
@@ -239,7 +241,7 @@ end
 
 function LevelSpell()
 		Control.KeyDown(HK_LUS)
-		if sequence == 0 then
+		if sequence == 0 or AMenu.Auto.SpellsOrder.Recommend:Value() then
 			Control.CastSpell (DefaultSpellsOrders[myHero.charName][(myHero.levelData.lvl + 1 - myHero.levelData.lvlPts)])
 		else
 			Control.CastSpell(SpellsSequence[sequence][(myHero.levelData.lvl + 1 - myHero.levelData.lvlPts)])
