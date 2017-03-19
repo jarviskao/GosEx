@@ -146,7 +146,7 @@
 	local ver = 0.5
 	local sequence = 0
 	local spellMaxfirst = string.char(DefaultSpellsOrders[myHero.charName][7])
-	local spellMaxSecond = string.char(DefaultSpellsOrders[myHero.charName][13])
+	local spellMaxSecond = string.char(DefaultSpellsOrders[myHero.charName][12])
 	local spellMaxThird = string.char(DefaultSpellsOrders[myHero.charName][18])
 
 	PrintChat ("[Auto Level Spell]  Loaded : "..myHero.charName.." || Version: "..ver," ", "|| LoL Support : "..lol)
