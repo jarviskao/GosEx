@@ -386,13 +386,12 @@ function KillSteal()
 	for i = 1, Game.HeroCount() do
 		local target = Game.Hero(i)
 		local Qdmg = ({30, 60, 90, 120, 150})[levelQ] + 0.1 * myHero.totalDamage
-		local Edmg = ({60, 105, 150, 195, 240})[levelE] + 0.8 * myHero.totalDamage
+		local Edmg = ({60, 105, 150, 195, 240})[levelE] + 0.2 * myHero.totalDamage
 		local QEdmg = Qdmg + Edmg + target.hpRegen * 2.5
+		PrintChat(Qdmg.."  E = "..Edmg.."  E lv = "..levelE)
 		if target.team ~= myHero.team and IsValidTarget(target, WukongE.range)  then
 			if QEdmg >= target.health and killStealE and isReady(_E) and killStealQ and isReady(_Q) then 
-				if killStealE and isReady(_E) then
 					castE(target)
-				end
 			elseif Edmg >= target.health and killStealE and isReady(_E) then 
 				castE(target)
 			elseif Qdmg >= target.health and killStealQ and isReady(_Q) and IsValidTarget(target, WukongQ.range + 50) then
