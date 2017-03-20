@@ -228,8 +228,6 @@ function check()
 		elseif EOrbWalking then
 			_G.EOW:MovementsEnabled(false)
 			_G.EOW:AttacksEnabled(false)
-		elseif ICOrbWalking then
-			Control.SetCursorPos(myHero)
 		end
 	end
 	
