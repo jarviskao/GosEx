@@ -44,11 +44,11 @@ PMenu.Mode.LaneClear:MenuElement({id = "EMana", name = "Min Mana to use E (%)", 
 --Main Menu-- Mode Setting-- Jungle 
 PMenu.Mode:MenuElement({type = MENU, id = "JungleClear", name = "Jungle Clear"})
 PMenu.Mode.JungleClear:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon = SpellIcons.Q})
-PMenu.Mode.JungleClear:MenuElement({id = "QMana", name = "Min Mana to use Q (%)", value = 80, min = 0, max = 100, step = 1})
+PMenu.Mode.JungleClear:MenuElement({id = "QMana", name = "Min Mana to use Q (%)", value = 30, min = 0, max = 100, step = 1})
 PMenu.Mode.JungleClear:MenuElement({id = "W", name = "Use W", value = true, leftIcon = SpellIcons.W})
-PMenu.Mode.JungleClear:MenuElement({id = "WMana", name = "Min Mana to use W (%)", value = 80, min = 0, max = 100, step = 1})
+PMenu.Mode.JungleClear:MenuElement({id = "WMana", name = "Min Mana to use W (%)", value = 30, min = 0, max = 100, step = 1})
 PMenu.Mode.JungleClear:MenuElement({id = "E", name = "Use E", value = true, leftIcon = SpellIcons.E})
-PMenu.Mode.JungleClear:MenuElement({id = "EMana", name = "Min Mana to use E (%)", value = 80, min = 0, max = 100, step = 1})
+PMenu.Mode.JungleClear:MenuElement({id = "EMana", name = "Min Mana to use E (%)", value = 30, min = 0, max = 100, step = 1})
 --Main Menu-- Mode Setting-- LastHit
 PMenu.Mode:MenuElement({type = MENU, id = "LastHit", name = "Last Hit"})
 PMenu.Mode.LastHit:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon = SpellIcons.Q})
