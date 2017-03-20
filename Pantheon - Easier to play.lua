@@ -273,6 +273,7 @@ function OnCombo()
 
 	if ICOrbWalking then
 		target = _G.SDK.TargetSelector:GetTarget(800)
+		if target == nil then return end
 	end
 	
 	if IsValidTarget(target,PantheonQ.range) and comboQ and isReady(_Q) and not myHero.isChanneling then
@@ -306,6 +307,7 @@ function onHarass()
 
 	if ICOrbWalking then
 		target = _G.SDK.TargetSelector:GetTarget(800)
+		if target == nil then return end
 	end
 
 	if IsValidTarget(target,PantheonQ.range) and harassQ and isReady(_Q) then
