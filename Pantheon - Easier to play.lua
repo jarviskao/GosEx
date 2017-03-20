@@ -323,7 +323,7 @@ end
 function OnClear()
 	local LaneClearQ = PMenu.Mode.LaneClear.Q:Value()
 	local LaneClearE = PMenu.Mode.LaneClear.E:Value()
-	local LaneClearQMana = PMenu.Mode.LaneClear.QMana:Value() * myHero.mana / myHero.mana
+	local LaneClearQMana = PMenu.Mode.LaneClear.QMana:Value()
 	local LaneClearEMana = PMenu.Mode.LaneClear.EMana:Value()
 	local JungleClearQ = PMenu.Mode.JungleClear.Q:Value()
 	local JungleClearW = PMenu.Mode.JungleClear.W:Value()
