@@ -5,3 +5,5 @@
 [Released] Garen
 
 [Released] Pantheon
+
+[Released] Wukong (Monkey King)
