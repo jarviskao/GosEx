@@ -151,6 +151,17 @@ function IsValidTarget(unit, range)
     return unit ~= nil and unit.valid and unit.visible and not unit.dead and unit.isTargetable and not unit.isImmortal and unit.distance <= range
 end
 
+function hasBuff(unit, buffname)
+    local target
+    for  i = 0, unit.buffCount do 
+        local buff = unit:GetBuff(i)
+        if buff ~= nil and  buff.count > 0 and buff.name == buffname   then
+            return true
+        end
+    end
+    return false
+end
+
 local function getMode()
 	if EOW then 
 		if EOW:Mode() == "Combo"  then return "Combo" end
@@ -231,7 +242,7 @@ function check()
 		end
 	end
 	
-	if GetTickCount() >= ticker + 900 then
+	if GetTickCount() >= ticker + 500 and not hasBuff(myHero,"pantheonesound") and isCastingE then
 		if GOSOrbWalking and StopOrbWalking then
 				_G.Orbwalker.Enabled:Value(true)
 				isCastingE = false
@@ -269,7 +280,7 @@ function OnCombo()
 	end
 
 	if IsValidTarget(target,PantheonE.range) and comboE and isReady(_E) and not myHero.isChanneling then
-		local Epos = target:GetPrediction(myHero:GetSpellData(_E).speed, myHero:GetSpellData(_E).delay)
+		local Epos = target:GetPrediction(myHero:GetSpellData(_E).speed, 0.3)
 		Control.SetCursorPos(Epos)
 		Control.KeyDown(HK_E)
 		Control.KeyUp(HK_E)
