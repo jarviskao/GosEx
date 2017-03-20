@@ -3,7 +3,7 @@ if myHero.charName ~= "Pantheon" then return end
 
 --Locals
 local LoL = "7.5"
-local ver = "1.3"
+local ver = "1.4"
 
 --icon
 local MenuIcons = "http://static.lolskill.net/img/champions/64/pantheon.png"
@@ -41,7 +41,6 @@ PMenu.Mode.LaneClear:MenuElement({id = "Q", name = "Use Q", value = true, leftIc
 PMenu.Mode.LaneClear:MenuElement({id = "QMana", name = "Min Mana to use Q (%)", value = 80, min = 0, max = 100, step = 1})
 PMenu.Mode.LaneClear:MenuElement({id = "E", name = "Use E", value = true, leftIcon = SpellIcons.E})
 PMenu.Mode.LaneClear:MenuElement({id = "EMana", name = "Min Mana to use E (%)", value = 80, min = 0, max = 100, step = 1})
---PMenu.Mode.LaneClear:MenuElement({id = "EKillMinion", name = "Use E when X minions", value = 3,min = 0, max = 5, step = 1})
 --Main Menu-- Mode Setting-- Jungle 
 PMenu.Mode:MenuElement({type = MENU, id = "JungleClear", name = "Jungle Clear"})
 PMenu.Mode.JungleClear:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon = SpellIcons.Q})
@@ -60,9 +59,9 @@ PMenu.KillSteal:MenuElement({id = "Q", name = "Use Q to KS", value = true})
 --PMenu.KillSteal:MenuElement({id = "ksUnder", name = "KS unter enemy Turret", value = true})
 
 --Main Menu-- Auto Setting
-PMenu:MenuElement({type = MENU, id = "Auto", name = "Auto Settings"})
-PMenu.Auto:MenuElement({id = "Q", name = "Auto Q When Target in Range", value = true})
-PMenu.Auto:MenuElement({id = "QMana", name = "Min Mana to auto Q (%)", value = 80,min = 0, max = 100, step = 1})
+--PMenu:MenuElement({type = MENU, id = "Auto", name = "Auto Settings"})
+--PMenu.Auto:MenuElement({id = "Q", name = "Auto Q When Target in Range", value = true})
+--PMenu.Auto:MenuElement({id = "QMana", name = "Min Mana to auto Q (%)", value = 80,min = 0, max = 100, step = 1})
 --PMenu.Auto:MenuElement({id = "DonQ", name = "Don't Auto Q in Enemy Turret Range" , value = true})
 
 --Main Menu-- Drawing 
@@ -70,10 +69,12 @@ PMenu:MenuElement({type = MENU, id = "Drawing", name = "Drawing"})
 PMenu.Drawing:MenuElement({id = "Q", name = "Draw Q Range", value = true})
 PMenu.Drawing:MenuElement({id = "W", name = "Draw W Range", value = true})
 PMenu.Drawing:MenuElement({id = "E", name = "Draw E Range", value = true})
+PMenu.Drawing:MenuElement({id = "R", name = "Draw R Range (MiniMap)", value = true})
 
 local PantheonQ = { range = 600 }
 local PantheonW = { range = 600 }
-local PantheonE = { range = 400 ,  channels = 0.75}
+local PantheonE = { range = 400 }
+local PantheonR = { range = 5500 }
 local EOrbWalking = false
 local ICOrbWalking = false
 local GOSOrbWalking = false
@@ -210,12 +211,13 @@ function OnDraw()
 	--Draw Range
 	if myHero.dead then return end
 	if PMenu.Drawing.Q:Value() or PMenu.Drawing.W:Value() then Draw.Circle(myHero.pos,600,1,Draw.Color(255, 255, 255, 255)) end
-	if PMenu.Drawing.E:Value() then Draw.Circle(myHero.pos,400,1,Draw.Color(255, 255, 255, 255)) end			
+	if PMenu.Drawing.E:Value() then Draw.Circle(myHero.pos,400,1,Draw.Color(255, 255, 255, 255)) end		
+	if PMenu.Drawing.R:Value() then Draw.CircleMinimap(Vector(myHero.pos),PantheonR.range,1,Draw.Color(255, 255, 255, 255)) end	
 end
 
 --Start
 function OnTick()
-	--PrintChat ("Gime Time : "..Game.Timer().." cast : "..(myHero:GetSpellData(_E).castTime - myHero:GetSpellData(_E).cd + 1))
+
 	if not PMenu.Enabled:Value() then return end
 	if myHero.dead then return end
 	check()
@@ -264,6 +266,8 @@ function OnCombo()
 	local comboQ = PMenu.Mode.Combo.Q:Value()
 	local comboW = PMenu.Mode.Combo.W:Value()
 	local comboE = PMenu.Mode.Combo.E:Value()
+	if not (comboQ and comboW and comboE) then return end
+	
 	local target = getTarget(800)
 	if target == nil then return end
 
@@ -295,6 +299,8 @@ function onHarass()
 	local harassQ = PMenu.Mode.Harass.Q:Value()
 	local harassW = PMenu.Mode.Harass.W:Value()
 	local harassE = PMenu.Mode.Harass.E:Value()
+	if not (harassQ and harassW and harassE) then return end
+	
 	local target = getTarget(800)
 	if target == nil then return end
 
@@ -315,7 +321,6 @@ end
 function OnClear()
 	local LaneClearQ = PMenu.Mode.LaneClear.Q:Value()
 	local LaneClearE = PMenu.Mode.LaneClear.E:Value()
-	--local LaneClearEminion = PMenu.Mode.LaneClear.EKillMinion:Value()
 	local LaneClearQMana = PMenu.Mode.LaneClear.QMana:Value() * myHero.mana / myHero.mana
 	local LaneClearEMana = PMenu.Mode.LaneClear.EMana:Value()
 	local JungleClearQ = PMenu.Mode.JungleClear.Q:Value()
@@ -324,6 +329,8 @@ function OnClear()
 	local JungleClearQMana = PMenu.Mode.JungleClear.QMana:Value()
 	local JungleClearWMana = PMenu.Mode.JungleClear.WMana:Value()
 	local JungleClearEMana = PMenu.Mode.JungleClear.EMana:Value()
+
+	if not (LaneClearQ and LaneClearE and JungleClearQ and JungleClearW and JungleClearE) then return end
 
 	local minion = getEnemyMinions(600)
 	if minion == nil then return end
@@ -376,6 +383,8 @@ end
 
 function OnLastHit()
 	local lastHitQ = PMenu.Mode.Harass.Q:Value()
+	if not lastHitQ then return end
+	
 	local minion = getEnemyMinions(800)
 	if minion == nil then return end
 	
@@ -396,6 +405,8 @@ end
 
 function KillSteal()
 	local killStealQ = PMenu.KillSteal.Q:Value()
+	if not killStealQ then return end
+	
 	local target = getTarget(800)
 	if target == nil then return end
 	
