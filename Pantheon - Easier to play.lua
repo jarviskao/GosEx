@@ -417,7 +417,7 @@ function KillSteal()
 	
 	for i = 1, Game.HeroCount() do
 		local target = Game.Hero(i)
-		local Qdmg = (({65, 105, 145, 185, 225})[level] + 1.4 * target.totalDamage) * ((target.health / target.maxHealth < 0.15) and 2 or 1)
+		local Qdmg = (({65, 105, 145, 185, 225})[level] + 1.4 * myHero.totalDamage) * ((target.health / target.maxHealth < 0.15) and 2 or 1)
 		if target.team ~= myHero.team and IsValidTarget(target, PantheonQ.range) then
 			if Qdmg >= target.health and killStealQ and isReady(_Q) then 
 				castQ(target)
