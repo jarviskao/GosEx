@@ -3,7 +3,7 @@ if myHero.charName ~= "MonkeyKing" then return end
 
 --Locals
 local LoL = "7.5"
-local ver = "1.0"
+local ver = "0.2"
 
 --icon
 local MenuIcons = "http://static.lolskill.net/img/champions/64/MonkeyKing.png"
