@@ -27,10 +27,12 @@ WMenu.Key:MenuElement({id = "LastHit",name = "Last Hit HotKey", key = string.byt
 --Main Menu-- Mode Setting
 WMenu:MenuElement({type = MENU, id = "Mode", name = "Mode Settings"})
 --Main Menu-- Mode Setting-- Combo
+--[[
 WMenu.Mode:MenuElement({type = MENU, id = "Combo", name = "Combo"})
 WMenu.Mode.Combo:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon = SpellIcons.Q})
 WMenu.Mode.Combo:MenuElement({id = "W", name = "Use W", value = true, leftIcon = SpellIcons.W})
 WMenu.Mode.Combo:MenuElement({id = "E", name = "Use E", value = true, leftIcon = SpellIcons.E})
+--]]
 --Main Menu-- Mode Setting-- Harass
 WMenu.Mode:MenuElement({type = MENU, id = "Harass", name = "Harass"})
 WMenu.Mode.Harass:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon = SpellIcons.Q})
