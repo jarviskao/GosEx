@@ -388,7 +388,7 @@ function KillSteal()
 		local Qdmg = ({30, 60, 90, 120, 150})[levelQ] + 0.1 * myHero.totalDamage
 		local Edmg = ({60, 105, 150, 195, 240})[levelE] + 0.8 * myHero.bonusDamage
 		local QEdmg = Qdmg + Edmg + target.hpRegen * 2.5
-		PrintChat(Qdmg.."  E = "..Edmg.."  E lv = "..levelE)
+		--PrintChat(Qdmg.."  E = "..Edmg.."  E lv = "..levelE)
 		if target.team ~= myHero.team and IsValidTarget(target, WukongE.range)  then
 			if QEdmg >= target.health and killStealE and isReady(_E) and killStealQ and isReady(_Q) then 
 					castE(target)
