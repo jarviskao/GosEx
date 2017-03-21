@@ -384,7 +384,7 @@ function OnClear()
 end
 
 function OnLastHit()
-	local lastHitQ = PMenu.Mode.Harass.Q:Value()
+	local lastHitQ = PMenu.Mode.LastHit.Q:Value()
 	if not lastHitQ then return end
 	
 	local minion = getEnemyMinions(800)
