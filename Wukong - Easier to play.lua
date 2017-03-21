@@ -3,7 +3,7 @@ if myHero.charName ~= "MonkeyKing" then return end
 
 --Locals
 local LoL = "7.5"
-local ver = "0.2"
+local ver = "1.0"
 
 --icon
 local MenuIcons = "http://static.lolskill.net/img/champions/64/MonkeyKing.png"
@@ -27,12 +27,10 @@ WMenu.Key:MenuElement({id = "LastHit",name = "Last Hit HotKey", key = string.byt
 --Main Menu-- Mode Setting
 WMenu:MenuElement({type = MENU, id = "Mode", name = "Mode Settings"})
 --Main Menu-- Mode Setting-- Combo
---[[
 WMenu.Mode:MenuElement({type = MENU, id = "Combo", name = "Combo"})
 WMenu.Mode.Combo:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon = SpellIcons.Q})
 WMenu.Mode.Combo:MenuElement({id = "W", name = "Use W", value = true, leftIcon = SpellIcons.W})
 WMenu.Mode.Combo:MenuElement({id = "E", name = "Use E", value = true, leftIcon = SpellIcons.E})
---]]
 --Main Menu-- Mode Setting-- Harass
 WMenu.Mode:MenuElement({type = MENU, id = "Harass", name = "Harass"})
 WMenu.Mode.Harass:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon = SpellIcons.Q})
@@ -251,22 +249,26 @@ end
 function onHarass()
 	local harassQ = WMenu.Mode.Harass.Q:Value()
 	local harassE = WMenu.Mode.Harass.E:Value()
-	if not (harassQ and harassW and harassE) then return end
+	if not (harassQ and harassE) then return end
 	
 	local target = getTarget(800)
 	if target == nil then return end
 
 	if ICOrbWalking then
 		target = _G.SDK.TargetSelector:GetTarget(800)
-		if target == nil then return end
+		if target ~= nil then
+		--PrintChat(target.charName)
+		end
 	end
 
 	if IsValidTarget(target,WukongQ.range) and harassQ and isReady(_Q) then
+		PrintChat("Q")
 		castQ()
 		Control.Attack(target)
 	end
 
-	if IsValidTarget(target,WukongE.range) and harassW and isReady(_E) then
+	if IsValidTarget(target,WukongE.range) and harassE and isReady(_E) then
+		PrintChat("E")
 		castE(target)
 	end
 
