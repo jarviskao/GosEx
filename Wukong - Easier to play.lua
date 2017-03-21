@@ -3,7 +3,7 @@ if myHero.charName ~= "MonkeyKing" then return end
 
 --Locals
 local LoL = "7.5"
-local ver = "1.0"
+local ver = "0.2"
 
 --icon
 local MenuIcons = "http://static.lolskill.net/img/champions/64/MonkeyKing.png"
@@ -23,7 +23,7 @@ WMenu.Key:MenuElement({id = "Combo",name = "Combo HotKey", key = 32})
 WMenu.Key:MenuElement({id = "Harass",name = "Harass HotKey", key = string.byte("C")})
 WMenu.Key:MenuElement({id = "Clear",name = "Clear HotKey", key = string.byte("V")})
 WMenu.Key:MenuElement({id = "LastHit",name = "Last Hit HotKey", key = string.byte("X")})
---[[
+
 --Main Menu-- Mode Setting
 WMenu:MenuElement({type = MENU, id = "Mode", name = "Mode Settings"})
 --Main Menu-- Mode Setting-- Combo
@@ -39,19 +39,19 @@ WMenu.Mode.Harass:MenuElement({id = "E", name = "Use E", value = true, leftIcon 
 --Main Menu-- Mode Setting-- LandClear 
 WMenu.Mode:MenuElement({type = MENU, id = "LaneClear", name = "Lane Clear"})
 WMenu.Mode.LaneClear:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon = SpellIcons.Q})
-WMenu.Mode.LaneClear:MenuElement({id = "QMana", name = "Min Mana to use Q (%)", value = 80, min = 0, max = 100, step = 1})
+WMenu.Mode.LaneClear:MenuElement({id = "QMana", name = "Min Mana to use Q (%)", value = 80, min = 0, max = 100, step = 1, leftIcon = SpellIcons.Q})
 WMenu.Mode.LaneClear:MenuElement({id = "E", name = "Use E", value = true, leftIcon = SpellIcons.E})
-WMenu.Mode.LaneClear:MenuElement({id = "EMana", name = "Min Mana to use E (%)", value = 80, min = 0, max = 100, step = 1})
+WMenu.Mode.LaneClear:MenuElement({id = "EMana", name = "Min Mana to use E (%)", value = 80, min = 0, max = 100, step = 1, leftIcon = SpellIcons.E})
 --Main Menu-- Mode Setting-- Jungle 
 WMenu.Mode:MenuElement({type = MENU, id = "JungleClear", name = "Jungle Clear"})
 WMenu.Mode.JungleClear:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon = SpellIcons.Q})
-WMenu.Mode.JungleClear:MenuElement({id = "QMana", name = "Min Mana to use Q (%)", value = 30, min = 0, max = 100, step = 1})
+WMenu.Mode.JungleClear:MenuElement({id = "QMana", name = "Min Mana to use Q (%)", value = 30, min = 0, max = 100, step = 1, leftIcon = SpellIcons.Q})
 WMenu.Mode.JungleClear:MenuElement({id = "E", name = "Use E", value = true, leftIcon = SpellIcons.E})
-WMenu.Mode.JungleClear:MenuElement({id = "EMana", name = "Min Mana to use E (%)", value = 30, min = 0, max = 100, step = 1})
+WMenu.Mode.JungleClear:MenuElement({id = "EMana", name = "Min Mana to use E (%)", value = 30, min = 0, max = 100, step = 1, leftIcon = SpellIcons.E})
 --Main Menu-- Mode Setting-- LastHit
 WMenu.Mode:MenuElement({type = MENU, id = "LastHit", name = "Last Hit"})
 WMenu.Mode.LastHit:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon = SpellIcons.Q})
---]]
+
 --Main Menu-- KillSteal Setting
 WMenu:MenuElement({type = MENU, id = "KillSteal", name = "KillSteal Settings"})
 WMenu.KillSteal:MenuElement({id = "Q", name = "Use Q to KS", value = true})
@@ -198,46 +198,21 @@ end
 
 --Start
 function OnTick()
-	--PrintChat ("Gime Time : "..Game.Timer().." cast : "..(myHero:GetSpellData(_E).castTime - myHero:GetSpellData(_E).cd + 1))
 	if not WMenu.Enabled:Value() then return end
 	if myHero.dead then return end
-	--check()
+	
 	if getMode() == "Combo" then
 		--OnCombo()
 	elseif getMode() == "Harass" then
-		--onHarass()
+		onHarass()
 	elseif getMode() == "Clear" then
-		--OnClear()
+		OnClear()
 	elseif getMode() == "LastHit" then
-		--OnLastHit()
+		OnLastHit()
 	end	
-	KillSteal()
-end
-
-function check()
-
-	if isCastingE then
-		if GOSOrbWalking then
-			_G.Orbwalker.Enabled:Value(false)
-		elseif EOrbWalking then
-			_G.EOW:MovementsEnabled(false)
-			_G.EOW:AttacksEnabled(false)
-		end
-	end
 	
-	if GetTickCount() >= ticker + 900 then
-		if GOSOrbWalking and StopOrbWalking then
-				_G.Orbwalker.Enabled:Value(true)
-				isCastingE = false
-				StopOrbWalking = false
-		elseif EOrbWalking and StopOrbWalking then
-				_G.EOW:MovementsEnabled(true)
-				_G.EOW:AttacksEnabled(true)
-				isCastingE = false
-				StopOrbWalking = false
-		end
-	end		
-
+	KillSteal()
+	
 end
 
 function OnCombo()
@@ -273,21 +248,24 @@ end
 
 function onHarass()
 	local harassQ = WMenu.Mode.Harass.Q:Value()
-	local harassW = WMenu.Mode.Harass.W:Value()
 	local harassE = WMenu.Mode.Harass.E:Value()
+	if not (harassQ and harassW and harassE) then return end
+	
 	local target = getTarget(800)
 	if target == nil then return end
 
 	if ICOrbWalking then
 		target = _G.SDK.TargetSelector:GetTarget(800)
+		if target == nil then return end
 	end
 
-	if IsValidTarget(target,PantheonQ.range) and harassQ and isReady(_Q) then
-		castQ(target)
+	if IsValidTarget(target,WukongQ.range) and harassQ and isReady(_Q) then
+		castQ()
+		Control.Attack(target)
 	end
 
-	if IsValidTarget(target,PantheonW.range) and harassW and isReady(_W) then
-		castW(target)
+	if IsValidTarget(target,WukongE.range) and harassW and isReady(_E) then
+		castE(target)
 	end
 
 end
@@ -302,57 +280,45 @@ function OnClear()
 	local JungleClearQMana = WMenu.Mode.JungleClear.QMana:Value()
 	local JungleClearEMana = WMenu.Mode.JungleClear.EMana:Value()
 
-	local minion = getEnemyMinions(600)
+	if not (LaneClearQ and LaneClearE and JungleClearQ and JungleClearE) then return end
+
+	local minion = getEnemyMinions(800)
 	if minion == nil then return end
 	
 	for i = 1, Game.MinionCount() do
 		local minion = Game.Minion(i)
 		if  minion.team == 200 then
 			--Q
-			if IsValidTarget(minion,550) and LaneClearQ and isReady(_Q) and not myHero.isChanneling and (myHero.mana/myHero.maxMana > LaneClearQMana / 100) then
-				Control.SetCursorPos(minion)
-				Control.KeyDown(HK_Q)
-				Control.KeyUp(HK_Q)
+			if IsValidTarget(minion,WukongQ.range) and LaneClearQ and isReady(_Q) and not myHero.isChanneling and (myHero.mana/myHero.maxMana > LaneClearQMana / 100) then
+				castQ()
+				Control.Attack(minion)
 			end
 			--E
-			if IsValidTarget(minion,350) and LaneClearE and isReady(_E) and not myHero.isChanneling and (myHero.mana / myHero.maxMana > LaneClearEMana / 100) then
-				local Epos = minion:GetPrediction(myHero:GetSpellData(_E).speed, myHero:GetSpellData(_E).delay)
-				Control.SetCursorPos(Epos)
+			if IsValidTarget(minion,WukongE.range) and LaneClearE and isReady(_E) and not myHero.isChanneling and (myHero.mana / myHero.maxMana > LaneClearEMana / 100) then
+				Control.SetCursorPos(minion)
 				Control.KeyDown(HK_E)
 				Control.KeyUp(HK_E)
-				isCastingE = true
-				StopOrbWalking = true
-				ticker = GetTickCount()
 			end
 		elseif minion.team == 300 then
 			--Q
-			if IsValidTarget(minion,550) and JungleClearQ and isReady(_Q) and not myHero.isChanneling and (myHero.mana/myHero.maxMana > JungleClearQMana / 100) then
-				Control.SetCursorPos(minion)
-				Control.KeyDown(HK_Q)
-				Control.KeyUp(HK_Q)
-			end
-			--W
-			if IsValidTarget(minion,500) and JungleClearW and isReady(_W) and not myHero.isChanneling and (myHero.mana/myHero.maxMana > JungleClearWMana / 100) then
-				Control.SetCursorPos(minion)
-				Control.KeyDown(HK_W)
-				Control.KeyUp(HK_W)
+			if IsValidTarget(minion,WukongQ.range) and JungleClearQ and isReady(_Q) and not myHero.isChanneling and (myHero.mana/myHero.maxMana > JungleClearQMana / 100) then
+				castQ()
+				Control.Attack(minion)
 			end
 			--E
-			if IsValidTarget(minion,350) and JungleClearE and isReady(_E) and not myHero.isChanneling and (myHero.mana/myHero.maxMana > JungleClearEMana / 100) then
-				local Epos = minion:GetPrediction(myHero:GetSpellData(_E).speed, myHero:GetSpellData(_E).delay)
-				Control.SetCursorPos(Epos)
+			if IsValidTarget(minion,WukongE.range) and JungleClearE and isReady(_E) and not myHero.isChanneling and (myHero.mana/myHero.maxMana > JungleClearEMana / 100) then
+				Control.SetCursorPos(minion)
 				Control.KeyDown(HK_E)
 				Control.KeyUp(HK_E)
-				isCastingE = true
-				StopOrbWalking = true
-				ticker = GetTickCount()
 			end
 		end
 	end
 end
 
 function OnLastHit()
-	local lastHitQ = WMenu.Mode.Harass.Q:Value()
+	local lastHitQ = WMenu.Mode.LastHit.Q:Value()
+	if not lastHitQ then return end
+	
 	local minion = getEnemyMinions(800)
 	if minion == nil then return end
 	
@@ -361,10 +327,11 @@ function OnLastHit()
 	
 	for i = 1, Game.MinionCount() do
 		local minion = Game.Minion(i)
-		local Qdmg = (({65, 105, 145, 185, 225})[level] + 1.4 * minion.totalDamage) * ((minion.health / minion.maxHealth < 0.15) and 2 or 1)
-		 if  minion.team ~= myHero.team and IsValidTarget(minion, PantheonQ.range) then
+		local Qdmg = ({30, 60, 90, 120, 150})[level] + 0.1 * myHero.totalDamage
+		 if  minion.team ~= myHero.team and IsValidTarget(minion, WukongQ.range) then
 			if Qdmg >= minion.health and lastHitQ and isReady(_Q) then
-				castQ(minion)
+				castQ()
+				Control.Attack(minion)
 			end
 		end
 	end
