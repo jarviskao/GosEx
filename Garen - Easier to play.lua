@@ -2,8 +2,8 @@
 if myHero.charName ~= "Garen" then return end
 
 --Locals
-local LoL = "7.5"
-local ver = "2.3"
+local LoL = "7.6"
+local ver = "2.4"
 
 --icon
 local MenuIcons = "http://static.lolskill.net/img/champions/64/garen.png"
@@ -43,7 +43,7 @@ GMenu.Mode.Harass:MenuElement({id = "E", name = "Use E", value = true, leftIcon 
 GMenu.Mode:MenuElement({type = MENU, id = "LaneClear", name = "Lane Clear"})
 GMenu.Mode.LaneClear:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon = SpellIcons.Q})
 GMenu.Mode.LaneClear:MenuElement({id = "E", name = "Use E", value = true, leftIcon = SpellIcons.E})
-GMenu.Mode.LaneClear:MenuElement({id = "EKillMinion", name = "Use E when X minions", value = 3,min = 0, max = 5, step = 1})
+GMenu.Mode.LaneClear:MenuElement({id = "EKillMinion", name = "Use E when X minions", value = 3,min = 0, max = 5, step = 1, leftIcon = SpellIcons.E})
 --Main Menu-- Mode Setting-- Jungle 
 GMenu.Mode:MenuElement({type = MENU, id = "JungleClear", name = "Jungle Clear"})
 GMenu.Mode.JungleClear:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon = SpellIcons.Q})
@@ -126,6 +126,16 @@ function isCasting(spell)
 	else
 		return false
 	end
+end
+
+function HasBuff(unit, buffname)
+	for i = 0, unit.buffCount do
+	local buff = unit:GetBuff(i)
+		if buff.name == buffname and buff.count > 0 then 
+			return true
+		end
+	end
+	return false
 end
 
 function getTarget(range)
@@ -238,8 +248,11 @@ function OnCombo()
 
 	if IsValidTarget(target,GarenR.range) and comboR and isReady(_R) then
 		local level = myHero:GetSpellData(_R).level
-		local Rdmg = ({175, 350, 525})[level] + ({8, 13, 20})[level] / 100 * (target.maxHealth - target.health)
-		if  Rdmg >= target.health then
+		local Rdmg = ({175, 350, 525})[level] + target.hpRegen * 2
+		local RBuffTarget = (target.maxHealth - target.health) / ({3.5, 3, 2.5})[level]  
+		if  HasBuff(target,"garenpassiveenemytarget") and Rdmg + RBuffTarget >= target.health then
+			castR(target)
+		elseif Rdmg >= target.health then
 			castR(target)
 		end
 	end
@@ -279,27 +292,25 @@ function OnClear()
 	local JungleClearW = GMenu.Mode.JungleClear.W:Value()
 	local JungleClearE = GMenu.Mode.JungleClear.E:Value()
 
-	local minion = getEnemyMinions(350)
+	local minion = getEnemyMinions(500)
 	if minion == nil then return end
 	
 	for i = 1, Game.MinionCount() do
 		local minion = Game.Minion(i)
 		if  minion.team == 200 then
-			if IsValidTarget(minion,200) and LaneClearQ and isReady(_Q) and not isCasting(_E) then
+			if IsValidTarget(minion,300) and LaneClearQ and isReady(_Q) and not isCasting(_E) then
 				castQ()
-				Control.Attack(minion)
 			end
 			
 			if IsValidTarget(minion,GarenE.range) and LaneClearE and isReady(_E) and not isCasting(_Q) and myHero:GetSpellData(_E).name == "GarenE" and  CountEnemyMinions(GarenE.range) >= LaneClearEminion then
 				castE()
 			end
 		elseif minion.team == 300 then
-			if IsValidTarget(minion,320) and JungleClearQ and isReady(_Q) and not isCasting(_E) then
+			if IsValidTarget(minion,400) and JungleClearQ and isReady(_Q) and not isCasting(_E) then
 				castQ()
-				Control.Attack(minion)
 			end
 			
-			if IsValidTarget(minion,320) and JungleClearW and isReady(_W) then
+			if IsValidTarget(minion,350) and JungleClearW and isReady(_W) then
 				castW()
 			end
 			
@@ -318,13 +329,16 @@ function OnLastHit()
 	local level = myHero:GetSpellData(_Q).level
 	if level == nil or level == 0 then return end
 	
+	
 	for i = 1, Game.MinionCount() do
 		local minion = Game.Minion(i)
 		local Qdmg = ({30, 55, 80, 105, 130})[level] + (1.4 * myHero.totalDamage)
-		if minion.team ~= myHero.team and IsValidTarget(minion, 200)   then
+		if minion.team ~= myHero.team and IsValidTarget(minion, 250)   then
 			if Qdmg >= minion.health and lastHitQ and isReady(_Q) and not isCasting(_E) then
 				castQ()
-				Control.Attack(minion)
+			end
+			if Qdmg >= minion.health and HasBuff(myHero,"GarenQ") then
+				Control.SetCursorPos(minion.pos)
 			end
 		end
 	end
@@ -333,6 +347,8 @@ end
 
 function KillSteal()
 	local killStealR = GMenu.KillSteal.R:Value()
+	if killStealR == false then return end
+	
 	local target = getTarget(800)
 	if target == nil then return end
 	
@@ -341,14 +357,17 @@ function KillSteal()
 	
 	for i = 1, Game.HeroCount() do
 		local target = Game.Hero(i)
-		local Rdmg = ({175, 350, 525})[level] + ({8, 13, 20})[level] / 100 * (target.maxHealth - target.health)
+		local Rdmg = ({175, 350, 525})[level] + target.hpRegen * 2
+		local RBuffTarget = (target.maxHealth - target.health) / ({3.5, 3, 2.5})[level]  
 		if target.team ~= myHero.team and IsValidTarget(target, GarenR.range) then
-			if Rdmg >= target.health and killStealR and isReady(_R) then 
-				if GMenu.KillSteal.black[target.networkID]:Value()  then
+			if GMenu.KillSteal.black[target.networkID]:Value() and killStealR and isReady(_R) then
+				if HasBuff(target,"garenpassiveenemytarget") and Rdmg + RBuffTarget >= target.health and killStealR and isReady(_R) then
+					castR(target)
+				elseif Rdmg >= target.health and killStealR and isReady(_R) then
 					castR(target)
 				end
 			end
 		end
 	end
-	
+
 end
