@@ -2,8 +2,8 @@
 if myHero.charName ~= "Pantheon" then return end
 
 --Locals
-local LoL = "7.5"
-local ver = "1.4"
+local LoL = "7.6"
+local ver = "1.5"
 
 --icon
 local MenuIcons = "http://static.lolskill.net/img/champions/64/pantheon.png"
@@ -38,17 +38,17 @@ PMenu.Mode.Harass:MenuElement({id = "E", name = "Use E", value = true, leftIcon 
 --Main Menu-- Mode Setting-- LandClear 
 PMenu.Mode:MenuElement({type = MENU, id = "LaneClear", name = "Lane Clear"})
 PMenu.Mode.LaneClear:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon = SpellIcons.Q})
-PMenu.Mode.LaneClear:MenuElement({id = "QMana", name = "Min Mana to use Q (%)", value = 80, min = 0, max = 100, step = 1})
+PMenu.Mode.LaneClear:MenuElement({id = "QMana", name = "Min Mana to use Q (%)", value = 80, min = 0, max = 100, step = 1, leftIcon = SpellIcons.Q})
 PMenu.Mode.LaneClear:MenuElement({id = "E", name = "Use E", value = true, leftIcon = SpellIcons.E})
-PMenu.Mode.LaneClear:MenuElement({id = "EMana", name = "Min Mana to use E (%)", value = 80, min = 0, max = 100, step = 1})
+PMenu.Mode.LaneClear:MenuElement({id = "EMana", name = "Min Mana to use E (%)", value = 80, min = 0, max = 100, step = 1, leftIcon = SpellIcons.E})
 --Main Menu-- Mode Setting-- Jungle 
 PMenu.Mode:MenuElement({type = MENU, id = "JungleClear", name = "Jungle Clear"})
 PMenu.Mode.JungleClear:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon = SpellIcons.Q})
-PMenu.Mode.JungleClear:MenuElement({id = "QMana", name = "Min Mana to use Q (%)", value = 30, min = 0, max = 100, step = 1})
+PMenu.Mode.JungleClear:MenuElement({id = "QMana", name = "Min Mana to use Q (%)", value = 30, min = 0, max = 100, step = 1, leftIcon = SpellIcons.Q})
 PMenu.Mode.JungleClear:MenuElement({id = "W", name = "Use W", value = true, leftIcon = SpellIcons.W})
-PMenu.Mode.JungleClear:MenuElement({id = "WMana", name = "Min Mana to use W (%)", value = 30, min = 0, max = 100, step = 1})
+PMenu.Mode.JungleClear:MenuElement({id = "WMana", name = "Min Mana to use W (%)", value = 30, min = 0, max = 100, step = 1, leftIcon = SpellIcons.W})
 PMenu.Mode.JungleClear:MenuElement({id = "E", name = "Use E", value = true, leftIcon = SpellIcons.E})
-PMenu.Mode.JungleClear:MenuElement({id = "EMana", name = "Min Mana to use E (%)", value = 30, min = 0, max = 100, step = 1})
+PMenu.Mode.JungleClear:MenuElement({id = "EMana", name = "Min Mana to use E (%)", value = 30, min = 0, max = 100, step = 1, leftIcon = SpellIcons.E})
 --Main Menu-- Mode Setting-- LastHit
 PMenu.Mode:MenuElement({type = MENU, id = "LastHit", name = "Last Hit"})
 PMenu.Mode.LastHit:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon = SpellIcons.Q})
@@ -56,13 +56,6 @@ PMenu.Mode.LastHit:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon
 --Main Menu-- KillSteal Setting
 PMenu:MenuElement({type = MENU, id = "KillSteal", name = "KillSteal Settings"})
 PMenu.KillSteal:MenuElement({id = "Q", name = "Use Q to KS", value = true})
---PMenu.KillSteal:MenuElement({id = "ksUnder", name = "KS unter enemy Turret", value = true})
-
---Main Menu-- Auto Setting
---PMenu:MenuElement({type = MENU, id = "Auto", name = "Auto Settings"})
---PMenu.Auto:MenuElement({id = "Q", name = "Auto Q When Target in Range", value = true})
---PMenu.Auto:MenuElement({id = "QMana", name = "Min Mana to auto Q (%)", value = 80,min = 0, max = 100, step = 1})
---PMenu.Auto:MenuElement({id = "DonQ", name = "Don't Auto Q in Enemy Turret Range" , value = true})
 
 --Main Menu-- Drawing 
 PMenu:MenuElement({type = MENU, id = "Drawing", name = "Drawing"})
@@ -152,15 +145,14 @@ function IsValidTarget(unit, range)
     return unit ~= nil and unit.valid and unit.visible and not unit.dead and unit.isTargetable and not unit.isImmortal and unit.distance <= range
 end
 
-function hasBuff(unit, buffname)
-    local target
-    for  i = 0, unit.buffCount do 
-        local buff = unit:GetBuff(i)
-        if buff ~= nil and  buff.count > 0 and buff.name == buffname   then
-            return true
-        end
-    end
-    return false
+function HasBuff(unit, buffname)
+	for i = 0, unit.buffCount do
+		local buff = unit:GetBuff(i)
+		if buff.name == buffname and buff.count > 0 then 
+			return true
+		end
+	end
+	return false
 end
 
 local function getMode()
@@ -203,7 +195,6 @@ function CountEnemyMinions(range)
             minionsCount = minionsCount + 1
         end
     end
-    --PrintChat (minionsCount)
     return minionsCount
 end
 
@@ -211,16 +202,15 @@ function OnDraw()
 	--Draw Range
 	if myHero.dead then return end
 	if PMenu.Drawing.Q:Value() or PMenu.Drawing.W:Value() then Draw.Circle(myHero.pos,600,1,Draw.Color(255, 255, 255, 255)) end
-	if PMenu.Drawing.E:Value() then Draw.Circle(myHero.pos,400,1,Draw.Color(255, 255, 255, 255)) end		
+	if PMenu.Drawing.E:Value() then Draw.Circle(myHero.pos,600,1,Draw.Color(255, 255, 255, 255)) end		
 	if PMenu.Drawing.R:Value() then Draw.CircleMinimap(Vector(myHero.pos),PantheonR.range,1,Draw.Color(255, 255, 255, 255)) end	
 end
 
---Start
+
 function OnTick()
 
 	if not PMenu.Enabled:Value() then return end
 	if myHero.dead then return end
-	check()
 	if getMode() == "Combo" then
 		OnCombo()
 	elseif getMode() == "Harass" then
@@ -233,48 +223,42 @@ function OnTick()
 	KillSteal()
 end
 
-function check()
-
-	if isCastingE then
-		if GOSOrbWalking then
-			_G.Orbwalker.Enabled:Value(false)
-		elseif EOrbWalking then
-			_G.EOW:MovementsEnabled(false)
-			_G.EOW:AttacksEnabled(false)
-		end
+function enableWalk()
+	if GOSOrbWalking then
+			_G.Orbwalker.Enabled:Value(true)
+	elseif EOrbWalking then
+			_G.EOW:MovementsEnabled(true)
+			_G.EOW:AttacksEnabled(true)
 	end
-	
-	if GetTickCount() >= ticker + 500 and not hasBuff(myHero,"pantheonesound") and isCastingE then
-		if GOSOrbWalking and StopOrbWalking then
-				_G.Orbwalker.Enabled:Value(true)
-				isCastingE = false
-				StopOrbWalking = false
-		elseif EOrbWalking and StopOrbWalking then
-				_G.EOW:MovementsEnabled(true)
-				_G.EOW:AttacksEnabled(true)
-				isCastingE = false
-				StopOrbWalking = false
-		elseif ICOrbWalking then
-				isCastingE = false
-				StopOrbWalking = false
-		end
-	end		
+end
 
+function disableWalk()
+	if GOSOrbWalking then
+		_G.Orbwalker.Enabled:Value(false)
+	elseif EOrbWalking then
+		_G.EOW:MovementsEnabled(false)
+		_G.EOW:AttacksEnabled(false)
+	end
 end
 
 function OnCombo()
 	local comboQ = PMenu.Mode.Combo.Q:Value()
 	local comboW = PMenu.Mode.Combo.W:Value()
 	local comboE = PMenu.Mode.Combo.E:Value()
-	if not (comboQ and comboW and comboE) then return end
+	if not comboQ and not comboW and not comboE then return end
 	
-	local target = getTarget(800)
-	if target == nil then return end
-
+	if not isReady(_E) and not myHero.isChanneling then
+		enableWalk()
+	end
+	
+	local target
 	if ICOrbWalking then
 		target = _G.SDK.TargetSelector:GetTarget(800)
-		if target == nil then return end
+	else
+		target = getTarget(800)
 	end
+
+	if target == nil then return end
 	
 	if IsValidTarget(target,PantheonQ.range) and comboQ and isReady(_Q) and not myHero.isChanneling then
 		castQ(target)
@@ -285,45 +269,56 @@ function OnCombo()
 	end
 
 	if IsValidTarget(target,PantheonE.range) and comboE and isReady(_E) and not myHero.isChanneling then
-		local Epos = target:GetPrediction(myHero:GetSpellData(_E).speed, 0.3)
+		disableWalk()
+		local Epos = target:GetPrediction(myHero:GetSpellData(_E).speed, 0.2)
 		Control.SetCursorPos(Epos)
 		Control.KeyDown(HK_E)
 		Control.KeyUp(HK_E)
-		isCastingE = true
-		StopOrbWalking = true
-		ticker = GetTickCount()
 	end
 	
+
 end
 
 function onHarass()
 	local harassQ = PMenu.Mode.Harass.Q:Value()
 	local harassW = PMenu.Mode.Harass.W:Value()
 	local harassE = PMenu.Mode.Harass.E:Value()
-	if not (harassQ and harassW and harassE) then return end
+	if not harassQ and not harassW and not harassE then return end
 	
-	local target = getTarget(800)
-	if target == nil then return end
-
+	if not isReady(_E) and not myHero.isChanneling then
+		enableWalk()
+	end
+	
+	local target
 	if ICOrbWalking then
 		target = _G.SDK.TargetSelector:GetTarget(800)
-		if target == nil then return end
+	else
+		target = getTarget(800)
 	end
+	if target == nil then return end
 
-	if IsValidTarget(target,PantheonQ.range) and harassQ and isReady(_Q) then
+	if IsValidTarget(target,PantheonQ.range) and harassQ and isReady(_Q) and not myHero.isChanneling then
 		castQ(target)
 	end
 
-	if IsValidTarget(target,PantheonW.range) and harassW and isReady(_W) then
+	if IsValidTarget(target,PantheonW.range) and harassW and isReady(_W) and not myHero.isChanneling then
 		castW(target)
 	end
-
+	
+	if IsValidTarget(target,PantheonE.range) and harassE and isReady(_E) and not myHero.isChanneling then
+		disableWalk()
+		local Epos = target:GetPrediction(myHero:GetSpellData(_E).speed, 0.2)
+		Control.SetCursorPos(Epos)
+		Control.KeyDown(HK_E)
+		Control.KeyUp(HK_E)
+	end
+	
 end
 
 function OnClear()
 	local LaneClearQ = PMenu.Mode.LaneClear.Q:Value()
 	local LaneClearE = PMenu.Mode.LaneClear.E:Value()
-	local LaneClearQMana = PMenu.Mode.LaneClear.QMana:Value()
+	local LaneClearQMana = PMenu.Mode.LaneClear.QMana:Value() * myHero.mana / myHero.mana
 	local LaneClearEMana = PMenu.Mode.LaneClear.EMana:Value()
 	local JungleClearQ = PMenu.Mode.JungleClear.Q:Value()
 	local JungleClearW = PMenu.Mode.JungleClear.W:Value()
@@ -332,7 +327,11 @@ function OnClear()
 	local JungleClearWMana = PMenu.Mode.JungleClear.WMana:Value()
 	local JungleClearEMana = PMenu.Mode.JungleClear.EMana:Value()
 
-	if not (LaneClearQ and LaneClearE and JungleClearQ and JungleClearW and JungleClearE) then return end
+	if not LaneClearQ and not LaneClearE and not JungleClearQ and not JungleClearW and not JungleClearE then return end
+
+	if not isReady(_E) and not myHero.isChanneling then
+		enableWalk()
+	end
 
 	local minion = getEnemyMinions(600)
 	if minion == nil then return end
@@ -348,13 +347,11 @@ function OnClear()
 			end
 			--E
 			if IsValidTarget(minion,350) and LaneClearE and isReady(_E) and not myHero.isChanneling and (myHero.mana / myHero.maxMana > LaneClearEMana / 100) then
-				local Epos = minion:GetPrediction(myHero:GetSpellData(_E).speed, myHero:GetSpellData(_E).delay)
+				disableWalk()
+				local Epos = minion:GetPrediction(myHero:GetSpellData(_E).speed, 0.2)
 				Control.SetCursorPos(Epos)
 				Control.KeyDown(HK_E)
 				Control.KeyUp(HK_E)
-				isCastingE = true
-				StopOrbWalking = true
-				ticker = GetTickCount()
 			end
 		elseif minion.team == 300 then
 			--Q
@@ -371,13 +368,11 @@ function OnClear()
 			end
 			--E
 			if IsValidTarget(minion,350) and JungleClearE and isReady(_E) and not myHero.isChanneling and (myHero.mana/myHero.maxMana > JungleClearEMana / 100) then
-				local Epos = minion:GetPrediction(myHero:GetSpellData(_E).speed, myHero:GetSpellData(_E).delay)
+				disableWalk()
+				local Epos = minion:GetPrediction(myHero:GetSpellData(_E).speed, 0.2)
 				Control.SetCursorPos(Epos)
 				Control.KeyDown(HK_E)
 				Control.KeyUp(HK_E)
-				isCastingE = true
-				StopOrbWalking = true
-				ticker = GetTickCount()
 			end
 		end
 	end
@@ -419,7 +414,7 @@ function KillSteal()
 		local target = Game.Hero(i)
 		local Qdmg = (({65, 105, 145, 185, 225})[level] + 1.4 * myHero.totalDamage) * ((target.health / target.maxHealth < 0.15) and 2 or 1)
 		if target.team ~= myHero.team and IsValidTarget(target, PantheonQ.range) then
-			if Qdmg >= target.health and killStealQ and isReady(_Q) then 
+			if Qdmg >= target.health and killStealQ and isReady(_Q) and not myHero.isChanneling then 
 				castQ(target)
 			end
 		end
