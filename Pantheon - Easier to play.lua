@@ -399,7 +399,7 @@ function KillSteal()
 	local killStealQ = PMenu.KillSteal.Q:Value()
 	if not killStealQ then return end
 	
-	target = getTarget(800)
+	local target = getTarget(800)
 	if target == nil then return end
 	
 	local level = myHero:GetSpellData(_R).level
