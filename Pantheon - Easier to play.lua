@@ -297,7 +297,7 @@ function onHarass()
 	end
 	if target == nil then return end
 
-	if IsValidTarget(target,PantheonQ.range) and harassQ and isReady(_Q) and not myHero.isChanneling then
+	if IsValidTarget(target,PantheonQ.range) and harassQ and isReady(_Q) and not myHero.isChanneling and not isReady(_W) then
 		castQ(target)
 	end
 
