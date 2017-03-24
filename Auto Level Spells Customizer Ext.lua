@@ -1,5 +1,5 @@
-	local DefaultSpellsOrders = {		
-		["Aatrox"]          =   {HK_W, HK_Q, HK_E, HK_W, HK_W, HK_R, HK_W, HK_Q, HK_W, HK_Q, HK_R, HK_Q, HK_Q, HK_E, HK_E, HK_R, HK_E, HK_E},
+local DefaultSpellsOrders = {		
+	["Aatrox"]          =   {HK_W, HK_Q, HK_E, HK_W, HK_W, HK_R, HK_W, HK_Q, HK_W, HK_Q, HK_R, HK_Q, HK_Q, HK_E, HK_E, HK_R, HK_E, HK_E},
         ["AurelionSol"]     =   {HK_Q, HK_W, HK_E, HK_Q, HK_Q, HK_R, HK_Q, HK_W, HK_Q, HK_W, HK_R, HK_W, HK_W, HK_E, HK_E, HK_R, HK_E, HK_E},
         ["Ahri"]            =   {HK_Q, HK_E, HK_W, HK_Q, HK_Q, HK_R, HK_Q, HK_W, HK_Q, HK_W, HK_R, HK_W, HK_W, HK_E, HK_E, HK_R, HK_E, HK_E},
         ["Akali"]           =   {HK_Q, HK_E, HK_W, HK_Q, HK_Q, HK_R, HK_Q, HK_E, HK_Q, HK_E, HK_R, HK_E, HK_E, HK_W, HK_W, HK_R, HK_W, HK_W},
@@ -139,11 +139,11 @@
 		end
 	end
 	
-	if not support then return end
+	if not support then PrintChat("Sorry, "..myHero.charName.." is not supported. Pls report to the post. Thanks!") return end
 	
 	--local
-	local lol = 7.5
-	local ver = 0.5
+	local lol = 7.6
+	local ver = 0.6
 	local sequence = 0
 	local spellMaxfirst = string.char(DefaultSpellsOrders[myHero.charName][7])
 	local spellMaxSecond = string.char(DefaultSpellsOrders[myHero.charName][12])
@@ -160,27 +160,33 @@ local SpellsSequence = {
     [6]= {HK_E, HK_Q, HK_W, HK_E, HK_E, HK_R, HK_E, HK_Q, HK_E, HK_Q, HK_R, HK_Q, HK_Q, HK_W, HK_W, HK_R, HK_W, HK_W},	-- EQW
 }
 
---http://i65.tinypic.com/23w1jes.png
+
 local MenuIcons = "http://vignette1.wikia.nocookie.net/getsetgames/images/8/82/Level_up_icon.png"
+local EnableIcons = "http://www.myiconfinder.com/uploads/iconsets/256-256-da4555b24380d442df41fc883fbe3411.png"
+local SequenceIcons = "http://www.swiftpcoptimizer.com/wp-content/uploads/2016/10/workflow.png"
+local lvlIcons = "https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Circle-icons-arrow-up.svg/600px-Circle-icons-arrow-up.svg.png"
+local RIcons = "https://lh5.ggpht.com/PA3Hy0O1KPzWA4nnWgI5MKfunyNGR66iTO8kugvNir-n1Zdfzlxm_fYOX6_beQPq=w170"
+local HumanizerIcons = "https://www.leasevillenocredit.com/skin/frontend/rwd/shine/images/ppc-pay-per-click-icon.png"
+local InfoIcons = "https://i.stack.imgur.com/qOXqp.png"
 
  --Main Menu
 local AMenu = MenuElement({type = MENU, id = "AMenu", name = "Auto Level Spells: Customizer", leftIcon = MenuIcons})
-AMenu:MenuElement({id = "UseAutoLvSpell", name = "Enable", value = false , leftIcon = "http://www.myiconfinder.com/uploads/iconsets/256-256-da4555b24380d442df41fc883fbe3411.png"})
+AMenu:MenuElement({id = "UseAutoLvSpell", name = "Enable", value = false , leftIcon = EnableIcons })
 
 --Auto Menu
 AMenu:MenuElement({type = MENU, id = "Auto", name = myHero.charName, leftIcon = "http://ddragon.leagueoflegends.com/cdn/6.24.1/img/champion/"..myHero.charName..".png"})
-AMenu.Auto:MenuElement({type = MENU, id = "SpellsOrder", name = "Spells Sequence", leftIcon = "http://www.swiftpcoptimizer.com/wp-content/uploads/2016/10/workflow.png"})
+AMenu.Auto:MenuElement({type = MENU, id = "SpellsOrder", name = "Spells Sequence", leftIcon = SequenceIcons})
 AMenu.Auto.SpellsOrder:MenuElement({id = "spell1",name = "Priority 1st Max : ", key = string.byte("Q")})
 AMenu.Auto.SpellsOrder:MenuElement({id = "spell2",name = "Priority 2nd Max : ", key = string.byte("W")})
 AMenu.Auto.SpellsOrder:MenuElement({type = SPACE, name = "Recommend : Max "..spellMaxfirst.." > "..spellMaxSecond.." > "..spellMaxThird})
 AMenu.Auto.SpellsOrder:MenuElement({id = "Recommend", name = "Use Recommend Spells Sequence", value = false})
-AMenu.Auto:MenuElement({id = "Disablelvl1", name = "Disable on First Level", value =true, leftIcon = "https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Circle-icons-arrow-up.svg/600px-Circle-icons-arrow-up.svg.png"})
-AMenu.Auto:MenuElement({id = "lvROnly", name = "Level R Spell Only", value =true, leftIcon =  "https://lh5.ggpht.com/PA3Hy0O1KPzWA4nnWgI5MKfunyNGR66iTO8kugvNir-n1Zdfzlxm_fYOX6_beQPq=w170"})
-AMenu.Auto:MenuElement({id = "UseHumanizer", name = "Humanizer", value = true, leftIcon = "https://www.leasevillenocredit.com/skin/frontend/rwd/shine/images/ppc-pay-per-click-icon.png"})
-AMenu.Auto:MenuElement({id = "Delay", name = "Adjust Level Spell for X second", value = 1, min = 0, max = 2.5, step = 0.1})
+AMenu.Auto:MenuElement({id = "Disablelvl1", name = "Disable on First Level", value = true, leftIcon = lvlIcons })
+AMenu.Auto:MenuElement({id = "lvROnly", name = "Level R Spell Only", value = true, leftIcon = RIcons })
+AMenu.Auto:MenuElement({id = "UseHumanizer", name = "Humanizer", value = true, leftIcon = HumanizerIcons})
+AMenu.Auto:MenuElement({id = "Delay", name = "Adjust Level Spell for X second", value = 1, min = 0, max = 2.5, step = 0.1, leftIcon = HumanizerIcons})
 
 ----Info Menu
-AMenu:MenuElement({type = MENU, id = "info", name = "Script Info", leftIcon = "https://i.stack.imgur.com/qOXqp.png"})
+AMenu:MenuElement({type = MENU, id = "info", name = "Script Info", leftIcon = InfoIcons })
 AMenu.info:MenuElement({type = SPACE, name = "Script Version: "..ver})
 AMenu.info:MenuElement({type = SPACE, name = "Support LoL: "..lol})
 AMenu.info:MenuElement({type = SPACE, name = "Author: JarKao"})
@@ -194,11 +200,11 @@ function SpellsSelect()
 	elseif string.byte("W") == AMenu.Auto.SpellsOrder.spell1:Key() and string.byte("Q") == AMenu.Auto.SpellsOrder.spell2:Key() then
 		sequence = 3 -- WQE
 	elseif string.byte("W") == AMenu.Auto.SpellsOrder.spell1:Key() and string.byte("E") == AMenu.Auto.SpellsOrder.spell2:Key() then
-		sequence = 4
+		sequence = 4 -- WEQ
 	elseif string.byte("E") == AMenu.Auto.SpellsOrder.spell1:Key() and string.byte("W") == AMenu.Auto.SpellsOrder.spell2:Key() then
-		sequence = 5
+		sequence = 5 -- EWQ
 	elseif string.byte("E") == AMenu.Auto.SpellsOrder.spell1:Key() and string.byte("Q") == AMenu.Auto.SpellsOrder.spell2:Key() then
-		sequence = 6
+		sequence = 6 -- EQW
 	else
 		sequence = 0
 	end
@@ -207,7 +213,6 @@ end
 
 function OnTick()
 if not AMenu.UseAutoLvSpell:Value() then return end
-	SpellsSelect()
 	AutoLevelSpell()
 end
 
@@ -215,8 +220,10 @@ function AutoLevelSpell()
 	local level = myHero.levelData.lvl
 	local levelpts = myHero.levelData.lvlPts
 	if AMenu.Auto.Disablelvl1:Value() and level <= 1 then return end
+	
 	if level >= 1 and levelpts >= 1 and AMenu.UseAutoLvSpell:Value() then
 		if (level + 1 - levelpts) then
+			local SpellsSequence = SpellsSelect()
 			if AMenu.Auto.UseHumanizer:Value() then
 				DelayAction(function()
 					if (level + 1 - levelpts) then
@@ -239,23 +246,19 @@ function AutoLevelSpell()
 end
 
 function LevelSpell()
-		--PrintChat (sequence)
 		local level = myHero.levelData.lvl
 		local levelpts = myHero.levelData.lvlPts
 		Control.KeyDown(HK_LUS)
 		if sequence == 0 or AMenu.Auto.SpellsOrder.Recommend:Value() then
-			Control.KeyDown(DefaultSpellsOrders[myHero.charName][(level + 1 - levelpts)])
-			Control.KeyUp(DefaultSpellsOrders[myHero.charName][(level + 1 - levelpts)])
+			Control.CastSpell(DefaultSpellsOrders[myHero.charName][(level + 1 - levelpts)])
 		else
-			Control.KeyDown(SpellsSequence[sequence][(level + 1 - levelpts)])
-			Control.KeyUp(SpellsSequence[sequence][(level + 1 - levelpts)])
+			Control.CastSpell(SpellsSequence[sequence][(level + 1 - levelpts)])
 		end
 		Control.KeyUp(HK_LUS)	
 end
 
 function LevelRSpell()
 	Control.KeyDown(HK_LUS)
-	Control.KeyDown(HK_R)
-	Control.KeyUp(HK_R)
+	Control.CastSpell(HK_R)
 	Control.KeyUp(HK_LUS)	
 end
