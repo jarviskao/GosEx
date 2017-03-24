@@ -1,9 +1,9 @@
 # GosEx
 
-[Released] Auto Level Spells Customizer
+[Released] Auto Level Spells Customizer (updated to version 7.6)
 
-[Released] Garen
+[Released] Garen (updated to version 7.6)
 
-[Released] Pantheon
+[Released] Pantheon (updated to version 7.6)
 
-[Released] Wukong (Monkey King)
+[Released] Wukong (Monkey King) (updated to version 7.5)
