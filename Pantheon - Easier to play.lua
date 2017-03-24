@@ -71,9 +71,6 @@ local PantheonR = { range = 5500 }
 local EOrbWalking = false
 local ICOrbWalking = false
 local GOSOrbWalking = false
-local StopOrbWalking = false
-local isCastingE = false
-local ticker = 0
 
 DelayAction(function()
 	if EOW then 
@@ -251,7 +248,6 @@ function OnCombo()
 		enableWalk()
 	end
 	
-	local target
 	if ICOrbWalking then
 		target = _G.SDK.TargetSelector:GetTarget(800)
 	else
@@ -289,7 +285,6 @@ function onHarass()
 		enableWalk()
 	end
 	
-	local target
 	if ICOrbWalking then
 		target = _G.SDK.TargetSelector:GetTarget(800)
 	else
@@ -404,7 +399,7 @@ function KillSteal()
 	local killStealQ = PMenu.KillSteal.Q:Value()
 	if not killStealQ then return end
 	
-	local target = getTarget(800)
+	target = getTarget(800)
 	if target == nil then return end
 	
 	local level = myHero:GetSpellData(_R).level
