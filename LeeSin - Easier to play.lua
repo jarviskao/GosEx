@@ -3,18 +3,18 @@ if myHero.charName ~= "LeeSin" then return end
 
 --Locals
 local LoL = "7.6"
-local ver = "1.0"
+local ver = "1.01"
 
 
 --icon
 local MenuIcons = "http://static.lolskill.net/img/champions/64/leesin.png"
-local SpellIcons = { Q1 = "http://static.lolskill.net/img/abilities/64/LeeSin_Q1.png",
-					 Q2 = "http://static.lolskill.net/img/abilities/64/LeeSin_Q2.png",
-					 W1 = "http://static.lolskill.net/img/abilities/64/LeeSin_W1.png",
-					 W2 = "http://static.lolskill.net/img/abilities/64/LeeSin_W2.png",
-					 E1 = "http://static.lolskill.net/img/abilities/64/LeeSin_E1.png",
-					 E2 = "http://static.lolskill.net/img/abilities/64/LeeSin_E2.png",
-					 R = "http://static.lolskill.net/img/abilities/64/LeeSin_R.png"
+local SpellIcons = { 	 Q1 = "http://static.lolskill.net/img/abilities/64/LeeSin_Q1.png",
+			 Q2 = "http://static.lolskill.net/img/abilities/64/LeeSin_Q2.png",
+			 W1 = "http://static.lolskill.net/img/abilities/64/LeeSin_W1.png",
+			 W2 = "http://static.lolskill.net/img/abilities/64/LeeSin_W2.png",
+			 E1 = "http://static.lolskill.net/img/abilities/64/LeeSin_E1.png",
+			 E2 = "http://static.lolskill.net/img/abilities/64/LeeSin_E2.png",
+			 R = "http://static.lolskill.net/img/abilities/64/LeeSin_R.png"
 }
 
 --Main Menu
@@ -41,6 +41,13 @@ Menu.Mode.JungleClear:MenuElement({id = "E1", name = "Use E1", value = true, lef
 --Main Menu-- Mode Setting-- Flee
 Menu.Mode:MenuElement({type = MENU, id = "Flee", name = "Flee"})
 Menu.Mode.Flee:MenuElement({id = "W1", name = "Use W1", value = true, leftIcon = SpellIcons.W1})
+
+--Main Menu-- Ward Iteam 
+Menu:MenuElement({type = MENU, id = "Ward", name = "Ward Items"})
+Menu.Ward:MenuElement({id = "2049", name = "Sightstone", value = true, leftIcon = "http://cdn.championcounter.com/images/items/2049-sightstone.png"})
+Menu.Ward:MenuElement({id = "2045", name = "Ruby Sightstone", value = true, leftIcon = "http://cdn.championcounter.com/images/items/2045-rubysightstone.png"})
+Menu.Ward:MenuElement({id = "3340", name = "Warding Totem (Trinket)", value = true, leftIcon = "http://cdn.championcounter.com/images/items/3340-wardingtotemtrinket.png"})
+Menu.Ward:MenuElement({id = "3711", name = "Tracker's Knife", value = true, leftIcon = "http://cdn.championcounter.com/images/items/3711-trackersknife.png"})
 
 --Main Menu-- Drawing 
 Menu:MenuElement({type = MENU, id = "Drawing", name = "Drawing"})
@@ -138,13 +145,16 @@ function OnCombo()
 
 	target = _G.SDK.TargetSelector:GetTarget(1300)
 	
+	
+	
+	--Q1
 	if IsValidTarget(target,LeeSinQ1.range-50) and comboQ1 and isReady(_Q) and myHero:GetSpellData(_Q).name == LeeSinQ1.name  then
-		if target:GetCollision(LeeSinQ1.width,LeeSinQ1.speed,LeeSinQ1.delay) == 0 then
-			local Q1pos = target:GetPrediction(LeeSinQ1.speed, LeeSinQ1.delay)
+		local Q1pos = target:GetPrediction(LeeSinQ1.speed, LeeSinQ1.delay)
+		if target:GetCollision(LeeSinQ1.width * 1.1 ,LeeSinQ1.speed,LeeSinQ1.delay) == 0 then
 			castQ1(Q1pos)
 		end
 	end
-
+	--Q2
 	if IsValidTarget(target,LeeSinQ2.range) and comboQ2 and isReady(_Q) and myHero:GetSpellData(_Q).name == LeeSinQ2.name then
 		local levelQ2 = myHero:GetSpellData(_Q).level
 		local Q2dmg = ({50, 80, 110, 140, 170})[levelQ2] + 0.9 * target.totalDamage 
@@ -157,16 +167,16 @@ function OnCombo()
 			end
 		end,2.8)
 	end
-	
+	--E1
 	if IsValidTarget(target,LeeSinE1.range-50) and comboE1 and isReady(_E) and myHero:GetSpellData(_E).name == LeeSinE1.name then
 			castE1()
 	end
-	
+	--W1
 	if IsValidTarget(target,LeeSinW1.range) and myHero.health / myHero.maxHealth * 100  <= 35 and comboW1 and isReady(_W) and myHero:GetSpellData(_W).name == LeeSinW1.name then
         Control.CastSpell(HK_W, myHero)
     end
-    
-    if IsValidTarget(target,LeeSinR.range) and comboR and isReady(_R) and not isReady(_Q) and not isReady(_E) then
+    --R
+    if IsValidTarget(target,LeeSinR.range) and comboR and isReady(_R) and not isReady(_Q) and myHero:GetSpellData(_E).name ~= LeeSinE1.name then
 		local levelR = myHero:GetSpellData(_R).level
 		local Rdmg = ({150, 300, 450})[levelR] + 2 * target.totalDamage
 		if  Rdmg >= target.health + target.hpRegen * 2 then
@@ -190,12 +200,16 @@ function OnClear()
 		if minion.team == 300 then
 			--Q1
 			if IsValidTarget(minion,LeeSinQ1.range-50) and JungleClearQ1 and isReady(_Q) and myHero:GetSpellData(_Q).name == LeeSinQ1.name  then
-				local Q1pos = minion:GetPrediction(LeeSinQ1.speed, LeeSinQ1.delay)
-				Control.SetCursorPos(Q1pos)
+				Control.SetCursorPos(minion)
 				Control.CastSpell(HK_Q)
 			end
 			--Q2
 			if IsValidTarget(minion,LeeSinQ2.range) and JungleClearQ2 and isReady(_Q) and myHero:GetSpellData(_Q).name == LeeSinQ2.name then
+				local levelQ2 = myHero:GetSpellData(_Q).level
+				local Q2dmg = ({50, 80, 110, 140, 170})[levelQ2] + 0.9 * minion.totalDamage 
+				if  Q2dmg >= minion.health then
+					castQ2()
+				end
 				DelayAction(function()
 					if (getMode() == "JungleClear" or getMode() == "LaneClear") and myHero:GetSpellData(_Q).name == LeeSinQ2.name then
 						castQ2()
