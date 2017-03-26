@@ -107,18 +107,18 @@ end
 function getWardSlot()
 	local wardSlot
 	for i = ITEM_1, ITEM_7 do  -- 6 to 12
-		if myHero:GetItemData(i).itemID ~= 0 and myHero:GetItemData(i).stacks > 0  then
+		if myHero:GetItemData(i).itemID ~= 0 and myHero:GetItemData(i).stacks > 0 then
 			for j = 1, #wardItemes do
 				if myHero:GetItemData(i).itemID == wardItemes[j] then
-					wardSlot = i
-					break
+						wardSlot = i
+						break
 				end
 			end
 		end
 	end
 	return wardSlot
 end
---PrintChat(myHero:GetItemData(12))
+
 function getEnemyMinions(range)
 	local target
     for i = 1,Game.MinionCount() do
@@ -265,13 +265,16 @@ function OnClear()
 	
 end
 
+
 function OnFlee()
 	local fleeW1 = Menu.Mode.Flee.W1:Value()
-	if  fleeW1 and isReady(_W) and myHero:GetSpellData(_W).name == LeeSinW1.name then
+	if  fleeW1 and isReady(_W) and myHero:GetSpellData(_W).name == LeeSinW1.name and myHero.pos:DistanceTo(mousePos) <= LeeSinW1.range then
 
-		if Menu.Mode.Flee.Ward:Value() and getWardSlot() ~= nil then
+		if Menu.Mode.Flee.Ward:Value() and getWardSlot() ~= nil and myHero.pos:DistanceTo(mousePos) <= 600 and not myHero.isChanneling then
 			local wardPos = mousePos
-			Control.CastSpell(wardKey(getWardSlot()))
+			local WardSlot = getWardSlot()
+			local Wardkey = wardKey(WardSlot)
+			Control.CastSpell(Wardkey)
 			DelayAction(function()
 					if wardPos:DistanceTo(mousePos) <= 50 then
 						Control.CastSpell(HK_W, wardPos)
@@ -279,7 +282,6 @@ function OnFlee()
 			end, 0.1)
 		end
 		
-
 		for i = 1, Game.WardCount() do
 			local ward = Game.Ward(i)
 				if ward.pos:DistanceTo(mousePos) <= 100 and IsValidTarget(ward,LeeSinW1.range) then
