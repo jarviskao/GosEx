@@ -41,7 +41,8 @@ Menu.Mode.JungleClear:MenuElement({id = "E1", name = "Use E1", value = true, lef
 --Main Menu-- Mode Setting-- Flee
 Menu.Mode:MenuElement({type = MENU, id = "Flee", name = "Flee"})
 Menu.Mode.Flee:MenuElement({id = "W1", name = "Use W1", value = true, leftIcon = SpellIcons.W1})
-Menu.Mode.Flee:MenuElement({id = "Ward", name = "Use W1 with Ward ", value = true, leftIcon = WardIcons})
+Menu.Mode.Flee:MenuElement({id = "Ward", name = "Use W1 with Ward ", key = string.byte("LCtrl"), toggle = true , leftIcon = WardIcons})
+
 --[[
 --Main Menu-- Ward Iteam 
 Menu:MenuElement({type = MENU, id = "Ward", name = "Ward Items"})
@@ -50,6 +51,11 @@ Menu.Ward:MenuElement({id = "2045", name = "Ruby Sightstone", value = true, left
 Menu.Ward:MenuElement({id = "3340", name = "Warding Totem (Trinket)", value = true, leftIcon = "http://cdn.championcounter.com/images/items/3340-wardingtotemtrinket.png"})
 Menu.Ward:MenuElement({id = "3711", name = "Tracker's Knife", value = true, leftIcon = "http://cdn.championcounter.com/images/items/3711-trackersknife.png"})
 --]]
+--Main Menu-- Ward Iteam 
+Menu:MenuElement({type = MENU, id = "Insec", name = "Insec Setting"})
+Menu.Insec:MenuElement({id = "UseInsec",name = "Use Insec", key = string.byte("T"), toggle = true})
+Menu.Insec:MenuElement({id = "SetKick",name = "Set Kick Direction", key = string.byte("G")})
+
 --Main Menu-- Drawing 
 Menu:MenuElement({type = MENU, id = "Drawing", name = "Drawing"})
 Menu.Drawing:MenuElement({id = "Q1", name = "Draw Q1 Range", value = true, leftIcon = SpellIcons.Q1})
@@ -59,6 +65,8 @@ Menu.Drawing:MenuElement({id = "E1", name = "Draw E1 Range", value = true, leftI
 Menu.Drawing:MenuElement({id = "E2", name = "Draw E2 Range", value = true, leftIcon = SpellIcons.E2})
 Menu.Drawing:MenuElement({id = "R", name = "Draw R Range", value = true, leftIcon = SpellIcons.R})
 Menu.Drawing:MenuElement({id = "Ward", name = "Draw Ward Status", value = true, leftIcon = WardIcons})
+Menu.Drawing:MenuElement({id = "Kick", name = "Draw Kick Direction", value = true, leftIcon = WardIcons})
+
 
 local LeeSinQ1 = 	{ name = "BlindMonkQOne" , range = 1000, 	speed = myHero:GetSpellData(_Q).speed, delay = 0.2, width = myHero:GetSpellData(_Q).width }
 local LeeSinQ2 = 	{ name = "BlindMonkQTwo" , range = 1250, 	speed = myHero:GetSpellData(_Q).speed, delay = 0.2, width = myHero:GetSpellData(_Q).width }
@@ -69,6 +77,7 @@ local LeeSinE2 = 	{ name = "BlindMonkETwo" , range = 575, 	speed = myHero:GetSpe
 local LeeSinR = 	{ name = "BlindMonkRKick" , range = 375, 	speed = myHero:GetSpellData(_R).speed, delay = 0.2, width = myHero:GetSpellData(_R).width }
 local Resolution = Game.Resolution()
 local wardItemes = {2049,2045,3711,1408,1409,1418,1410}
+local kickDirection = nil
 
 local function getMode()
 	if _G.SDK.Orbwalker.Modes[_G.SDK.ORBWALKER_MODE_COMBO] then return "Combo" end
@@ -105,13 +114,17 @@ function castR(target)
 end
 
 function getWardSlot()
+	if myHero:GetItemData(ITEM_7).itemID == 3340 and myHero:GetSpellData(ITEM_7).ammo > 0 then return ITEM_7 end
+	
+	if  Game.Timer() < myHero:GetSpellData(ITEM_7).castTime + 5 then return nil end
+
 	local wardSlot
-	for i = ITEM_1, ITEM_7 do  -- 6 to 12
+	for i = ITEM_1, ITEM_6 do  -- 6 to 12
 		if myHero:GetItemData(i).itemID ~= 0 and myHero:GetItemData(i).stacks > 0 then
 			for j = 1, #wardItemes do
-				if myHero:GetItemData(i).itemID == wardItemes[j] then
-						wardSlot = i
-						break
+				if myHero:GetItemData(i).itemID == wardItemes[j] and Game.Timer() > myHero:GetSpellData(i).castTime + 5 then
+					wardSlot = i
+					break
 				end
 			end
 		end
@@ -158,6 +171,12 @@ function OnTick()
 	if not Menu.Enabled:Value() then return end
 	
 	if myHero.dead then return end
+	
+	--PrintChat(Game.Timer())
+	
+	if Menu.Insec.UseInsec:Value() and Menu.Insec.SetKick:Value() then 
+		kickDirection = mousePos 
+	end
 	
 	if getMode() == "Combo" then
 		OnCombo()
@@ -265,12 +284,11 @@ function OnClear()
 	
 end
 
-
 function OnFlee()
 	local fleeW1 = Menu.Mode.Flee.W1:Value()
 	if  fleeW1 and isReady(_W) and myHero:GetSpellData(_W).name == LeeSinW1.name and myHero.pos:DistanceTo(mousePos) <= LeeSinW1.range then
 
-		if Menu.Mode.Flee.Ward:Value() and getWardSlot() ~= nil and myHero.pos:DistanceTo(mousePos) <= 600 and not myHero.isChanneling then
+		if Menu.Mode.Flee.Ward:Value() and getWardSlot() ~= nil and myHero.pos:DistanceTo(mousePos) <= 600 then
 			local wardPos = mousePos
 			local WardSlot = getWardSlot()
 			local Wardkey = wardKey(WardSlot)
@@ -316,4 +334,6 @@ function OnDraw()
 	if Menu.Drawing.E2:Value() and myHero:GetSpellData(_E).name == LeeSinE2.name then Draw.Circle(myHero.pos,LeeSinE2.range,1,Draw.Color(220,0,255,0)) end	
 	if Menu.Drawing.R:Value() then Draw.Circle(myHero.pos,LeeSinR.range,1,Draw.Color(220,255,0,0)) end	
 	if Menu.Drawing.Ward:Value() and Menu.Mode.Flee.Ward:Value() then Draw.Text("Use Ward to Flee", 20, Resolution.x/2.2, Resolution.y * 0.75, Draw.Color(150, 0, 255, 0)) end
+	if Menu.Drawing.Kick:Value() and Menu.Insec.UseInsec:Value() then Draw.Text("Use Insec", 20, Resolution.x/2.2, Resolution.y * 0.73, Draw.Color(150, 0, 255, 0)) end
+	if Menu.Drawing.Kick:Value() and kickDirection ~= nil and myHero.pos:DistanceTo(kickDirection) <= 2000 then Draw.Circle(kickDirection,80,1,Draw.Color(255, 255, 0, 0)) end
 end
