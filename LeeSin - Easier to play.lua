@@ -41,14 +41,14 @@ Menu.Mode.JungleClear:MenuElement({id = "E1", name = "Use E1", value = true, lef
 --Main Menu-- Mode Setting-- Flee
 Menu.Mode:MenuElement({type = MENU, id = "Flee", name = "Flee"})
 Menu.Mode.Flee:MenuElement({id = "W1", name = "Use W1", value = true, leftIcon = SpellIcons.W1})
-
+--[[
 --Main Menu-- Ward Iteam 
 Menu:MenuElement({type = MENU, id = "Ward", name = "Ward Items"})
 Menu.Ward:MenuElement({id = "2049", name = "Sightstone", value = true, leftIcon = "http://cdn.championcounter.com/images/items/2049-sightstone.png"})
 Menu.Ward:MenuElement({id = "2045", name = "Ruby Sightstone", value = true, leftIcon = "http://cdn.championcounter.com/images/items/2045-rubysightstone.png"})
 Menu.Ward:MenuElement({id = "3340", name = "Warding Totem (Trinket)", value = true, leftIcon = "http://cdn.championcounter.com/images/items/3340-wardingtotemtrinket.png"})
 Menu.Ward:MenuElement({id = "3711", name = "Tracker's Knife", value = true, leftIcon = "http://cdn.championcounter.com/images/items/3711-trackersknife.png"})
-
+--]]
 --Main Menu-- Drawing 
 Menu:MenuElement({type = MENU, id = "Drawing", name = "Drawing"})
 Menu.Drawing:MenuElement({id = "Q1", name = "Draw Q1 Range", value = true, leftIcon = SpellIcons.Q1})
