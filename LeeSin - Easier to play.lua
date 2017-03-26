@@ -3,18 +3,18 @@ if myHero.charName ~= "LeeSin" then return end
 
 --Locals
 local LoL = "7.6"
-local ver = "1.01"
-
+local ver = "1.1"
 
 --icon
 local MenuIcons = "http://static.lolskill.net/img/champions/64/leesin.png"
-local SpellIcons = { 	 Q1 = "http://static.lolskill.net/img/abilities/64/LeeSin_Q1.png",
-			 Q2 = "http://static.lolskill.net/img/abilities/64/LeeSin_Q2.png",
-			 W1 = "http://static.lolskill.net/img/abilities/64/LeeSin_W1.png",
-			 W2 = "http://static.lolskill.net/img/abilities/64/LeeSin_W2.png",
-			 E1 = "http://static.lolskill.net/img/abilities/64/LeeSin_E1.png",
-			 E2 = "http://static.lolskill.net/img/abilities/64/LeeSin_E2.png",
-			 R = "http://static.lolskill.net/img/abilities/64/LeeSin_R.png"
+local WardIcons = "http://vignette1.wikia.nocookie.net/leagueoflegends/images/0/06/Conquering_Ward.jpg"
+local SpellIcons = { Q1 = "http://static.lolskill.net/img/abilities/64/LeeSin_Q1.png",
+					 Q2 = "http://static.lolskill.net/img/abilities/64/LeeSin_Q2.png",
+					 W1 = "http://static.lolskill.net/img/abilities/64/LeeSin_W1.png",
+					 W2 = "http://static.lolskill.net/img/abilities/64/LeeSin_W2.png",
+					 E1 = "http://static.lolskill.net/img/abilities/64/LeeSin_E1.png",
+					 E2 = "http://static.lolskill.net/img/abilities/64/LeeSin_E2.png",
+					 R = "http://static.lolskill.net/img/abilities/64/LeeSin_R.png"
 }
 
 --Main Menu
@@ -41,6 +41,7 @@ Menu.Mode.JungleClear:MenuElement({id = "E1", name = "Use E1", value = true, lef
 --Main Menu-- Mode Setting-- Flee
 Menu.Mode:MenuElement({type = MENU, id = "Flee", name = "Flee"})
 Menu.Mode.Flee:MenuElement({id = "W1", name = "Use W1", value = true, leftIcon = SpellIcons.W1})
+Menu.Mode.Flee:MenuElement({id = "Ward", name = "Use W1 with Ward ", value = true, leftIcon = WardIcons})
 --[[
 --Main Menu-- Ward Iteam 
 Menu:MenuElement({type = MENU, id = "Ward", name = "Ward Items"})
@@ -57,6 +58,7 @@ Menu.Drawing:MenuElement({id = "W1", name = "Draw W1 Range", value = true, leftI
 Menu.Drawing:MenuElement({id = "E1", name = "Draw E1 Range", value = true, leftIcon = SpellIcons.E1})
 Menu.Drawing:MenuElement({id = "E2", name = "Draw E2 Range", value = true, leftIcon = SpellIcons.E2})
 Menu.Drawing:MenuElement({id = "R", name = "Draw R Range", value = true, leftIcon = SpellIcons.R})
+Menu.Drawing:MenuElement({id = "Ward", name = "Draw Ward Status", value = true, leftIcon = WardIcons})
 
 local LeeSinQ1 = 	{ name = "BlindMonkQOne" , range = 1000, 	speed = myHero:GetSpellData(_Q).speed, delay = 0.2, width = myHero:GetSpellData(_Q).width }
 local LeeSinQ2 = 	{ name = "BlindMonkQTwo" , range = 1250, 	speed = myHero:GetSpellData(_Q).speed, delay = 0.2, width = myHero:GetSpellData(_Q).width }
@@ -65,6 +67,8 @@ local LeeSinW2 = 	{ name = "BlindMonkWTwo" , range = 300, 	speed = myHero:GetSpe
 local LeeSinE1 = 	{ name = "BlindMonkEOne" , range = 420, 	speed = myHero:GetSpellData(_E).speed, delay = 0.2, width = myHero:GetSpellData(_E).width }
 local LeeSinE2 = 	{ name = "BlindMonkETwo" , range = 575, 	speed = myHero:GetSpellData(_E).speed, delay = 0.2, width = myHero:GetSpellData(_E).width }
 local LeeSinR = 	{ name = "BlindMonkRKick" , range = 375, 	speed = myHero:GetSpellData(_R).speed, delay = 0.2, width = myHero:GetSpellData(_R).width }
+local Resolution = Game.Resolution()
+local wardItemes = {2049,2045,3711,1408,1409,1418,1410}
 
 local function getMode()
 	if _G.SDK.Orbwalker.Modes[_G.SDK.ORBWALKER_MODE_COMBO] then return "Combo" end
@@ -100,6 +104,21 @@ function castR(target)
 	Control.CastSpell(HK_R,target.pos)
 end
 
+function getWardSlot()
+	local wardSlot
+	for i = ITEM_1, ITEM_7 do  -- 6 to 12
+		if myHero:GetItemData(i).itemID ~= 0 and myHero:GetItemData(i).stacks > 0  then
+			for j = 1, #wardItemes do
+				if myHero:GetItemData(i).itemID == wardItemes[j] then
+					wardSlot = i
+					break
+				end
+			end
+		end
+	end
+	return wardSlot
+end
+--PrintChat(myHero:GetItemData(12))
 function getEnemyMinions(range)
 	local target
     for i = 1,Game.MinionCount() do
@@ -114,6 +133,24 @@ end
 
 function IsValidTarget(unit, range)
     return unit ~= nil and unit.valid and unit.visible and not unit.dead and unit.isTargetable and not unit.isImmortal and unit.distance <= range
+end
+
+function wardKey(ward)
+	if ward == ITEM_1 then
+		return HK_ITEM_1
+	elseif ward == ITEM_2 then
+		return HK_ITEM_2
+	elseif ward == ITEM_3 then
+		return HK_ITEM_3
+	elseif ward == ITEM_4 then
+		return HK_ITEM_4
+	elseif ward == ITEM_5 then
+		return HK_ITEM_5
+	elseif ward == ITEM_6 then
+		return HK_ITEM_6
+	elseif ward == ITEM_7 then
+		return HK_ITEM_7
+	end
 end
 
 function OnTick()
@@ -144,8 +181,6 @@ function OnCombo()
 	local comboR = Menu.Mode.Combo.R:Value()
 
 	target = _G.SDK.TargetSelector:GetTarget(1300)
-	
-	
 	
 	--Q1
 	if IsValidTarget(target,LeeSinQ1.range-50) and comboQ1 and isReady(_Q) and myHero:GetSpellData(_Q).name == LeeSinQ1.name  then
@@ -233,14 +268,39 @@ end
 function OnFlee()
 	local fleeW1 = Menu.Mode.Flee.W1:Value()
 	if  fleeW1 and isReady(_W) and myHero:GetSpellData(_W).name == LeeSinW1.name then
-		for i = 1, Game.ObjectCount() do
-			local target = Game.Object(i)
-			if not target.isMe and IsValidTarget(target,LeeSinW1.range) and target.team == myHero.team  then
-				if target.pos:DistanceTo(mousePos) <= 100 then
-					Control.CastSpell(HK_W, target)
-				end
-			end
+
+		if Menu.Mode.Flee.Ward:Value() and getWardSlot() ~= nil then
+			local wardPos = mousePos
+			Control.CastSpell(wardKey(getWardSlot()))
+			DelayAction(function()
+					if wardPos:DistanceTo(mousePos) <= 50 then
+						Control.CastSpell(HK_W, wardPos)
+					end
+			end, 0.1)
 		end
+		
+
+		for i = 1, Game.WardCount() do
+			local ward = Game.Ward(i)
+				if ward.pos:DistanceTo(mousePos) <= 100 and IsValidTarget(ward,LeeSinW1.range) then
+					Control.CastSpell(HK_W, ward)
+				end
+		end
+		
+		for i = 1, Game.HeroCount() do
+			local hero = Game.Hero(i)
+				if hero.pos:DistanceTo(mousePos) <= 100 and IsValidTarget(hero,LeeSinW1.range) and hero.team == myHero.team and not hero.isMe then
+					Control.CastSpell(HK_W, hero)
+				end
+		end
+
+		for i = 1, Game.MinionCount() do
+			local minion = Game.Minion(i)
+				if minion.pos:DistanceTo(mousePos) <= 100 and IsValidTarget(minion,LeeSinW1.range) and minion.team == myHero.team then
+					Control.CastSpell(HK_W, minion)
+				end
+		end
+		
 	end
 end
 
@@ -253,4 +313,5 @@ function OnDraw()
 	if Menu.Drawing.E1:Value() and myHero:GetSpellData(_E).name == LeeSinE1.name then Draw.Circle(myHero.pos,LeeSinE1.range,1,Draw.Color(220,0,255,0)) end	
 	if Menu.Drawing.E2:Value() and myHero:GetSpellData(_E).name == LeeSinE2.name then Draw.Circle(myHero.pos,LeeSinE2.range,1,Draw.Color(220,0,255,0)) end	
 	if Menu.Drawing.R:Value() then Draw.Circle(myHero.pos,LeeSinR.range,1,Draw.Color(220,255,0,0)) end	
+	if Menu.Drawing.Ward:Value() and Menu.Mode.Flee.Ward:Value() then Draw.Text("Use Ward to Flee", 20, Resolution.x/2.2, Resolution.y * 0.75, Draw.Color(150, 0, 255, 0)) end
 end
