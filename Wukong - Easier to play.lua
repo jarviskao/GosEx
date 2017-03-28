@@ -76,7 +76,7 @@ local isCastingE = false
 local ticker = 0
 
 DelayAction(function()
-	if EOW then 
+	if _G.EOWLoaded then 
 		PrintChat ("[Info] WuKong Script is intergreted with the eXternal Orbwalker")
 		EOrbWalking = true
 		if _G.Orbwalker then
@@ -149,7 +149,7 @@ function IsValidTarget(unit, range)
 end
 
 local function getMode()
-	if EOW then 
+	if _G.EOWLoaded then 
 		if EOW:Mode() == "Combo"  then return "Combo" end
 		if EOW:Mode() == "Harass" then return "Harass" end
 		if EOW:Mode() == "LaneClear" then return "Clear" end
