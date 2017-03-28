@@ -3,7 +3,7 @@ if myHero.charName ~= "LeeSin" then return end
 
 --Locals
 local LoL = "7.6"
-local ver = "1.1"
+local ver = "1.2"
 
 --icon
 local MenuIcons = "http://static.lolskill.net/img/champions/64/leesin.png"
@@ -65,7 +65,7 @@ Menu.Drawing:MenuElement({id = "E1", name = "Draw E1 Range", value = true, leftI
 Menu.Drawing:MenuElement({id = "E2", name = "Draw E2 Range", value = true, leftIcon = SpellIcons.E2})
 Menu.Drawing:MenuElement({id = "R", name = "Draw R Range", value = true, leftIcon = SpellIcons.R})
 Menu.Drawing:MenuElement({id = "Ward", name = "Draw Ward Status", value = true, leftIcon = WardIcons})
-Menu.Drawing:MenuElement({id = "Kick", name = "Draw Kick Direction", value = true, leftIcon = WardIcons})
+Menu.Drawing:MenuElement({id = "Kick", name = "Draw Kick Position", value = true, leftIcon = WardIcons})
 
 
 local LeeSinQ1 = 	{ name = "BlindMonkQOne" , range = 1000, 	speed = myHero:GetSpellData(_Q).speed, delay = 0.2, width = myHero:GetSpellData(_Q).width }
@@ -77,7 +77,8 @@ local LeeSinE2 = 	{ name = "BlindMonkETwo" , range = 575, 	speed = myHero:GetSpe
 local LeeSinR = 	{ name = "BlindMonkRKick" , range = 375, 	speed = myHero:GetSpellData(_R).speed, delay = 0.2, width = myHero:GetSpellData(_R).width }
 local Resolution = Game.Resolution()
 local wardItemes = {2049,2045,3711,1408,1409,1418,1410}
-local kickDirection = nil
+local wardAmmo = nil
+local kickPos = nil
 
 local function getMode()
 	if _G.SDK.Orbwalker.Modes[_G.SDK.ORBWALKER_MODE_COMBO] then return "Combo" end
@@ -111,6 +112,25 @@ end
 
 function castR(target) 
 	Control.CastSpell(HK_R,target.pos)
+end
+
+function getWardsAmmo()
+	local count = 0
+	if myHero:GetItemData(ITEM_7).itemID == 3340 then 
+		count = myHero:GetSpellData(ITEM_7).ammo
+	end
+	
+	for i = ITEM_1, ITEM_6 do  -- 6 to 12
+		if myHero:GetItemData(i).itemID ~= 0 and myHero:GetItemData(i).stacks > 0 then
+			for j = 1, #wardItemes do
+				if myHero:GetItemData(i).itemID == wardItemes[j]  then
+					count = count + myHero:GetItemData(i).ammo
+					break
+				end
+			end
+		end
+	end
+	return count
 end
 
 function getWardSlot()
@@ -148,6 +168,24 @@ function IsValidTarget(unit, range)
     return unit ~= nil and unit.valid and unit.visible and not unit.dead and unit.isTargetable and not unit.isImmortal and unit.distance <= range
 end
 
+function IsImmobileTarget(unit)
+	for i = 0, unit.buffCount do
+		local buff = unit:GetBuff(i)
+		if buff and (buff.type == 5 or buff.type == 11 or buff.type == 29 or buff.type == 24 or buff.name == "recall") and buff.count > 0 then
+			return true
+		end
+	end
+	return false	
+end
+
+local function GetPred(unit,speed,delay)
+	if IsImmobileTarget(unit) then
+		return unit.pos
+	else
+		return unit:GetPrediction(speed,delay)
+	end
+end
+
 function wardKey(ward)
 	if ward == ITEM_1 then
 		return HK_ITEM_1
@@ -166,16 +204,22 @@ function wardKey(ward)
 	end
 end
 
+function InsectCheck()
+	local target = _G.SDK.TargetSelector:GetTarget(1300)
+	if kickPos == nil or target == nil then return nil end
+	local tempPos = kickPos:DistanceTo(target.pos) + LeeSinR.range - 100
+	local wardPos = kickPos:Extended(target.pos, tempPos)
+	return wardPos
+end
+
 function OnTick()
 
 	if not Menu.Enabled:Value() then return end
 	
 	if myHero.dead then return end
 	
-	--PrintChat(Game.Timer())
-	
 	if Menu.Insec.UseInsec:Value() and Menu.Insec.SetKick:Value() then 
-		kickDirection = mousePos 
+		kickPos = mousePos 
 	end
 	
 	if getMode() == "Combo" then
@@ -192,49 +236,102 @@ function OnTick()
 	
 end
 
+
+local wardUsed = false
+local wardPinPos = nil
 function OnCombo()
 	local comboQ1 = Menu.Mode.Combo.Q1:Value()
 	local comboQ2 = Menu.Mode.Combo.Q2:Value()
 	local comboW1 = Menu.Mode.Combo.W1:Value()
 	local comboE1 = Menu.Mode.Combo.E1:Value()
 	local comboR = Menu.Mode.Combo.R:Value()
-
-	target = _G.SDK.TargetSelector:GetTarget(1300)
+	local Insec = Menu.Insec.UseInsec:Value()
 	
-	--Q1
-	if IsValidTarget(target,LeeSinQ1.range-50) and comboQ1 and isReady(_Q) and myHero:GetSpellData(_Q).name == LeeSinQ1.name  then
-		local Q1pos = target:GetPrediction(LeeSinQ1.speed, LeeSinQ1.delay)
-		if target:GetCollision(LeeSinQ1.width * 1.1 ,LeeSinQ1.speed,LeeSinQ1.delay) == 0 then
-			castQ1(Q1pos)
+	local target = _G.SDK.TargetSelector:GetTarget(1300)
+	
+	if Insec then 
+		local wardAmmo = getWardsAmmo()
+		if isReady(_R) then
+			if(IsValidTarget(target,LeeSinQ1.range) and  myHero.pos:DistanceTo(target.pos) >= LeeSinR.range) then
+				--Q1
+				if IsValidTarget(target,LeeSinQ1.range-50) and isReady(_Q) and myHero:GetSpellData(_Q).name == LeeSinQ1.name  then
+					local Q1pos = GetPred(target, LeeSinQ1.speed, LeeSinQ1.delay + Game.Latency()/1000)
+					if Q1pos and target:GetCollision(LeeSinQ1.width * 1.1 ,LeeSinQ1.speed,LeeSinQ1.delay) == 0 then
+						castQ1(Q1pos)
+					end
+				end
+				--Q2
+				if IsValidTarget(target,LeeSinQ2.range) and isReady(_Q) and myHero:GetSpellData(_Q).name == LeeSinQ2.name then
+					local levelQ2 = myHero:GetSpellData(_Q).level
+					local Q2dmg = ({50, 80, 110, 140, 170})[levelQ2] + 0.9 * target.totalDamage 
+					if  Q2dmg >= target.health + target.hpRegen * 2 then
+						castQ2()
+					end
+					if getMode() == "Combo" and myHero:GetSpellData(_Q).name == LeeSinQ2.name then
+						castQ2()
+					end
+				end
+			else
+				local wardPos = InsectCheck()
+				if IsValidTarget(target,LeeSinW1.range-50) and wardPos ~= nil and isReady(_W) and myHero:GetSpellData(_W).name == LeeSinW1.name and not myHero.isChanneling and wardAmmo and wardUsed == false then
+					Control.SetCursorPos(wardPos)
+					if getWardSlot() ~= nil then
+						Control.CastSpell(wardKey(getWardSlot()),wardPos)
+					elseif getWardSlot() == nil then
+						wardUsed = true
+						wardPinPos = wardPos
+					end
+				end
+					
+				if wardUsed and isReady(_W) then
+					Control.CastSpell(HK_W, wardPinPos)
+				end
+	
+				if wardUsed and not isReady(_W) then
+					Control.CastSpell(HK_R,target)
+				end
+				
+			end
+		else
+			Menu.Insec.UseInsec:Value(false)
+			wardUsed = false
 		end
-	end
-	--Q2
-	if IsValidTarget(target,LeeSinQ2.range) and comboQ2 and isReady(_Q) and myHero:GetSpellData(_Q).name == LeeSinQ2.name then
-		local levelQ2 = myHero:GetSpellData(_Q).level
-		local Q2dmg = ({50, 80, 110, 140, 170})[levelQ2] + 0.9 * target.totalDamage 
-		if  Q2dmg >= target.health + target.hpRegen * 2 then
-			castQ2()
+	else 
+		--Q1
+		if IsValidTarget(target,LeeSinQ1.range-50) and comboQ1 and isReady(_Q) and myHero:GetSpellData(_Q).name == LeeSinQ1.name  then
+			local Q1pos = GetPred(target, LeeSinQ1.speed, LeeSinQ1.delay + Game.Latency()/1000 )
+			if Q1pos and target:GetCollision(LeeSinQ1.width * 1.1 ,LeeSinQ1.speed,LeeSinQ1.delay) == 0 then
+				castQ1(Q1pos)
+			end
 		end
-		DelayAction(function()
-			if getMode() == "Combo" and myHero:GetSpellData(_Q).name == LeeSinQ2.name then
+		--Q2
+		if IsValidTarget(target,LeeSinQ2.range) and comboQ2 and isReady(_Q) and myHero:GetSpellData(_Q).name == LeeSinQ2.name then
+			local levelQ2 = myHero:GetSpellData(_Q).level
+			local Q2dmg = ({50, 80, 110, 140, 170})[levelQ2] + 0.9 * target.totalDamage 
+			if  Q2dmg >= target.health + target.hpRegen * 2 then
 				castQ2()
 			end
-		end,2.8)
-	end
-	--E1
-	if IsValidTarget(target,LeeSinE1.range-50) and comboE1 and isReady(_E) and myHero:GetSpellData(_E).name == LeeSinE1.name then
-			castE1()
-	end
-	--W1
-	if IsValidTarget(target,LeeSinW1.range) and myHero.health / myHero.maxHealth * 100  <= 35 and comboW1 and isReady(_W) and myHero:GetSpellData(_W).name == LeeSinW1.name then
-        Control.CastSpell(HK_W, myHero)
-    end
-    --R
-    if IsValidTarget(target,LeeSinR.range) and comboR and isReady(_R) and not isReady(_Q) and myHero:GetSpellData(_E).name ~= LeeSinE1.name then
-		local levelR = myHero:GetSpellData(_R).level
-		local Rdmg = ({150, 300, 450})[levelR] + 2 * target.totalDamage
-		if  Rdmg >= target.health + target.hpRegen * 2 then
-			castR(target)
+			DelayAction(function()
+				if getMode() == "Combo" and myHero:GetSpellData(_Q).name == LeeSinQ2.name then
+					castQ2()
+				end
+			end,2.8)
+		end
+		--E1
+		if IsValidTarget(target,LeeSinE1.range-50) and comboE1 and isReady(_E) and myHero:GetSpellData(_E).name == LeeSinE1.name then
+				castE1()
+		end
+		--W1
+		if IsValidTarget(target,LeeSinW1.range) and myHero.health / myHero.maxHealth * 100  <= 35 and comboW1 and isReady(_W) and myHero:GetSpellData(_W).name == LeeSinW1.name then
+			Control.CastSpell(HK_W, myHero)
+		end
+		--R
+		if IsValidTarget(target,LeeSinR.range) and comboR and isReady(_R) and not isReady(_Q) and myHero:GetSpellData(_E).name ~= LeeSinE1.name then
+			local levelR = myHero:GetSpellData(_R).level
+			local Rdmg = ({150, 300, 450})[levelR] + 2 * target.totalDamage
+			if  Rdmg >= target.health + target.hpRegen * 2 then
+				castR(target)
+			end
 		end
 	end
     
@@ -286,17 +383,15 @@ end
 
 function OnFlee()
 	local fleeW1 = Menu.Mode.Flee.W1:Value()
-	if  fleeW1 and isReady(_W) and myHero:GetSpellData(_W).name == LeeSinW1.name and myHero.pos:DistanceTo(mousePos) <= LeeSinW1.range then
+	if  fleeW1 and isReady(_W) and myHero:GetSpellData(_W).name == LeeSinW1.name and myHero.pos:DistanceTo(mousePos) <= LeeSinW1.range + 50 then
 
-		if Menu.Mode.Flee.Ward:Value() and getWardSlot() ~= nil and myHero.pos:DistanceTo(mousePos) <= 600 then
+		if Menu.Mode.Flee.Ward:Value() and getWardSlot() ~= nil and myHero.pos:DistanceTo(mousePos) <= 650 then
 			local wardPos = mousePos
-			local WardSlot = getWardSlot()
-			local Wardkey = wardKey(WardSlot)
-			Control.CastSpell(Wardkey)
+			Control.CastSpell(wardKey(getWardSlot()))
 			DelayAction(function()
-					if wardPos:DistanceTo(mousePos) <= 50 then
-						Control.CastSpell(HK_W, wardPos)
-					end
+				if wardPos:DistanceTo(mousePos) <= 80 then
+					Control.CastSpell(HK_W, wardPos)
+				end
 			end, 0.1)
 		end
 		
@@ -333,7 +428,19 @@ function OnDraw()
 	if Menu.Drawing.E1:Value() and myHero:GetSpellData(_E).name == LeeSinE1.name then Draw.Circle(myHero.pos,LeeSinE1.range,1,Draw.Color(220,0,255,0)) end	
 	if Menu.Drawing.E2:Value() and myHero:GetSpellData(_E).name == LeeSinE2.name then Draw.Circle(myHero.pos,LeeSinE2.range,1,Draw.Color(220,0,255,0)) end	
 	if Menu.Drawing.R:Value() then Draw.Circle(myHero.pos,LeeSinR.range,1,Draw.Color(220,255,0,0)) end	
-	if Menu.Drawing.Ward:Value() and Menu.Mode.Flee.Ward:Value() then Draw.Text("Use Ward to Flee", 20, Resolution.x/2.2, Resolution.y * 0.75, Draw.Color(150, 0, 255, 0)) end
-	if Menu.Drawing.Kick:Value() and Menu.Insec.UseInsec:Value() then Draw.Text("Use Insec", 20, Resolution.x/2.2, Resolution.y * 0.73, Draw.Color(150, 0, 255, 0)) end
-	if Menu.Drawing.Kick:Value() and kickDirection ~= nil and myHero.pos:DistanceTo(kickDirection) <= 2000 then Draw.Circle(kickDirection,80,1,Draw.Color(255, 255, 0, 0)) end
+	if Menu.Drawing.Ward:Value() then 
+		if Menu.Mode.Flee.Ward:Value() then 
+			Draw.Text("Use Ward to Flee : ON", 20, Resolution.x/2.2, Resolution.y * 0.75, Draw.Color(150, 0, 255, 0)) 
+		elseif not Menu.Mode.Flee.Ward:Value() then 
+			Draw.Text("Use Ward to Flee : OFF", 20, Resolution.x/2.2, Resolution.y * 0.75, Draw.Color(180, 204, 0, 0)) 
+		end
+	end
+	if Menu.Drawing.Kick:Value() then 
+		if Menu.Insec.UseInsec:Value() then 
+			Draw.Text("Use Insec : ON", 20, Resolution.x/2.2, Resolution.y * 0.73, Draw.Color(150, 0, 255, 0)) 
+		elseif not Menu.Insec.UseInsec:Value() then
+			Draw.Text("Use Insec : OFF", 20, Resolution.x/2.2, Resolution.y * 0.73, Draw.Color(180, 204, 0, 0)) 
+		end
+	end
+	if Menu.Drawing.Kick:Value() and kickPos ~= nil and myHero.pos:DistanceTo(kickPos) <= 3000 then Draw.Circle(kickPos,80,1,Draw.Color(255, 255, 0, 0)) end
 end
