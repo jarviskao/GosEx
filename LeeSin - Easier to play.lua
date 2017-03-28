@@ -41,7 +41,7 @@ Menu.Mode.JungleClear:MenuElement({id = "E1", name = "Use E1", value = true, lef
 --Main Menu-- Mode Setting-- Flee
 Menu.Mode:MenuElement({type = MENU, id = "Flee", name = "Flee"})
 Menu.Mode.Flee:MenuElement({id = "W1", name = "Use W1", value = true, leftIcon = SpellIcons.W1})
-Menu.Mode.Flee:MenuElement({id = "Ward", name = "Use W1 with Ward ", key = string.byte("LCtrl"), toggle = true , leftIcon = WardIcons})
+Menu.Mode.Flee:MenuElement({id = "Ward", name = "Use W1 with Ward ", key = 162 , toggle = true , leftIcon = WardIcons})
 
 --[[
 --Main Menu-- Ward Iteam 
