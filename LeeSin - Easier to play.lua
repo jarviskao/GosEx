@@ -95,7 +95,9 @@ function isReady (spell)
 end
 
 function castQ1(pos)
-	Control.CastSpell(HK_Q,pos)
+	if not myHero.isChanneling then
+		Control.CastSpell(HK_Q,pos)
+	end
 end
 
 function castQ2()
@@ -103,7 +105,9 @@ function castQ2()
 end
 
 function castW(target)
-	Control.CastSpell(HK_W,target.pos)
+	Control.SetCursorPos(target.pos)
+	Control.KeyDown(HK_W)
+	Control.KeyUp(HK_W)
 end
 
 function castE1() 
@@ -111,7 +115,9 @@ function castE1()
 end
 
 function castR(target) 
-	Control.CastSpell(HK_R,target.pos)
+	if not myHero.isChanneling then
+		Control.CastSpell(HK_R,target.pos)
+	end
 end
 
 function getWardsAmmo()
