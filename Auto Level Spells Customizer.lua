@@ -253,9 +253,9 @@ function AutoLevelSpells:Tick()
 	
 	if self.Menu.Auto.UseHumanizer:Value() then
 		if self.Menu.Auto.lvROnly:Value() then
-			if (level + 1 - levelpts) ==  (level == 6 or level == 11 or level == 16) then
+			if (level + 1 - levelpts) ==  6 or  11 or 16 then
 				DelayAction(function()
-					if self.Menu.Auto.lvROnly:Value() and (level + 1 - levelpts) ==  (level == 6 or level == 11 or level == 16) then
+					if self.Menu.Auto.lvROnly:Value() and (level + 1 - levelpts) ==  6 or  11 or 16 then
 						Control.KeyDown(HK_LUS)
 						Control.CastSpell(HK_R)
 						Control.KeyUp(HK_LUS)	
@@ -278,7 +278,7 @@ function AutoLevelSpells:Tick()
 		end
 	elseif not self.Menu.Auto.UseHumanizer:Value() then
 		if self.Menu.Auto.lvROnly:Value() then
-			if (level + 1 - levelpts) ==  (level == 6 or level == 11 or level == 16) then
+			if (level + 1 - levelpts) ==  6 or  11 or 16 then
 				Control.KeyDown(HK_LUS)
 				Control.CastSpell(HK_R)
 				Control.KeyUp(HK_LUS)
