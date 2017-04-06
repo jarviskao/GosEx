@@ -4,6 +4,8 @@ lol = 7.7
 ver = 0.7
 
 function AutoLevelSpells:__init()
+	currentLvPts = 0
+	LvSpellTimer = nil
 	self:LoadSpellOrder()
 	self:LoadMenu()
 	Callback.Add("Tick", function() self:Tick() end)
@@ -269,21 +271,24 @@ function AutoLevelSpells:Tick()
 	local levelpts = myHero.levelData.lvlPts
 	if self.Menu.Auto.Disablelvl1:Value() and level <= 1 then return end
 	
+	if levelpts ~= currentLvPts then
+		currentLvPts = levelpts
+		LvSpellTimer = Game.Timer()
+	end
+	
 	if self.Menu.Auto.UseHumanizer:Value() then
 		if self.Menu.Auto.lvROnly:Value() then
 			if (level + 1 - levelpts) ==  6 or (level + 1 - levelpts) == 11 or (level + 1 - levelpts) == 16 then
-				DelayAction(function()
-					if self.Menu.Auto.lvROnly:Value() and (level + 1 - levelpts) ==  6 or (level + 1 - levelpts) == 11 or (level + 1 - levelpts) == 16 then
-						Control.KeyDown(HK_LUS)
-						Control.CastSpell(HK_R)
-						Control.KeyUp(HK_LUS)	
-					end
-				end, self.Menu.Auto.Delay: Value())
+				if Game.Timer() > LvSpellTimer + self.Menu.Auto.Delay: Value() then
+					Control.KeyDown(HK_LUS)
+					Control.CastSpell(HK_R)
+					Control.KeyUp(HK_LUS)	
+				end	
 			end
 		elseif not self.Menu.Auto.lvROnly:Value() then
 			if level >= 1 and levelpts >= 1 then
 				local order = self:OrderSelect()
-				DelayAction(function()
+				if Game.Timer() > LvSpellTimer + self.Menu.Auto.Delay: Value() then
 					Control.KeyDown(HK_LUS)
 					if order == 0 or self.Menu.Auto.SpellsOrder.Recommend:Value() then
 						Control.CastSpell(self:ToHK(DefaultSpellsOrders[myHero.charName][(level + 1 - levelpts)]))
@@ -291,7 +296,7 @@ function AutoLevelSpells:Tick()
 						Control.CastSpell(self:ToHK(SpellOrder[order][(level + 1 - levelpts)]))
 					end
 					Control.KeyUp(HK_LUS)	
-				end, self.Menu.Auto.Delay: Value())
+				end
 			end
 		end
 	elseif not self.Menu.Auto.UseHumanizer:Value() then
