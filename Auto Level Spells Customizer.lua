@@ -244,8 +244,26 @@ function AutoLevelSpells:OrderSelect()
 	return order
 end
 
+function AutoLevelSpells:ForceQWE()
+	if self.Menu.Auto.SpellsOrder.spell1:Key() ~= string.byte("Q") and self.Menu.Auto.SpellsOrder.spell1:Key() ~= string.byte("W") and self.Menu.Auto.SpellsOrder.spell1:Key() ~= string.byte("E") and self.Menu.Auto.SpellsOrder.spell1:Key() ~= -1 then
+		self.Menu.Auto.SpellsOrder.spell1:Key(string.byte("Q"))
+	elseif self.Menu.Auto.SpellsOrder.spell2:Key() ~= string.byte("Q") and self.Menu.Auto.SpellsOrder.spell2:Key() ~= string.byte("W") and self.Menu.Auto.SpellsOrder.spell2:Key() ~= string.byte("E") and self.Menu.Auto.SpellsOrder.spell2:Key() ~= -1 then
+		self.Menu.Auto.SpellsOrder.spell2:Key(string.byte("W"))
+	elseif self.Menu.Auto.SpellsOrder.spell1:Key() == self.Menu.Auto.SpellsOrder.spell2:Key() then
+		if self.Menu.Auto.SpellsOrder.spell1:Key() == string.byte("Q") then
+			self.Menu.Auto.SpellsOrder.spell2:Key(string.byte("E"))
+		elseif self.Menu.Auto.SpellsOrder.spell1:Key() == string.byte("W") then
+			self.Menu.Auto.SpellsOrder.spell2:Key(string.byte("Q"))
+		elseif self.Menu.Auto.SpellsOrder.spell1:Key() == string.byte("E") then
+			self.Menu.Auto.SpellsOrder.spell2:Key(string.byte("Q"))
+		end
+	end
+end
+
 function AutoLevelSpells:Tick()
 	if not self.Menu.UseAutoLvSpell:Value() then return end
+	
+	self:ForceQWE()
 	
 	local level = myHero.levelData.lvl
 	local levelpts = myHero.levelData.lvlPts
@@ -253,9 +271,9 @@ function AutoLevelSpells:Tick()
 	
 	if self.Menu.Auto.UseHumanizer:Value() then
 		if self.Menu.Auto.lvROnly:Value() then
-			if (level + 1 - levelpts) ==  6 or 11 or 16 then
+			if (level + 1 - levelpts) ==  6 or (level + 1 - levelpts) == 11 or (level + 1 - levelpts) == 16 then
 				DelayAction(function()
-					if self.Menu.Auto.lvROnly:Value() and (level + 1 - levelpts) ==  6 or 11 or 16 then
+					if self.Menu.Auto.lvROnly:Value() and (level + 1 - levelpts) ==  6 or (level + 1 - levelpts) == 11 or (level + 1 - levelpts) == 16 then
 						Control.KeyDown(HK_LUS)
 						Control.CastSpell(HK_R)
 						Control.KeyUp(HK_LUS)	
@@ -278,7 +296,7 @@ function AutoLevelSpells:Tick()
 		end
 	elseif not self.Menu.Auto.UseHumanizer:Value() then
 		if self.Menu.Auto.lvROnly:Value() then
-			if (level + 1 - levelpts) ==  6 or 11 or 16 then
+			if (level + 1 - levelpts) ==  6 or (level + 1 - levelpts) == 11 or (level + 1 - levelpts) == 16 then
 				Control.KeyDown(HK_LUS)
 				Control.CastSpell(HK_R)
 				Control.KeyUp(HK_LUS)
