@@ -135,6 +135,14 @@ function Garen:CountEnemyMinions(range)
     return minionsCount
 end
 
+function Garen:isReady (spell)
+	return Game.CanUseSpell(spell) == 0 
+end
+
+function Garen:IsValidTarget(unit,range)
+    return unit ~= nil and unit.valid and unit.visible and not unit.dead and unit.isTargetable and not unit.isImmortal and unit.pos:DistanceTo(myHero.pos) <= range
+end
+
 function Garen:Combo()
 
 	if self:GetValidEnemy(800) == false then return end
@@ -143,19 +151,19 @@ function Garen:Combo()
 	
 	local target =  (_G.SDK and _G.SDK.TargetSelector:GetTarget(800, _G.SDK.DAMAGE_TYPE_PHYSICAL)) or (_G.GOS and _G.GOS:GetTarget(800,"AD"))
 		
-	if self:IsValidTarget(target) and target.pos:DistanceTo(myHero.pos) < Q.range and self.Menu.Mode.Combo.Q:Value() and self:isReady(_Q) and not self:isCasting(_E) then
+	if self:IsValidTarget(target,Q.range) and self.Menu.Mode.Combo.Q:Value() and self:isReady(_Q) and not self:isCasting(_E) then
 		Control.CastSpell(HK_Q)
 	end 
 			
-	if self:IsValidTarget(target) and target.pos:DistanceTo(myHero.pos) < 300 and self.Menu.Mode.Combo.W:Value() and self:isReady(_W) then
+	if self:IsValidTarget(target,300) and self.Menu.Mode.Combo.W:Value() and self:isReady(_W) then
 		Control.CastSpell(HK_W)
 	end
 
-	if  self:IsValidTarget(target) and target.pos:DistanceTo(myHero.pos) < E.range and self.Menu.Mode.Combo.E:Value() and self:isReady(_E) and not self:isCasting(_Q) and myHero:GetSpellData(_E).name == "GarenE" then
+	if  self:IsValidTarget(target,E.range) and self.Menu.Mode.Combo.E:Value() and self:isReady(_E) and not self:isCasting(_Q) and myHero:GetSpellData(_E).name == "GarenE" then
 		Control.CastSpell(HK_E)
 	end
 
-	if  self:IsValidTarget(target) and target.pos:DistanceTo(myHero.pos) < R.range and self.Menu.Mode.Combo.R:Value() and self:isReady(_R) then
+	if  self:IsValidTarget(target,R.range) and self.Menu.Mode.Combo.R:Value() and self:isReady(_R) then
 		local level = myHero:GetSpellData(_R).level
 		local Rdmg = ({175, 350, 525})[level] * (target.magicResist/ (100 + target.magicResist)) + (target.maxHealth - target.health) / ({3.5, 3, 2.5})[level] * (target.magicResist/ (100 + target.magicResist))
 		if Rdmg >= target.health then
@@ -172,26 +180,26 @@ function Garen:Clear()
 	for i = 1, Game.MinionCount() do
 		local minion = Game.Minion(i)
 		if  minion.team == 200 then
-			if minion.valid and minion.pos:DistanceTo(myHero.pos) < 250 and self.Menu.Mode.LaneClear.Q:Value() and self:isReady(_Q) and not self:isCasting(_E) then
+			if self:IsValidTarget(minion,250) and self.Menu.Mode.LaneClear.Q:Value() and self:isReady(_Q) and not self:isCasting(_E) then
 				Control.CastSpell(HK_Q)
 			end 
 			
-			if minion.valid and minion.pos:DistanceTo(myHero.pos) < E.range and self.Menu.Mode.LaneClear.E:Value() and self:isReady(_E) and not self:isCasting(_Q) and myHero:GetSpellData(_E).name == "GarenE" then
+			if self:IsValidTarget(minion,E.range) and self.Menu.Mode.LaneClear.E:Value() and self:isReady(_E) and not self:isCasting(_Q) and myHero:GetSpellData(_E).name == "GarenE" then
 				if self:CountEnemyMinions(E.range) >= self.Menu.Mode.LaneClear.EKillMinion:Value() then
 					Control.CastSpell(HK_E)
 				end
 			end
 	
 		elseif minion.team == 300 then
-			if minion.valid and minion.pos:DistanceTo(myHero.pos) < 500 and self.Menu.Mode.JungleClear.Q:Value() and self:isReady(_Q) and not self:isCasting(_E) then
+			if self:IsValidTarget(minion,500) and self.Menu.Mode.JungleClear.Q:Value() and self:isReady(_Q) and not self:isCasting(_E) then
 				Control.CastSpell(HK_Q)
 			end 
 					
-			if minion.valid and minion.pos:DistanceTo(myHero.pos) < 300 and self.Menu.Mode.JungleClear.W:Value() and self:isReady(_W) then
+			if self:IsValidTarget(minion,300) and self.Menu.Mode.JungleClear.W:Value() and self:isReady(_W) then
 				Control.CastSpell(HK_W)
 			end
 
-			if  minion.valid and minion.pos:DistanceTo(myHero.pos) < E.range and self.Menu.Mode.JungleClear.E:Value() and self:isReady(_E) and not self:isCasting(_Q) and myHero:GetSpellData(_E).name == "GarenE" then
+			if  self:IsValidTarget(minion,E.range) and self.Menu.Mode.JungleClear.E:Value() and self:isReady(_E) and not self:isCasting(_Q) and myHero:GetSpellData(_E).name == "GarenE" then
 				Control.CastSpell(HK_E)
 			end
 
@@ -212,7 +220,7 @@ function Garen:LastHit()
 	for i = 1, Game.MinionCount() do
 		local minion = Game.Minion(i)
 		local Qdmg = ({30, 55, 80, 105, 130})[level] + (1.4 * myHero.totalDamage)
-		if minion.valid and minion.isEnemy and minion.pos:DistanceTo(myHero.pos) < 250 then
+		if self:IsValidTarget(minion,250) and minion.isEnemy then
 			if Qdmg >= minion.health and self:isReady(_Q) then
 				Control.CastSpell(HK_Q)
 			elseif Qdmg >= minion.health and self:HasBuff(myHero,"GarenQ") then
@@ -221,14 +229,6 @@ function Garen:LastHit()
 		end
 	end
 	
-end
-
-function Garen:isReady (spell)
-	return Game.CanUseSpell(spell) == 0 
-end
-
-function Garen:IsValidTarget(unit)
-    return unit ~= nil and unit.valid and unit.visible and not unit.dead and unit.isTargetable and not unit.isImmortal
 end
 
 function Garen:KillSteal()
@@ -244,7 +244,7 @@ function Garen:KillSteal()
 	for _, target in ipairs(enemyTable) do
 		--Damage Reduction = total magic resistance ÷ (100 + total magic resistance)
 		local Rdmg = ({175, 350, 525})[level] * (target.magicResist/ (100 + target.magicResist)) + (target.maxHealth - target.health) / ({3.5, 3, 2.5})[level] * (target.magicResist/ (100 + target.magicResist))
-		if self:IsValidTarget(target) and myHero.pos:DistanceTo(target.pos) <= R.range then
+		if self:IsValidTarget(target,R.range) then
 			if self.Menu.KillSteal.black[target.networkID]:Value() and self.Menu.KillSteal.R:Value() and self:isReady(_R) then
 				if Rdmg >= target.health and self.Menu.KillSteal.R:Value() and self:isReady(_R) then
 					Control.CastSpell(HK_R,target)
