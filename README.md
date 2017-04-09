@@ -2,7 +2,7 @@
 
 [Released] Auto Level Spells Customizer (updated to version 7.7)
 
-[Released] Garen (updated to version 7.6)
+[Released] Garen (updated to version 7.7)
 
 [Released] Pantheon (updated to version 7.6)
 
