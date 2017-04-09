@@ -164,8 +164,8 @@ function Garen:Combo()
 
 	if  self:IsValidTarget(target,R.range) and self.Menu.Mode.Combo.R:Value() and self:isReady(_R) then
 		local level = myHero:GetSpellData(_R).level
-		local Rdmg = (({175, 350, 525})[level] + (target.maxHealth - target.health) / ({3.5, 3, 2.5})[level] ) * 0.95
-		if Rdmg >= target.health then
+		local Rdmg = (({175, 350, 525})[level] + (target.maxHealth - target.health) / ({3.5, 3, 2.5})[level] ) * 0.9
+		if Rdmg >= target.health + target.hpRegen * 1.5 then
 			Control.CastSpell(HK_R,target)
 		end
 	end
@@ -241,10 +241,10 @@ function Garen:KillSteal()
 	for i = 1, Game.HeroCount() do
 		local target = Game.Hero(i)
 		--Damage Reduction = total magic resistance ÷ (100 + total magic resistance)
-		local Rdmg = (({175, 350, 525})[level] + (target.maxHealth - target.health) / ({3.5, 3, 2.5})[level] ) * 0.95
+		local Rdmg = (({175, 350, 525})[level] + (target.maxHealth - target.health) / ({3.5, 3, 2.5})[level] ) * 0.9
 		if self:IsValidTarget(target,R.range) and target.team ~= myHero.team and self.Menu.KillSteal.black[target.networkID]:Value() and self:isReady(_R) then
 			--PrintChat(Rdmg)
-			if Rdmg >= target.health then
+			if Rdmg >= target.health + target.hpRegen * 1.5 then
 				Control.CastSpell(HK_R,target)
 			end
 		end
