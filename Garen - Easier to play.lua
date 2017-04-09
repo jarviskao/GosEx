@@ -164,7 +164,7 @@ function Garen:Combo()
 
 	if  self:IsValidTarget(target,R.range) and self.Menu.Mode.Combo.R:Value() and self:isReady(_R) then
 		local level = myHero:GetSpellData(_R).level
-		local Rdmg = ({175, 350, 525})[level] * (target.magicResist/ (100 + target.magicResist)) + (target.maxHealth - target.health) / ({3.5, 3, 2.5})[level] * (target.magicResist/ (100 + target.magicResist))
+		local Rdmg = (({175, 350, 525})[level] + (target.maxHealth - target.health) / ({3.5, 3, 2.5})[level] ) * 0.95
 		if Rdmg >= target.health then
 			Control.CastSpell(HK_R,target)
 		end
