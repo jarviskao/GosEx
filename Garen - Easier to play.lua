@@ -239,12 +239,12 @@ function Garen:KillSteal()
 	local level = myHero:GetSpellData(_R).level
 	if level == nil or level == 0 then return end
 	
-	local enemyTable = (_G.SDK and _G.SDK.ObjectManager:GetEnemyHeroes(R.range + 100)) or (_G.GOS and _G.GOS:GetEnemyHeroes())
-	
-	for _, target in ipairs(enemyTable) do
+	for i = 1, Game.HeroCount() do
+		local target = Game.Hero(i)
 		--Damage Reduction = total magic resistance ÷ (100 + total magic resistance)
 		local Rdmg = ({175, 350, 525})[level] * (target.magicResist/ (100 + target.magicResist)) + (target.maxHealth - target.health) / ({3.5, 3, 2.5})[level] * (target.magicResist/ (100 + target.magicResist))
-		if self:IsValidTarget(target,R.range) and self.Menu.KillSteal.black[target.networkID]:Value() and self:isReady(_R) then
+		if self:IsValidTarget(target,R.range) and target.team ~= myHero.team and self.Menu.KillSteal.black[target.networkID]:Value() and self:isReady(_R) then
+			--PrintChat(Rdmg)
 			if Rdmg >= target.health then
 				Control.CastSpell(HK_R,target)
 			end
