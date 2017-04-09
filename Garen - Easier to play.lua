@@ -244,15 +244,14 @@ function Garen:KillSteal()
 	for _, target in ipairs(enemyTable) do
 		--Damage Reduction = total magic resistance ÷ (100 + total magic resistance)
 		local Rdmg = ({175, 350, 525})[level] * (target.magicResist/ (100 + target.magicResist)) + (target.maxHealth - target.health) / ({3.5, 3, 2.5})[level] * (target.magicResist/ (100 + target.magicResist))
-		if self:IsValidTarget(target,R.range) then
-			if self.Menu.KillSteal.black[target.networkID]:Value() and self.Menu.KillSteal.R:Value() and self:isReady(_R) then
-				if Rdmg >= target.health and self.Menu.KillSteal.R:Value() and self:isReady(_R) then
-					Control.CastSpell(HK_R,target)
-				end
+		if self:IsValidTarget(target,R.range) and self.Menu.KillSteal.black[target.networkID]:Value() and self:isReady(_R) then
+			if Rdmg >= target.health then
+				Control.CastSpell(HK_R,target)
 			end
 		end
 	end
 end
+
 function Garen:Draw()
 	--Draw Range
 	if myHero.dead then return end
