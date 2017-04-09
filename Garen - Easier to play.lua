@@ -241,7 +241,7 @@ function Garen:KillSteal()
 	for i = 1, Game.HeroCount() do
 		local target = Game.Hero(i)
 		--Damage Reduction = total magic resistance ÷ (100 + total magic resistance)
-		local Rdmg = ({175, 350, 525})[level] + (target.maxHealth - target.health) / ({3.5, 3, 2.5})[level] * (target.magicResist/ (100 + target.magicResist))
+		local Rdmg = (({175, 350, 525})[level] + (target.maxHealth - target.health) / ({3.5, 3, 2.5})[level] ) * 0.95
 		if self:IsValidTarget(target,R.range) and target.team ~= myHero.team and self.Menu.KillSteal.black[target.networkID]:Value() and self:isReady(_R) then
 			--PrintChat(Rdmg)
 			if Rdmg >= target.health then
