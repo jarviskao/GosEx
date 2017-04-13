@@ -4,7 +4,7 @@
 
 [Released] Garen (updated to 7.7)
 
-[Released] Pantheon (updated to 7.6)
+[Released] Pantheon (updated to 7.7)
 
 [Released] Wukong (Monkey King) (updated to 7.5)
 
