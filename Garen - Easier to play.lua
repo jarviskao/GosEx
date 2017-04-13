@@ -181,25 +181,30 @@ function Garen:Clear()
 		if  minion.team == 200 then
 			if self:IsValidTarget(minion,250) and self.Menu.Mode.LaneClear.Q:Value() and self:isReady(_Q) and not self:isCasting(_E) then
 				Control.CastSpell(HK_Q)
+				break
 			end 
 			
 			if self:IsValidTarget(minion,E.range) and self.Menu.Mode.LaneClear.E:Value() and self:isReady(_E) and not self:isCasting(_Q) and myHero:GetSpellData(_E).name == "GarenE" then
 				if self:CountEnemyMinions(E.range) >= self.Menu.Mode.LaneClear.EKillMinion:Value() then
 					Control.CastSpell(HK_E)
+					break
 				end
 			end
 	
 		elseif minion.team == 300 then
 			if self:IsValidTarget(minion,500) and self.Menu.Mode.JungleClear.Q:Value() and self:isReady(_Q) and not self:isCasting(_E) then
 				Control.CastSpell(HK_Q)
+				break
 			end 
 					
 			if self:IsValidTarget(minion,300) and self.Menu.Mode.JungleClear.W:Value() and self:isReady(_W) then
 				Control.CastSpell(HK_W)
+				break
 			end
 
 			if  self:IsValidTarget(minion,E.range) and self.Menu.Mode.JungleClear.E:Value() and self:isReady(_E) and not self:isCasting(_Q) and myHero:GetSpellData(_E).name == "GarenE" then
 				Control.CastSpell(HK_E)
+				break
 			end
 
 		end
@@ -222,8 +227,10 @@ function Garen:LastHit()
 		if self:IsValidTarget(minion,250) and minion.isEnemy then
 			if Qdmg >= minion.health and self:isReady(_Q) then
 				Control.CastSpell(HK_Q)
+				break
 			elseif Qdmg >= minion.health and self:HasBuff(myHero,"GarenQ") then
 				Control.SetCursorPos(minion.pos)
+				break
 			end
 		end
 	end
@@ -246,6 +253,7 @@ function Garen:KillSteal()
 			--PrintChat(Rdmg)
 			if Rdmg >= target.health + target.hpRegen * 1.5 then
 				Control.CastSpell(HK_R,target)
+				break
 			end
 		end
 	end
