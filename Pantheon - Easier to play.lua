@@ -270,7 +270,7 @@ function Pantheon:LastHit()
 	for i = 1, Game.MinionCount() do
 		local minion = Game.Minion(i)
 		local Qdmg = (({65, 105, 145, 185, 225})[level] + 1.4 * myHero.totalDamage) * ((minion.health / minion.maxHealth < 0.15) and 2 or 1)
-		if self:IsValidTarget(minion,Q.range) and minion.isEnemy then
+		if minion.isEnemy and self:IsValidTarget(minion,Q.range) then
 			if Qdmg >= minion.health and self:isReady(_Q) then
 				Control.CastSpell(HK_Q, minion.pos)
 				break
