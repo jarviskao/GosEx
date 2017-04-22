@@ -13,8 +13,8 @@ end
 function Pantheon:LoadSpells()
 	Q = { range = 600 ,speed = myHero:GetSpellData(_Q).speed, delay = 0.2, width = myHero:GetSpellData(_Q).width }
 	W = { range = 600 ,speed = myHero:GetSpellData(_W).speed, delay = 0.2, width = myHero:GetSpellData(_Q).width }
-	E = { range = 400 ,speed = myHero:GetSpellData(_E).speed, delay = 0.2, width = myHero:GetSpellData(_Q).width}
-	R = { range = 5500 ,speed = myHero:GetSpellData(_R).speed, delay = 0.2, width = myHero:GetSpellData(_Q).width}
+	E = { range = 400 ,speed = myHero:GetSpellData(_E).speed, delay = 0.2, width = myHero:GetSpellData(_Q).width }
+	R = { range = 5500 ,speed = myHero:GetSpellData(_R).speed, delay = 0.2, width = myHero:GetSpellData(_Q).width }
 end
 
 function Pantheon:LoadMenu()
@@ -82,9 +82,7 @@ function Pantheon:Tick()
 			self:BlockMove(false)
 		end, 1)
 	end
-	
-	
-	PrintChat()
+
 	if Combo then
 		self:Combo()
 	elseif Harass then
@@ -94,7 +92,9 @@ function Pantheon:Tick()
 	elseif LastHit then
 		self:LastHit()
 	end
+	
 	self:KillSteal()
+	
 end
 
 function Pantheon:HasBuff(unit, buffname)
