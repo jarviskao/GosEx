@@ -216,8 +216,6 @@ end
 function Garen:HpPred(unit, delay)
 	if _G.GOS then
 		hp =  GOS:HP_Pred(unit,delay)
-	elseif _G.SDK then
-		hp = _G.SDK.HealthPrediction:GetPrediction(unit, delay)
 	else
 		hp = unit.health
 	end
