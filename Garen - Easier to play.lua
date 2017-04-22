@@ -1,7 +1,7 @@
 class "Garen"
 
-lol = 7.7
-ver = 2.5
+lol = 7.8
+ver = 2.6
 
 function Garen:__init()
 	self:LoadSpells()
@@ -154,7 +154,7 @@ function Garen:Combo()
 		Control.CastSpell(HK_Q)
 	end 
 			
-	if self:IsValidTarget(target,300) and self.Menu.Mode.Combo.W:Value() and self:isReady(_W) then
+	if self:IsValidTarget(target,300) and self.Menu.Mode.Combo.W:Value() and self:isReady(_W) and not myHero.isChanneling  then
 		Control.CastSpell(HK_W)
 	end
 
@@ -164,8 +164,8 @@ function Garen:Combo()
 
 	if  self:IsValidTarget(target,R.range) and self.Menu.Mode.Combo.R:Value() and self:isReady(_R) then
 		local level = myHero:GetSpellData(_R).level
-		local Rdmg = (({175, 350, 525})[level] + (target.maxHealth - target.health) / ({3.5, 3, 2.5})[level] ) * 0.93
-		if Rdmg >= target.health + target.hpRegen * 1.5 then
+		local Rdmg = (({175, 350, 525})[level] + (target.maxHealth - target.health) / ({3.5, 3, 2.5})[level] ) * 0.92
+		if Rdmg >= self:HpPred(target,1) + target.hpRegen * 2 then
 			Control.CastSpell(HK_R,target)
 		end
 	end
@@ -197,7 +197,7 @@ function Garen:Clear()
 				break
 			end 
 					
-			if self:IsValidTarget(minion,300) and self.Menu.Mode.JungleClear.W:Value() and self:isReady(_W) then
+			if self:IsValidTarget(minion,300) and self.Menu.Mode.JungleClear.W:Value() and self:isReady(_W) and not myHero.isChanneling then
 				Control.CastSpell(HK_W)
 				break
 			end
@@ -213,6 +213,17 @@ function Garen:Clear()
 	
 end
 
+function Garen:HpPred(unit, delay)
+	if _G.GOS then
+		hp =  GOS:HP_Pred(unit,delay)
+	elseif _G.SDK then
+		hp = _G.SDK.HealthPrediction:GetPrediction(unit, delay)
+	else
+		hp = unit.health
+	end
+	return hp
+end
+
 function Garen:LastHit()
 	if self.Menu.Mode.LastHit.Q:Value() == false then return end
 	
@@ -220,12 +231,13 @@ function Garen:LastHit()
 	if level == nil or level == 0 then return end
 	
 	if self:GetValidMinion(400) == false then return end
-
+	
+	
 	for i = 1, Game.MinionCount() do
 		local minion = Game.Minion(i)
 		local Qdmg = ({30, 55, 80, 105, 130})[level] + (1.4 * myHero.totalDamage)
 		if self:IsValidTarget(minion,250) and minion.isEnemy then
-			if Qdmg >= minion.health and self:isReady(_Q) then
+			if Qdmg >= self:HpPred(minion,0.5) and self:isReady(_Q) then
 				Control.CastSpell(HK_Q)
 				break
 			elseif Qdmg >= minion.health and self:HasBuff(myHero,"GarenQ") then
@@ -247,11 +259,9 @@ function Garen:KillSteal()
 	
 	for i = 1, Game.HeroCount() do
 		local target = Game.Hero(i)
-		--Damage Reduction = total magic resistance ÷ (100 + total magic resistance)
-		local Rdmg = (({175, 350, 525})[level] + (target.maxHealth - target.health) / ({3.5, 3, 2.5})[level] ) * 0.93
 		if self:IsValidTarget(target,R.range) and target.team ~= myHero.team and self.Menu.KillSteal.black[target.networkID]:Value() and self:isReady(_R) then
-			--PrintChat(Rdmg)
-			if Rdmg >= target.health + target.hpRegen * 1.5 then
+			local Rdmg = (({175, 350, 525})[level] + (target.maxHealth - target.health) / ({3.5, 3, 2.5})[level] ) * 0.92
+			if Rdmg >= self:HpPred(target,1) + target.hpRegen * 2 then
 				Control.CastSpell(HK_R,target)
 				break
 			end
