@@ -1,7 +1,7 @@
 class "Pantheon"
 
-lol = 7.7
-ver = 1.6
+lol = 7.8
+ver = 1.7
 
 function Pantheon:__init()
 	self:LoadSpells()
@@ -112,6 +112,17 @@ function Pantheon:GetValidEnemy(range)
         end
     end
     return false
+end
+
+function Pantheon:HpPred(unit, delay)
+	if _G.GOS then
+		hp =  GOS:HP_Pred(unit,delay)
+	elseif _G.SDK then
+		hp = _G.SDK.HealthPrediction:GetPrediction(unit, delay)
+	else
+		hp = unit.health
+	end
+	return hp
 end
 
 function Pantheon:GetValidMinion(range)
@@ -271,7 +282,7 @@ function Pantheon:LastHit()
 		local minion = Game.Minion(i)
 		local Qdmg = (({65, 105, 145, 185, 225})[level] + 1.4 * myHero.totalDamage) * ((minion.health / minion.maxHealth < 0.15) and 2 or 1)
 		if minion.isEnemy and self:IsValidTarget(minion,Q.range) then
-			if Qdmg >= minion.health and self:isReady(_Q) then
+			if Qdmg >= self:HpPred(minion,0.5) and self:isReady(_Q) then
 				Control.CastSpell(HK_Q, minion.pos)
 				break
 			end
@@ -292,7 +303,7 @@ function Pantheon:KillSteal()
 		local target = Game.Hero(i)
 		local Qdmg = (({65, 105, 145, 185, 225})[level] + 1.4 * myHero.totalDamage) * ((target.health / target.maxHealth < 0.15) and 2 or 1)
 		if target.team ~= myHero.team and  self:IsValidTarget(target,Q.range) and self:isReady(_Q)then
-			if Qdmg >= target.health + target.hpRegen * 1.5 then 
+			if Qdmg >= self:HpPred(target,0.5) + target.hpRegen * 2 then 
 				Control.CastSpell(HK_Q,target)
 				break
 			end
