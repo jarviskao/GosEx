@@ -251,14 +251,12 @@ function Pantheon:Clear()
 				Control.SetCursorPos(minion)
 				Control.KeyDown(HK_Q)
 				Control.KeyUp(HK_Q)
-				break
 			end 
 			--E
 			if self:IsValidTarget(minion,E.range) and self.Menu.Mode.LaneClear.E:Value() and self:isReady(_E) and not myHero.isChanneling and (myHero.mana / myHero.maxMana > self.Menu.Mode.LaneClear.EMana:Value() / 100) then
 				Control.SetCursorPos(minion)
 				Control.KeyDown(HK_E)
 				Control.KeyUp(HK_E)
-				break
 			end
 	
 		elseif minion.team == 300 then
@@ -267,21 +265,18 @@ function Pantheon:Clear()
 				Control.SetCursorPos(minion)
 				Control.KeyDown(HK_Q)
 				Control.KeyUp(HK_Q)
-				break
 			end 
 			--W
 			if self:IsValidTarget(minion,W.range) and self.Menu.Mode.JungleClear.W:Value() and self:isReady(_W) and not myHero.isChanneling and (myHero.mana / myHero.maxMana > self.Menu.Mode.JungleClear.EMana:Value() / 100) then
 				Control.SetCursorPos(minion)
 				Control.KeyDown(HK_W)
 				Control.KeyUp(HK_W)
-				break
 			end
 			--E
 			if self:IsValidTarget(minion,E.range) and self.Menu.Mode.JungleClear.E:Value() and self:isReady(_E) and not myHero.isChanneling and (myHero.mana / myHero.maxMana > self.Menu.Mode.JungleClear.EMana:Value() / 100) then
 				Control.SetCursorPos(minion)
 				Control.KeyDown(HK_E)
 				Control.KeyUp(HK_E)
-				break
 			end
 
 		end
@@ -304,7 +299,6 @@ function Pantheon:LastHit()
 		if minion.isEnemy and self:IsValidTarget(minion,Q.range) then
 			if Qdmg >= self:HpPred(minion,0.2) and self:isReady(_Q) then
 				Control.CastSpell(HK_Q, minion.pos)
-				break
 			end
 		end
 	end
@@ -325,7 +319,6 @@ function Pantheon:KillSteal()
 		if target.team ~= myHero.team and  self:IsValidTarget(target,Q.range) and self:isReady(_Q)then
 			if Qdmg >= self:HpPred(target,0.2) + target.hpRegen * 2 then 
 				Control.CastSpell(HK_Q,target)
-				break
 			end
 		end
 	end
