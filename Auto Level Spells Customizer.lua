@@ -1,7 +1,7 @@
 class "AutoLevelSpells"
 
-lol = 7.8
-ver = 0.9
+lol = 7.9
+ver = 1.0
 
 function AutoLevelSpells:__init()
 	currentLvPts = 0
