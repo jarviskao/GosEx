@@ -231,7 +231,7 @@ function AutoLevelSpells:LoadMenu()
 				self.Menu.SpellsOrder.Q.QW:Value(false) end})
 	--Main Menu --Spells Order
 	self.Menu:MenuElement({id = "Start", name = "Start Above Level", value = 2, min = 1, max = 18, step = 1, leftIcon = lvlIcons })
-	self.Menu:MenuElement({id = "Delay", name = "Level Up Spell Delay (seconds)", value = 1, min = 0, max = 2.5, step = 0.1, leftIcon = HumanizerIcons})
+	self.Menu:MenuElement({id = "Delay", name = "Level Up Spell Delay (seconds)", value = 0.8, min = 0, max = 2.5, step = 0.1, leftIcon = HumanizerIcons})
 end
 
 
