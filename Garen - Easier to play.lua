@@ -57,20 +57,21 @@ function Garen:LoadMenu()
 	self.Menu:MenuElement({type = MENU, id = "KillSteal", name = "KillSteal Settings"})
 	self.Menu.KillSteal:MenuElement({id = "R", name = "Use R to KS", value = true})
 	self.Menu.KillSteal:MenuElement({type = MENU, id = "black", name = "KillSteal White List"})
-	DelayAction(function()
-		for i = 1, Game.HeroCount() do
-			local hero = Game.Hero(i)
-			if hero.isEnemy then
-				self.Menu.KillSteal.black:MenuElement({id = hero.networkID, name = "Use R On: "..hero.charName, value = true})
-			end
-		end
-	end, 15)
-
+	if Game.Timer() > 30 then self:LoadKsTable() else DelayAction(function() self:LoadKsTable() end, 30) end
 	--Main Menu-- Drawing 
 	self.Menu:MenuElement({type = MENU, id = "Drawing", name = "Drawing"})
 	self.Menu.Drawing:MenuElement({id = "E", name = "Draw E Range", value = true})
 	self.Menu.Drawing:MenuElement({id = "R", name = "Draw R Range", value = true})
 
+end
+
+function Garen:LoadKsTable()
+	for i = 1, Game.HeroCount() do
+		local hero = Game.Hero(i)
+		if hero.isEnemy then
+			self.Menu.KillSteal.black:MenuElement({id = hero.networkID, name = "Use R On: "..hero.charName, value = true})
+		end
+	end
 end
 
 function Garen:Tick()
@@ -266,7 +267,8 @@ end
 function Garen:KillSteal()
 	if self.Menu.KillSteal.R:Value() == false then return end
 	if self:GetValidEnemy(600) == false then return end
-	
+	if myHero:GetSpellData(_R).level == nil then return end
+
 	for i = 1, Game.HeroCount() do
 		local target = Game.Hero(i)
 		if self:IsValidTarget(target,R.range) and target.team ~= myHero.team and self.Menu.KillSteal.black[target.networkID]:Value() and self:isReady(_R) then
