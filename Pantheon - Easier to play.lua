@@ -1,9 +1,10 @@
 class "Pantheon"
 
-lol = 7.8
-ver = 1.7
+lol = 7.9
+ver = 1.8
 
 function Pantheon:__init()
+	ICLoaded = _G.SDK and true
 	self:LoadSpells()
 	self:LoadMenu()
 	Callback.Add("Tick", function() self:Tick() end)
@@ -12,9 +13,9 @@ end
 
 function Pantheon:LoadSpells()
 	Q = { range = 600 ,speed = myHero:GetSpellData(_Q).speed, delay = 0.2, width = myHero:GetSpellData(_Q).width }
-	W = { range = 600 ,speed = myHero:GetSpellData(_W).speed, delay = 0.2, width = myHero:GetSpellData(_Q).width }
-	E = { range = 400 ,speed = myHero:GetSpellData(_E).speed, delay = 0.2, width = myHero:GetSpellData(_Q).width }
-	R = { range = 5500 ,speed = myHero:GetSpellData(_R).speed, delay = 0.2, width = myHero:GetSpellData(_Q).width }
+	W = { range = 600 ,speed = myHero:GetSpellData(_W).speed, delay = 0.2, width = myHero:GetSpellData(_W).width }
+	E = { range = 400 ,speed = myHero:GetSpellData(_E).speed, delay = 0.2, width = myHero:GetSpellData(_E).width }
+	R = { range = 5500 ,speed = myHero:GetSpellData(_R).speed, delay = 0.2, width = myHero:GetSpellData(_R).width }
 end
 
 function Pantheon:LoadMenu()
@@ -25,7 +26,7 @@ function Pantheon:LoadMenu()
 	}
 
 	--Main Menu
-	self.Menu = MenuElement({type = MENU, id = "Menu", name = "Pantheon", leftIcon = MenuIcons})
+	self.Menu = MenuElement({type = MENU, id = "Menu", name = "Pantheon - Easier to play", leftIcon = MenuIcons})
 
 	--Main Menu-- Mode Setting
 	self.Menu:MenuElement({type = MENU, id = "Mode", name = "Mode Settings"})
@@ -71,10 +72,19 @@ function Pantheon:LoadMenu()
 end
 
 function Pantheon:Tick()
-	local Combo = (_G.SDK and _G.SDK.Orbwalker.Modes[_G.SDK.ORBWALKER_MODE_COMBO]) or (_G.GOS and _G.GOS:GetMode() == "Combo") or (_G.EOWLoaded and EOW:Mode() == "Combo")
-	local Harass = (_G.SDK and _G.SDK.Orbwalker.Modes[_G.SDK.ORBWALKER_MODE_HARASS]) or (_G.GOS and _G.GOS:GetMode() == "Harass") or (_G.EOWLoaded and EOW:Mode() == "Harass")
-	local Clear = (_G.SDK and _G.SDK.Orbwalker.Modes[_G.SDK.ORBWALKER_MODE_LANECLEAR]) or (_G.SDK and _G.SDK.Orbwalker.Modes[_G.SDK.ORBWALKER_MODE_JUNGLECLEAR]) or (_G.GOS and _G.GOS:GetMode() == "Clear") or (_G.EOWLoaded and EOW:Mode() == "LaneClear")
-	local LastHit = (_G.SDK and _G.SDK.Orbwalker.Modes[_G.SDK.ORBWALKER_MODE_LASTHIT]) or (_G.GOS and _G.GOS:GetMode() == "Lasthit") or (_G.EOWLoaded and EOW:Mode() == "LastHit")
+	local Combo = 	(_G.Orbwalker.Enabled:Value() and _G.GOS:GetMode() == "Combo") or
+					(ICLoaded and _G.SDK.Orbwalker:IsEnabled() and _G.SDK.Orbwalker.Modes[_G.SDK.ORBWALKER_MODE_COMBO]) or
+					(_G.EOWLoaded and EOW:Mode() == "Combo")
+	local Harass = 	(_G.Orbwalker.Enabled:Value() and _G.GOS:GetMode() == "Harass") or 
+					(ICLoaded and _G.SDK.Orbwalker:IsEnabled() and _G.SDK.Orbwalker.Modes[_G.SDK.ORBWALKER_MODE_HARASS]) or 
+					(_G.EOWLoaded and EOW:Mode() == "Harass")
+	local Clear = (_G.Orbwalker.Enabled:Value()and _G.GOS:GetMode() == "Clear") or
+				  (ICLoaded and _G.SDK.Orbwalker:IsEnabled() and _G.SDK.Orbwalker.Modes[_G.SDK.ORBWALKER_MODE_LANECLEAR]) or
+				  (ICLoaded and _G.SDK.Orbwalker:IsEnabled() and _G.SDK.Orbwalker.Modes[_G.SDK.ORBWALKER_MODE_JUNGLECLEAR]) or
+				  (_G.EOWLoaded and EOW:Mode() == "LaneClear")
+	local LastHit = (_G.Orbwalker.Enabled:Value() and _G.GOS:GetMode() == "Lasthit") or
+					(ICLoaded and _G.SDK.Orbwalker:IsEnabled() and _G.SDK.Orbwalker.Modes[_G.SDK.ORBWALKER_MODE_LASTHIT]) or
+					(_G.EOWLoaded and EOW:Mode() == "LastHit")
 	
 	if  myHero.activeSpell.name == "PantheonE" then
 		self:BlockMove(true)
@@ -125,17 +135,22 @@ function Pantheon:GetValidEnemy(range)
 end
 
 function Pantheon:BlockMove(bool)
-	if _G.GOS and Orbwalker.Enabled:Value() == true then
+	if Orbwalker.Enabled:Value() then
 		_G.GOS.BlockAttack = bool
 		_G.GOS.BlockMovement = bool
-	elseif _G.SDK then
+	elseif ICLoaded and _G.SDK.Orbwalker:IsEnabled()  then
 		_G.SDK.Orbwalker:SetMovement(not bool)
 		_G.SDK.Orbwalker:SetAttack(not bool)
 	end
 end
 
 function Pantheon:HpPred(unit, delay)
-	if _G.GOS then
+	delay = delay or 0
+	if ICLoaded	then
+		hp = _G.SDK.HealthPrediction:GetPrediction(unit, delay)
+	elseif _G.EOWLoaded then
+		hp = EOW:PredictHealth(unit, delay)
+	elseif _G.Orbwalker.Enabled:Value() then
 		hp =  GOS:HP_Pred(unit,delay)
 	else
 		hp = unit.health
@@ -189,13 +204,23 @@ function Pantheon:GetPred(unit,speed,delay)
 	return unit:GetPrediction(speed,delay)
 end
 
+function Pantheon:GetCurrentTarget()
+	if ICLoaded then
+		return _G.SDK.TargetSelector:GetTarget(800, _G.SDK.DAMAGE_TYPE_PHYSICAL)
+	elseif _G.EOWLoaded then
+		return EOW:GetTarget()
+	elseif _G.Orbwalker.Enabled:Value() then
+		return (_G.GOS:GetTarget(800,"AD"))
+	end
+end
+
 function Pantheon:Combo()
 
 	if self:GetValidEnemy(800) == false then return end
 	
-	if (not _G.SDK and not _G.GOS and not _G.EOWLoaded) then return end
+	if (not ICLoaded and not _G.EOWLoaded and not _G.Orbwalker.Enabled:Value()) then return end
 	
-	local target =  (_G.SDK and _G.SDK.TargetSelector:GetTarget(800, _G.SDK.DAMAGE_TYPE_PHYSICAL)) or (_G.GOS and _G.GOS:GetTarget(800,"AD")) or ( _G.EOWLoaded and EOW:GetTarget())
+	local target = self:GetCurrentTarget()
 	
 	if self:IsValidTarget(target, Q.range) and self.Menu.Mode.Combo.Q:Value() and self:isReady(_Q) and not myHero.isChanneling then
 		Control.CastSpell(HK_Q, target.pos)
@@ -207,9 +232,7 @@ function Pantheon:Combo()
 
 	if self:IsValidTarget(target, E.range) and self.Menu.Mode.Combo.E:Value() and self:isReady(_E) and not myHero.isChanneling then
 		local Epos = target:GetPrediction(myHero:GetSpellData(_E).speed, E.delay)
-		Control.SetCursorPos(Epos)
-		Control.KeyDown(HK_E)
-		Control.KeyUp(HK_E)
+		Control.CastSpell(HK_E, Epos)
 	end
 	
 end
@@ -218,9 +241,9 @@ function Pantheon:Harass()
 
 	if self:GetValidEnemy(800) == false then return end
 	
-	if (not _G.SDK and not _G.GOS and not _G.EOWLoaded) then return end
+	if (not ICLoaded and not _G.EOWLoaded and not _G.Orbwalker.Enabled:Value()) then return end
 	
-	local target =  (_G.SDK and _G.SDK.TargetSelector:GetTarget(800, _G.SDK.DAMAGE_TYPE_PHYSICAL)) or (_G.GOS and _G.GOS:GetTarget(800,"AD"))
+	local target = self:GetCurrentTarget()
 	
 	if self:IsValidTarget(target, Q.range) and self.Menu.Mode.Combo.Q:Value() and self:isReady(_Q) and not myHero.isChanneling and not self:isReady(_W) then
 		Control.CastSpell(HK_Q, target.pos)
@@ -232,9 +255,7 @@ function Pantheon:Harass()
 
 	if self:IsValidTarget(target, E.range) and self.Menu.Mode.Combo.E:Value() and self:isReady(_E) and not myHero.isChanneling then
 		local Epos = self:GetPred(target,E.speed, E.delay)
-		Control.SetCursorPos(Epos)
-		Control.KeyDown(HK_E)
-		Control.KeyUp(HK_E)
+		Control.CastSpell(HK_E, Epos)
 	end
 	
 end
@@ -248,56 +269,40 @@ function Pantheon:Clear()
 		if  minion.team == 200 then
 			--Q
 			if self:IsValidTarget(minion, Q.range) and self.Menu.Mode.LaneClear.Q:Value() and self:isReady(_Q) and not myHero.isChanneling and (myHero.mana/myHero.maxMana > self.Menu.Mode.LaneClear.QMana:Value() / 100) then
-				Control.SetCursorPos(minion)
-				Control.KeyDown(HK_Q)
-				Control.KeyUp(HK_Q)
+				Control.CastSpell(HK_Q, minion.pos)
 			end 
 			--E
 			if self:IsValidTarget(minion,E.range) and self.Menu.Mode.LaneClear.E:Value() and self:isReady(_E) and not myHero.isChanneling and (myHero.mana / myHero.maxMana > self.Menu.Mode.LaneClear.EMana:Value() / 100) then
-				Control.SetCursorPos(minion)
-				Control.KeyDown(HK_E)
-				Control.KeyUp(HK_E)
+				Control.CastSpell(HK_E, minion.pos)
 			end
 	
 		elseif minion.team == 300 then
 			--Q
 			if self:IsValidTarget(minion, Q.range) and self.Menu.Mode.JungleClear.Q:Value() and self:isReady(_Q) and not myHero.isChanneling and (myHero.mana/myHero.maxMana > self.Menu.Mode.JungleClear.QMana:Value() / 100) then
-				Control.SetCursorPos(minion)
-				Control.KeyDown(HK_Q)
-				Control.KeyUp(HK_Q)
+				Control.CastSpell(HK_Q, minion.pos)
 			end 
 			--W
 			if self:IsValidTarget(minion,W.range) and self.Menu.Mode.JungleClear.W:Value() and self:isReady(_W) and not myHero.isChanneling and (myHero.mana / myHero.maxMana > self.Menu.Mode.JungleClear.EMana:Value() / 100) then
-				Control.SetCursorPos(minion)
-				Control.KeyDown(HK_W)
-				Control.KeyUp(HK_W)
+				Control.CastSpell(HK_W, minion.pos)
 			end
 			--E
 			if self:IsValidTarget(minion,E.range) and self.Menu.Mode.JungleClear.E:Value() and self:isReady(_E) and not myHero.isChanneling and (myHero.mana / myHero.maxMana > self.Menu.Mode.JungleClear.EMana:Value() / 100) then
-				Control.SetCursorPos(minion)
-				Control.KeyDown(HK_E)
-				Control.KeyUp(HK_E)
+				Control.CastSpell(HK_E, minion.pos)
 			end
-
 		end
-
-	end
-	
+	end	
 end
 
 function Pantheon:LastHit()
 	if self.Menu.Mode.LastHit.Q:Value() == false then return end
-	
-	local level = myHero:GetSpellData(_Q).level
-	if level == nil or level == 0 then return end
-	
+	if myHero:GetSpellData(_Q).level == nil then return end
 	if self:GetValidMinion(600) == false then return end
 
 	for i = 1, Game.MinionCount() do
 		local minion = Game.Minion(i)
-		local Qdmg = (({65, 105, 145, 185, 225})[level] + 1.4 * myHero.totalDamage) * ((minion.health / minion.maxHealth < 0.15) and 2 or 1)
+		local Qdmg = getdmg("Q",minion,myHero)
 		if minion.isEnemy and self:IsValidTarget(minion,Q.range) then
-			if Qdmg >= self:HpPred(minion,0.2) and self:isReady(_Q) then
+			if Qdmg >= self:HpPred(minion) and self:isReady(_Q) then
 				Control.CastSpell(HK_Q, minion.pos)
 			end
 		end
@@ -307,18 +312,15 @@ end
 
 function Pantheon:KillSteal()
 	if self.Menu.KillSteal.Q:Value() == false then return end
-	
+	if myHero:GetSpellData(_Q).level == nil then return end
 	if self:GetValidEnemy(600) == false then return end
-	
-	local level = myHero:GetSpellData(_Q).level
-	if level == nil or level == 0 then return end
 	
 	for i = 1, Game.HeroCount() do
 		local target = Game.Hero(i)
-		local Qdmg = (({65, 105, 145, 185, 225})[level] + 1.4 * myHero.totalDamage) * ((target.health / target.maxHealth < 0.15) and 2 or 1)
+		local Qdmg = getdmg("Q",target,myHero)
 		if target.team ~= myHero.team and  self:IsValidTarget(target,Q.range) and self:isReady(_Q)then
-			if Qdmg >= self:HpPred(target,0.2) + target.hpRegen * 2 then 
-				Control.CastSpell(HK_Q,target)
+			if Qdmg >= self:HpPred(target) + target.hpRegen * 2 then 
+				Control.CastSpell(HK_Q,target.pos)
 			end
 		end
 	end
@@ -335,5 +337,6 @@ end
 
 function OnLoad()
 	if myHero.charName ~= "Pantheon" then return end
+	require "DamageLib"
 	Pantheon()
 end
