@@ -282,7 +282,7 @@ function Pantheon:Clear()
 				Control.CastSpell(HK_Q, minion.pos)
 			end 
 			--W
-			if self:IsValidTarget(minion,W.range) and self.Menu.Mode.JungleClear.W:Value() and self:isReady(_W) and not myHero.isChanneling and (myHero.mana / myHero.maxMana > self.Menu.Mode.JungleClear.EMana:Value() / 100) then
+			if self:IsValidTarget(minion,W.range) and self.Menu.Mode.JungleClear.W:Value() and self:isReady(_W) and not myHero.isChanneling and (myHero.mana / myHero.maxMana > self.Menu.Mode.JungleClear.WMana:Value() / 100) then
 				Control.CastSpell(HK_W, minion.pos)
 			end
 			--E
@@ -307,7 +307,6 @@ function Pantheon:LastHit()
 			end
 		end
 	end
-	
 end
 
 function Pantheon:KillSteal()
@@ -324,7 +323,6 @@ function Pantheon:KillSteal()
 			end
 		end
 	end
-
 end
 
 function Pantheon:Draw()
