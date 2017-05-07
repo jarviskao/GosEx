@@ -1,9 +1,10 @@
 class "Garen"
 
-lol = 7.8
-ver = 2.6
+lol = 7.9
+ver = 2.7
 
 function Garen:__init()
+	ICLoaded = _G.SDK and true
 	self:LoadSpells()
 	self:LoadMenu()
 	Callback.Add("Tick", function() self:Tick() end)
@@ -28,7 +29,7 @@ function Garen:LoadMenu()
 	local RangeIcons = "http://wfarm2.dataknet.com/static/resources/icons/set51/4004fa57.png"
 
 	--Main Menu
-	self.Menu = MenuElement({type = MENU, id = "Menu", name = "Garen", leftIcon = MenuIcons})
+	self.Menu = MenuElement({type = MENU, id = "Menu", name = "Garen - Easier to play", leftIcon = MenuIcons})
 	
 	--Main Menu-- Mode Setting
 	self.Menu:MenuElement({type = MENU, id = "Mode", name = "Mode Settings"})
@@ -73,9 +74,16 @@ function Garen:LoadMenu()
 end
 
 function Garen:Tick()
-	local Combo = (_G.SDK and _G.SDK.Orbwalker.Modes[_G.SDK.ORBWALKER_MODE_COMBO]) or (_G.GOS and _G.GOS:GetMode() == "Combo") or (_G.EOWLoaded and EOW:Mode() == "Combo")
-	local Clear = (_G.SDK and _G.SDK.Orbwalker.Modes[_G.SDK.ORBWALKER_MODE_LANECLEAR]) or (_G.SDK and _G.SDK.Orbwalker.Modes[_G.SDK.ORBWALKER_MODE_JUNGLECLEAR]) or (_G.GOS and _G.GOS:GetMode() == "Clear") or (_G.EOWLoaded and EOW:Mode() == "LaneClear")
-	local LastHit = (_G.SDK and _G.SDK.Orbwalker.Modes[_G.SDK.ORBWALKER_MODE_LASTHIT]) or (_G.GOS and _G.GOS:GetMode() == "Lasthit") or (_G.EOWLoaded and EOW:Mode() == "LastHit")
+	local Combo = (_G.Orbwalker.Enabled:Value() and _G.GOS:GetMode() == "Combo") or
+				  (ICLoaded and _G.SDK.Orbwalker:IsEnabled() and _G.SDK.Orbwalker.Modes[_G.SDK.ORBWALKER_MODE_COMBO]) or
+				  (_G.EOWLoaded and EOW:Mode() == "Combo")
+	local Clear = (_G.Orbwalker.Enabled:Value()and _G.GOS:GetMode() == "Clear") or
+				  (ICLoaded and _G.SDK.Orbwalker:IsEnabled() and _G.SDK.Orbwalker.Modes[_G.SDK.ORBWALKER_MODE_LANECLEAR]) or
+				  (ICLoaded and _G.SDK.Orbwalker:IsEnabled() and _G.SDK.Orbwalker.Modes[_G.SDK.ORBWALKER_MODE_JUNGLECLEAR]) or
+				  (_G.EOWLoaded and EOW:Mode() == "LaneClear")
+	local LastHit = (_G.Orbwalker.Enabled:Value() and _G.GOS:GetMode() == "Lasthit") or
+					(ICLoaded and _G.SDK.Orbwalker:IsEnabled() and _G.SDK.Orbwalker.Modes[_G.SDK.ORBWALKER_MODE_LASTHIT]) or
+					(_G.EOWLoaded and EOW:Mode() == "LastHit")
 	if Combo then
 		self:Combo()
 	elseif Clear then
@@ -146,9 +154,11 @@ function Garen:Combo()
 
 	if self:GetValidEnemy(800) == false then return end
 	
-	if (not _G.SDK and not _G.GOS and not _G.EOWLoaded) then return end
+	if (not ICLoaded and not _G.EOWLoaded and not _G.Orbwalker.Enabled:Value()) then return end
 	
-	local target =  (_G.SDK and _G.SDK.TargetSelector:GetTarget(800, _G.SDK.DAMAGE_TYPE_PHYSICAL)) or (_G.GOS and _G.GOS:GetTarget(800,"AD")) or ( _G.EOWLoaded and EOW:GetTarget())
+	local target =  (ICLoaded and _G.SDK.TargetSelector:GetTarget(800, _G.SDK.DAMAGE_TYPE_PHYSICAL)) or 
+					(_G.EOWLoaded and EOW:GetTarget()) or
+					(_G.GOS:GetTarget(800,"AD"))
 		
 	if self:IsValidTarget(target,Q.range) and self.Menu.Mode.Combo.Q:Value() and self:isReady(_Q) and not self:isCasting(_E) then
 		Control.CastSpell(HK_Q)
@@ -163,9 +173,8 @@ function Garen:Combo()
 	end
 
 	if  self:IsValidTarget(target,R.range) and self.Menu.Mode.Combo.R:Value() and self:isReady(_R) then
-		local level = myHero:GetSpellData(_R).level
-		local Rdmg = (({175, 350, 525})[level] + (target.maxHealth - target.health) / ({3.5, 3, 2.5})[level] ) * 0.92
-		if Rdmg >= self:HpPred(target,1) + target.hpRegen * 2 then
+		local Rdmg = getdmg("R",target,myHero)
+		if Rdmg >= self:HpPred(target) + target.hpRegen * 2 then
 			Control.CastSpell(HK_R,target)
 		end
 	end
@@ -209,7 +218,12 @@ function Garen:Clear()
 end
 
 function Garen:HpPred(unit, delay)
-	if _G.GOS then
+	delay = delay or 0
+	if ICLoaded	then
+		hp = _G.SDK.HealthPrediction:GetPrediction(unit, delay)
+	elseif _G.EOWLoaded then
+		hp = EOW:PredictHealth(unit, delay)
+	elseif _G.Orbwalker.Enabled:Value() then
 		hp =  GOS:HP_Pred(unit,delay)
 	else
 		hp = unit.health
@@ -219,40 +233,45 @@ end
 
 function Garen:LastHit()
 	if self.Menu.Mode.LastHit.Q:Value() == false then return end
-	
-	local level = myHero:GetSpellData(_Q).level
-	if level == nil or level == 0 then return end
-	
 	if self:GetValidMinion(400) == false then return end
-	
 	
 	for i = 1, Game.MinionCount() do
 		local minion = Game.Minion(i)
-		local Qdmg = ({30, 55, 80, 105, 130})[level] + (1.4 * myHero.totalDamage)
-		if self:IsValidTarget(minion,250) and minion.isEnemy then
-			if Qdmg >= self:HpPred(minion,0.5) and self:isReady(_Q) then
+		local Qdmg = getdmg("Q",minion,myHero)
+		if self:IsValidTarget(minion,300) and minion.isEnemy then
+			if Qdmg >= self:HpPred(minion) and self:isReady(_Q) then
 				Control.CastSpell(HK_Q)
 			elseif Qdmg >= minion.health and self:HasBuff(myHero,"GarenQ") then
-				Control.SetCursorPos(minion.pos)
+				if self:CanAA() then
+					Control.Attack(minion)
+				end
 			end
 		end
 	end
 	
 end
 
+function Garen:CanAA()
+	local AA
+	if ICLoaded then
+		AA = _G.SDK.Orbwalker:CanAttack(myHero)
+	elseif _G.EOWLoaded then
+		AA = EOW:CanAttack()
+	elseif _G.Orbwalker.Enabled:Value() then
+		AA = GOS:CanAttack()
+	end
+	return AA
+end
+
 function Garen:KillSteal()
 	if self.Menu.KillSteal.R:Value() == false then return end
-	
 	if self:GetValidEnemy(600) == false then return end
-	
-	local level = myHero:GetSpellData(_R).level
-	if level == nil or level == 0 then return end
 	
 	for i = 1, Game.HeroCount() do
 		local target = Game.Hero(i)
 		if self:IsValidTarget(target,R.range) and target.team ~= myHero.team and self.Menu.KillSteal.black[target.networkID]:Value() and self:isReady(_R) then
-			local Rdmg = (({175, 350, 525})[level] + (target.maxHealth - target.health) / ({3.5, 3, 2.5})[level] ) * 0.92
-			if Rdmg >= self:HpPred(target,1) + target.hpRegen * 2 then
+			local Rdmg = getdmg("R",target,myHero)
+			if Rdmg >= self:HpPred(target) + target.hpRegen * 2 then
 				Control.CastSpell(HK_R,target)
 			end
 		end
@@ -268,5 +287,6 @@ end
 
 function OnLoad()
 	if myHero.charName ~= "Garen" then return end
+	require "DamageLib"
 	Garen()
 end
