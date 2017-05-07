@@ -151,16 +151,24 @@ function Garen:IsValidTarget(unit,range)
     return unit ~= nil and unit.valid and unit.visible and not unit.dead and unit.isTargetable and not unit.isImmortal and unit.pos:DistanceTo(myHero.pos) <= range
 end
 
+function Garen:GetCurrentTarget()
+	if ICLoaded then
+		return _G.SDK.TargetSelector:GetTarget(800, _G.SDK.DAMAGE_TYPE_PHYSICAL)
+	elseif _G.EOWLoaded then
+		return EOW:GetTarget()
+	elseif _G.Orbwalker.Enabled:Value() then
+		return (_G.GOS:GetTarget(800,"AD"))
+	end
+end
+
 function Garen:Combo()
 
 	if self:GetValidEnemy(800) == false then return end
 	
 	if (not ICLoaded and not _G.EOWLoaded and not _G.Orbwalker.Enabled:Value()) then return end
 	
-	local target =  (ICLoaded and _G.SDK.TargetSelector:GetTarget(800, _G.SDK.DAMAGE_TYPE_PHYSICAL)) or 
-					(_G.EOWLoaded and EOW:GetTarget()) or
-					(_G.GOS:GetTarget(800,"AD"))
-		
+	local target = self:GetCurrentTarget()
+	
 	if self:IsValidTarget(target,Q.range) and self.Menu.Mode.Combo.Q:Value() and self:isReady(_Q) and not self:isCasting(_E) then
 		Control.CastSpell(HK_Q)
 	end 
