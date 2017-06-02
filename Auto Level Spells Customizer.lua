@@ -27,7 +27,7 @@ function AutoLevelSpells:LoadFile()
           end
      end
   end
-  PrintChat(customSkillOrder)
+  --PrintChat(customSkillOrder)
 end
 
 function AutoLevelSpells:GetChampionName(file)
