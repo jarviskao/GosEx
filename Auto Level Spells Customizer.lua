@@ -1,7 +1,7 @@
 class "AutoLevelSpells"
 
-lol = 7.10
-ver = 1.1
+lol = 7.11
+ver = 1.2
 
 function AutoLevelSpells:__init()
 	myHeroName = myHero.charName
@@ -13,25 +13,15 @@ function AutoLevelSpells:__init()
 	Callback.Add("Tick", function() self:Tick() end)
 end
 
-function AutoLevelSpells:ToString(spellNum)
-	local spells = {"Q", "W", "E", "R"}
-	return spells[spellNum+1]
-end
-
-function AutoLevelSpells:ToHK(spellNum)
-	local HK = {HK_Q, HK_W, HK_E, HK_R}
-	return HK[spellNum+1]
-end
-
 function AutoLevelSpells:LoadFile()
-  local  gsal_File = io.open(COMMON_PATH.."AutoLevel.txt", "r")
-  local gsal_FileContent = gsal_File:read("*all")
-  gsal_File:close()
+  local File = io.open(COMMON_PATH.."AutoLevel.txt", "r")
+  local FileContent = File:read("*all")
+  File:close()
 
-  for s in string.gmatch(gsal_FileContent,'[^\r\n]+') do   --('+' is for skipping over empty lines
+  for s in string.gmatch(FileContent,'[^\r\n]+') do   --('+' is for skipping over empty lines
       local champion = AutoLevelSpells:GetChampionName(s)
       local str = s:sub(1, 1)
-      if str ~= "-" then -- if it's not a comment then
+      if str ~= "-" and str ~= "/" and str ~= "*" then -- if it's not a comment then
           if champion:lower():find(myHeroName:lower()) then
               AutoLevelSpells:GetSkillOrder(s)
           end
@@ -89,53 +79,100 @@ function AutoLevelSpells:LoadMenu()
 	self.Menu:MenuElement({type = MENU, id = "SpellsOrder", name = "Spells Order", leftIcon = SequenceIcons})
 	--Main Menu --Spells Order -- Q
 	self.Menu.SpellsOrder:MenuElement({type = MENU, id = "Q", name = " Q First", leftIcon = KeyQ})
-	self.Menu.SpellsOrder.Q:MenuElement({id = "QW", name = "Q > W > E > Q > Q (Max Q > W)", value = false, onclick =	function() 	self.Menu.SpellsOrder.Q.QE:Value(false) 	self.Menu.SpellsOrder.W.WQ:Value(false)
-																																																																self.Menu.SpellsOrder.W.WE:Value(false) 	self.Menu.SpellsOrder.E.EQ:Value(false)
-																																																																self.Menu.SpellsOrder.E.EW:Value(false) 	self.Menu.SpellsOrder.ROnly:Value(false)
-																																																																self.Menu.SpellsOrder.Default.Order:Value(false) end})
-	self.Menu.SpellsOrder.Q:MenuElement({id = "QE", name = "Q > E > W > Q > Q (Max Q > E)", value = false, onclick =	function() 	self.Menu.SpellsOrder.Q.QW:Value(false) 	self.Menu.SpellsOrder.W.WQ:Value(false)
-																																																																self.Menu.SpellsOrder.W.WE:Value(false) 	self.Menu.SpellsOrder.E.EQ:Value(false)
-																																																																self.Menu.SpellsOrder.E.EW:Value(false) 	self.Menu.SpellsOrder.ROnly:Value(false)
-																																																																self.Menu.SpellsOrder.Default.Order:Value(false) end})
+	self.Menu.SpellsOrder.Q:MenuElement({id = "QW", name = "Q > W > E > Q > Q (Max Q > W)", value = false, onclick =	function() self:SetMenuStatus(1)	end})
+	self.Menu.SpellsOrder.Q:MenuElement({id = "QE", name = "Q > E > W > Q > Q (Max Q > E)", value = false, onclick =	function() self:SetMenuStatus(2)	end})
 	--Main Menu --Spells Order -- W
 	self.Menu.SpellsOrder:MenuElement({type = MENU, id = "W", name = " W First", leftIcon = KeyW})
-	self.Menu.SpellsOrder.W:MenuElement({id = "WQ", name = "W > Q > E > W > W (Max W > Q)", value = false, onclick =	function() 	self.Menu.SpellsOrder.Q.QE:Value(false) 	self.Menu.SpellsOrder.Q.QW:Value(false)
-																																																																self.Menu.SpellsOrder.W.WE:Value(false) 	self.Menu.SpellsOrder.E.EQ:Value(false)
-																																																																self.Menu.SpellsOrder.E.EW:Value(false) 	self.Menu.SpellsOrder.ROnly:Value(false)
-																																																																self.Menu.SpellsOrder.Default.Order:Value(false) end})
-	self.Menu.SpellsOrder.W:MenuElement({id = "WE", name = "W > E > Q > W > W (Max W > E)", value = false, onclick =	function() 	self.Menu.SpellsOrder.Q.QE:Value(false) 	self.Menu.SpellsOrder.W.WQ:Value(false)
-																																																																self.Menu.SpellsOrder.Q.QW:Value(false) 	self.Menu.SpellsOrder.E.EQ:Value(false)
-																																																																self.Menu.SpellsOrder.E.EW:Value(false) 	self.Menu.SpellsOrder.ROnly:Value(false)
-																																																																self.Menu.SpellsOrder.Default.Order:Value(false) end})
+	self.Menu.SpellsOrder.W:MenuElement({id = "WQ", name = "W > Q > E > W > W (Max W > Q)", value = false, onclick =	function() self:SetMenuStatus(3)	end})
+	self.Menu.SpellsOrder.W:MenuElement({id = "WE", name = "W > E > Q > W > W (Max W > E)", value = false, onclick =	function() self:SetMenuStatus(4)	end})
 	--Main Menu --Spells Order -- E
 	self.Menu.SpellsOrder:MenuElement({type = MENU, id = "E", name = " E First", leftIcon = KeyE})
-	self.Menu.SpellsOrder.E:MenuElement({id = "EQ", name = "E > Q > W > E > E (Max E > Q)", value = false, onclick =	function() 	self.Menu.SpellsOrder.Q.QE:Value(false) 	self.Menu.SpellsOrder.W.WQ:Value(false)
-																																																																self.Menu.SpellsOrder.W.WE:Value(false) 	self.Menu.SpellsOrder.Q.QW:Value(false)
-																																																																self.Menu.SpellsOrder.E.EW:Value(false) 	self.Menu.SpellsOrder.ROnly:Value(false)
-																																																																self.Menu.SpellsOrder.Default.Order:Value(false) end})
-	self.Menu.SpellsOrder.E:MenuElement({id = "EW", name = "E > W > Q > E > E (Max E > W)", value = false, onclick =	function() 	self.Menu.SpellsOrder.Q.QE:Value(false) 	self.Menu.SpellsOrder.W.WQ:Value(false)
-																																																																self.Menu.SpellsOrder.W.WE:Value(false) 	self.Menu.SpellsOrder.E.EQ:Value(false)
-																																																																self.Menu.SpellsOrder.Q.QW:Value(false) 	self.Menu.SpellsOrder.ROnly:Value(false)
-																																																																self.Menu.SpellsOrder.Default.Order:Value(false) end})
+	self.Menu.SpellsOrder.E:MenuElement({id = "EQ", name = "E > Q > W > E > E (Max E > Q)", value = false, onclick =	function() self:SetMenuStatus(5)	end})
+	self.Menu.SpellsOrder.E:MenuElement({id = "EW", name = "E > W > Q > E > E (Max E > W)", value = false, onclick =	function() self:SetMenuStatus(6)	end})
 	--Main Menu --Spells Order -- R
-	self.Menu.SpellsOrder:MenuElement({id = "ROnly", name = " R Only", value = false, leftIcon = KeyR, onclick = function() 	self.Menu.SpellsOrder.Q.QE:Value(false) 	self.Menu.SpellsOrder.W.WQ:Value(false)
-																																																														self.Menu.SpellsOrder.W.WE:Value(false) 	self.Menu.SpellsOrder.E.EQ:Value(false)
-																																																														self.Menu.SpellsOrder.E.EW:Value(false) 	self.Menu.SpellsOrder.Q.QW:Value(false)
-																																																														self.Menu.SpellsOrder.Default.Order:Value(false) end})
+	self.Menu.SpellsOrder:MenuElement({id = "ROnly", name = " R Only", value = false, leftIcon = KeyR, onclick = function() self:SetMenuStatus(7) end})
 	--Main Menu --Spells Order -- Recommend
 	self.Menu.SpellsOrder:MenuElement({type = MENU, id = "Default", name = myHero.charName.." - Custom", leftIcon = DefaultIcons})
 	self.Menu.SpellsOrder.Default:MenuElement({id = "Order", name = self:ToString(customSkillOrder[1]).." > "..self:ToString(customSkillOrder[2]).." > "..
 																																	self:ToString(customSkillOrder[3]).." > "..self:ToString(customSkillOrder[4]).." > "..
 																																	self:ToString(customSkillOrder[5]).." > "..self:ToString(customSkillOrder[6]).." > "..
-																																	self:ToString(customSkillOrder[7]).." > "..self:ToString(customSkillOrder[8]), value = false, onclick = function() 	self.Menu.SpellsOrder.Q.QE:Value(false) 	self.Menu.SpellsOrder.W.WQ:Value(false)
-																																																																												self.Menu.SpellsOrder.W.WE:Value(false) 	self.Menu.SpellsOrder.E.EQ:Value(false)
-																																																																												self.Menu.SpellsOrder.E.EW:Value(false) 	self.Menu.SpellsOrder.ROnly:Value(false)
-																																																																												self.Menu.SpellsOrder.Q.QW:Value(false) end})
+																																	self:ToString(customSkillOrder[7]).." > "..self:ToString(customSkillOrder[8]), value = false, onclick = function() self:SetMenuStatus(8)	end})
 	--Main Menu --Spells Order
 	self.Menu:MenuElement({id = "Start", name = "Start Above Level", value = 2, min = 1, max = 18, step = 1, leftIcon = lvlIcons })
 	self.Menu:MenuElement({id = "Delay", name = "Level Up Spell Delay (seconds)", value = 0.8, min = 0, max = 2.5, step = 0.1, leftIcon = HumanizerIcons})
+	self:SetMenuInit()
 end
 
+function AutoLevelSpells:SetMenuInit()
+	self.Menu.SpellsOrder.Q.QW:Value(false)		self.Menu.SpellsOrder.Default.Order:Value()
+	self.Menu.SpellsOrder.Q.QE:Value(false) 	self.Menu.SpellsOrder.W.WQ:Value(false)
+	self.Menu.SpellsOrder.W.WE:Value(false) 	self.Menu.SpellsOrder.E.EQ:Value(false)
+	self.Menu.SpellsOrder.E.EW:Value(false) 	self.Menu.SpellsOrder.ROnly:Value(false)
+end
+
+function AutoLevelSpells:SetMenuStatus(num)
+	local switch = {
+	    [1] = function()    -- for case 1
+				self.Menu.SpellsOrder.Q.QE:Value(false) 	self.Menu.SpellsOrder.W.WQ:Value(false)
+				self.Menu.SpellsOrder.W.WE:Value(false) 	self.Menu.SpellsOrder.E.EQ:Value(false)
+				self.Menu.SpellsOrder.E.EW:Value(false) 	self.Menu.SpellsOrder.ROnly:Value(false)
+				self.Menu.SpellsOrder.Default.Order:Value(false)
+	    end,
+	    [2] = function()    -- for case 2
+				self.Menu.SpellsOrder.Q.QW:Value(false) 	self.Menu.SpellsOrder.W.WQ:Value(false)
+				self.Menu.SpellsOrder.W.WE:Value(false) 	self.Menu.SpellsOrder.E.EQ:Value(false)
+				self.Menu.SpellsOrder.E.EW:Value(false) 	self.Menu.SpellsOrder.ROnly:Value(false)
+				self.Menu.SpellsOrder.Default.Order:Value(false)
+	    end,
+	    [3] = function()    -- for case 3
+				self.Menu.SpellsOrder.Q.QE:Value(false) 	self.Menu.SpellsOrder.Q.QW:Value(false)
+				self.Menu.SpellsOrder.W.WE:Value(false) 	self.Menu.SpellsOrder.E.EQ:Value(false)
+				self.Menu.SpellsOrder.E.EW:Value(false) 	self.Menu.SpellsOrder.ROnly:Value(false)
+				self.Menu.SpellsOrder.Default.Order:Value(false)
+	    end,
+			[4] = function()
+				self.Menu.SpellsOrder.Q.QE:Value(false) 	self.Menu.SpellsOrder.W.WQ:Value(false)
+				self.Menu.SpellsOrder.Q.QW:Value(false) 	self.Menu.SpellsOrder.E.EQ:Value(false)
+				self.Menu.SpellsOrder.E.EW:Value(false) 	self.Menu.SpellsOrder.ROnly:Value(false)
+				self.Menu.SpellsOrder.Default.Order:Value(false)
+	    end,
+			[5] = function()
+				self.Menu.SpellsOrder.Q.QE:Value(false) 	self.Menu.SpellsOrder.W.WQ:Value(false)
+				self.Menu.SpellsOrder.W.WE:Value(false) 	self.Menu.SpellsOrder.Q.QW:Value(false)
+				self.Menu.SpellsOrder.E.EW:Value(false) 	self.Menu.SpellsOrder.ROnly:Value(false)
+				self.Menu.SpellsOrder.Default.Order:Value(false)
+	    end,
+			[6] = function()
+				self.Menu.SpellsOrder.Q.QE:Value(false) 	self.Menu.SpellsOrder.W.WQ:Value(false)
+				self.Menu.SpellsOrder.W.WE:Value(false) 	self.Menu.SpellsOrder.E.EQ:Value(false)
+				self.Menu.SpellsOrder.Q.QW:Value(false) 	self.Menu.SpellsOrder.ROnly:Value(false)
+				self.Menu.SpellsOrder.Default.Order:Value(false)
+	    end,
+			[7] = function()
+				self.Menu.SpellsOrder.Q.QE:Value(false) 	self.Menu.SpellsOrder.W.WQ:Value(false)
+				self.Menu.SpellsOrder.W.WE:Value(false) 	self.Menu.SpellsOrder.E.EQ:Value(false)
+				self.Menu.SpellsOrder.E.EW:Value(false) 	self.Menu.SpellsOrder.Q.QW:Value(false)
+				self.Menu.SpellsOrder.Default.Order:Value(false)
+	    end,
+			[8] = function()
+				self.Menu.SpellsOrder.Q.QE:Value(false) 	self.Menu.SpellsOrder.W.WQ:Value(false)
+				self.Menu.SpellsOrder.W.WE:Value(false) 	self.Menu.SpellsOrder.E.EQ:Value(false)
+				self.Menu.SpellsOrder.E.EW:Value(false) 	self.Menu.SpellsOrder.ROnly:Value(false)
+				self.Menu.SpellsOrder.Q.QW:Value(false)
+	    end
+	}
+	switch[num]()
+end
+
+function AutoLevelSpells:ToString(spellNum)
+	local spells = {"Q", "W", "E", "R"}
+	return spells[spellNum+1]
+end
+
+function AutoLevelSpells:ToHK(spellNum)
+	local HK = {HK_Q, HK_W, HK_E, HK_R}
+	return HK[spellNum+1]
+end
 
 function AutoLevelSpells:OrderSelected()
 	if self.Menu.SpellsOrder.Q.QW:Value() then
@@ -202,8 +239,8 @@ end
 
 function OnLoad()
 	if not FileExist(COMMON_PATH.."AutoLevel.txt") then
-		local  gsal_File = io.open(COMMON_PATH.."AutoLevel.txt", "w")
-		gsal_File:close()
+		local  File = io.open(COMMON_PATH.."AutoLevel.txt", "w")
+		File:close()
 	end
 	AutoLevelSpells()
 end
