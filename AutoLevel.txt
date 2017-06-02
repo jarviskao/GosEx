@@ -1,4 +1,4 @@
---updated to Gragas for Patch 7.11
+--updated to Jayce for Patch 7.11
 Aatrox             wewqwrwewereeqqrqq
 Ahri               qeqwqrqwqwrwweeree
 Akali              qeeqwrqeqerqewwrww
@@ -34,15 +34,16 @@ Gangplank          qewqqrqeqereewwrww
 Garen              qeweqreqqerqewwrww
 Gnar               qweqqrqwqwrwweeree
 Gragas             qweqqrqeqereewwrww
-Graves              132114131343322422
-Hecarim              123114121242233433
-Heimerdinger              123114121242233433
-Illaoi              123114121242233433
-Irelia              132224232343311411
-Janna              321334323242211411
-JarvanIV              312114131343322422
-Jax              321224212141133433
-Jayce              132114131343322422
+Graves             eqqwqrqeqereewwrww
+Hecarim            qweqqrqeqereewwrww
+Heimerdinger       qweqqrwwwqrqweeree
+Illaoi             qweeereqeqrqqwwrww
+Irelia             eqwwwrwewereeqqrqq
+Ivern              qeweereqeqrqqwwrww
+Janna              eqewerewewrwwqqrqq
+JarvanIV           eqwqqrqeqereewwrww
+Jax                ewqwwrwqwqrqqeeree
+Jayce              qwqeqwqwqwqwweeeee
 Jinx              123224212141133433
 Jhin              123114131343322422
 Kalista              312334313141122422
