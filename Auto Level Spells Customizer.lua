@@ -61,16 +61,16 @@ function AutoLevelSpells:GetSkillOrder(file)
 end
 
 function AutoLevelSpells:LoadMenu()
-	local MenuIcons			  =	"https://lh3.ggpht.com/N6pVC84qnooEsOCJ15dijaOIfiZwBi1t0z6IDwczm_xKO1E_y9NGaogv5jhjQDx3YRIF=w300"
-	local EnableIcons		  =	"http://www.myiconfinder.com/uploads/iconsets/256-256-da4555b24380d442df41fc883fbe3411.png"
-	local SequenceIcons		=	"http://www.basistechnologies.com/sites/default/files/04_Sequence.png"
-	local lvlIcons			  =	"http://downloadicons.net/sites/default/files/right-arrow-icon-95235.png"
-	local HumanizerIcons	=	"https://cdn4.iconfinder.com/data/icons/small-n-flat/24/clock-128.png"
-	local KeyQ	          = "http://www.mobafire.com/images/key-q.png"
-	local KeyW	          = "http://www.mobafire.com/images/key-w.png"
-	local KeyE	          = "http://www.mobafire.com/images/key-e.png"
-	local KeyR	          = "http://www.mobafire.com/images/key-r.png"
-	local DefaultIcons	  =	"http://findicons.com/files/icons/1700/2d/512/star.png"
+	local MenuIcons			  =	"https://image.ibb.co/b3XCCa/N6p_VC84qnoo_Es_OCJ15dija_OIfi_Zw_Bi1t0z6_IDwczm_x_KO1_E_y9_NGaogv5jhj_QDx3_YRIF_w300.png"
+	local EnableIcons		  =	"https://image.ibb.co/fo93JF/256_256_da4555b24380d442df41fc883fbe3411.png"
+	local SequenceIcons		=	"https://image.ibb.co/npkAyF/04_Sequence.png"
+	local lvlIcons			  =	"https://image.ibb.co/kAzEQv/right_arrow_icon_95235.png"
+	local HumanizerIcons	=	"https://image.ibb.co/kizsCa/clock_128.png"
+	local KeyQ	          = "https://image.ibb.co/c2dKsa/key_q.png"
+	local KeyW	          = "https://image.ibb.co/nawTkv/key_w.png"
+	local KeyE	          = "https://image.ibb.co/jCCesa/key_e.png"
+	local KeyR	          = "https://image.ibb.co/e6xesa/key_r.png"
+	local DefaultIcons	  =	"https://image.ibb.co/fdM5Xa/star.png"
 	--Main Menu
 	self.Menu = MenuElement({type = MENU, id = "Menu", name = "Auto Level Spells: Customizer", leftIcon = MenuIcons})
 	self.Menu:MenuElement({id = "UseAutoLvSpell", name = "Enable", value = true , leftIcon = EnableIcons })
