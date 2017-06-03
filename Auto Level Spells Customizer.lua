@@ -4,7 +4,7 @@ lol = 7.11
 ver = 1.2
 
 function AutoLevelSpells:__init()
-	myHeroName = myHero.charName
+
   customSkillOrder = {}
 	currentLvPts = 0
 	LvSpellTimer = nil
@@ -19,46 +19,46 @@ function AutoLevelSpells:LoadFile()
   File:close()
 
   for s in string.gmatch(FileContent,'[^\r\n]+') do   --('+' is for skipping over empty lines
-      local champion = self:GetChampionName(s)
+      local  champion = self:GetChampionName(s)
+			local myHeroName = myHero.charName
       local str = s:sub(1, 1)
       if str ~= "-" and str ~= "/" and str ~= "*" then -- if it's not a comment then
-          if champion:lower():find(myHeroName:lower()) then
-              self:GetSkillOrder(s)
-          end
+        if myHeroName:lower():find(champion:lower()) then
+            self:GetSkillOrder(s)
+        end
      end
   end
-  --PrintChat(customSkillOrder)
 end
 
 function AutoLevelSpells:GetChampionName(file)
   for i = 1, #file do
-        local str1 = file:sub(i, i)
-        local str2 = file:sub(i-1 , i-1)
-        if str1 == ' ' and str2 ~= ' ' then
-          return file:sub(1, i)
-        end
+      local str1 = file:sub(i, i)
+      local str2 = file:sub(i-1 , i-1)
+      if str1 == ' ' and str2 ~= ' ' then
+        return file:sub(1, i-1)
+      end
   end
 end
 
 function AutoLevelSpells:GetSkillOrder(file)
-        for i = 1, #file do
-                local str1 = file:sub(i, i)
-                local str2 = file:sub(i+1, i+1)
-                if str1 == " " and str2 ~= " " then
-                        for j = 1, 18 do
-                                local spell = file:sub(i+j, i+j)
-                                if spell == "1" or spell == "q" or spell == "Q" then
-                                        customSkillOrder[j] = _Q
-                                elseif spell == "2" or spell == "w" or spell == "W" then
-                                        customSkillOrder[j] = _W
-                                elseif spell == "3" or spell == "e" or spell == "E" then
-                                        customSkillOrder[j] = _E
-                                elseif spell == "4" or spell == "r" or spell == "R" then
-                                        customSkillOrder[j] = _R
-                                end
-                        end
+    for i = 1, #file do
+        local str1 = file:sub(i, i)
+        local str2 = file:sub(i+1, i+1)
+        if str1 == " " and str2 ~= " " then
+            for j = 1, 18 do
+                local spell = file:sub(i+j, i+j)
+                if spell == "1" or spell == "q" or spell == "Q" then
+                        customSkillOrder[j] = _Q
+                elseif spell == "2" or spell == "w" or spell == "W" then
+                        customSkillOrder[j] = _W
+                elseif spell == "3" or spell == "e" or spell == "E" then
+                        customSkillOrder[j] = _E
+                elseif spell == "4" or spell == "r" or spell == "R" then
+                        customSkillOrder[j] = _R
                 end
+            end
         end
+    end
 end
 
 function AutoLevelSpells:LoadMenu()
@@ -104,7 +104,7 @@ function AutoLevelSpells:LoadMenu()
 end
 
 function AutoLevelSpells:SetMenuInit()
-	self.Menu.SpellsOrder.Q.QW:Value(false)		self.Menu.SpellsOrder.Default.Order:Value()
+	self.Menu.SpellsOrder.Q.QW:Value(false)		--self.Menu.SpellsOrder.Default.Order:Value()
 	self.Menu.SpellsOrder.Q.QE:Value(false) 	self.Menu.SpellsOrder.W.WQ:Value(false)
 	self.Menu.SpellsOrder.W.WE:Value(false) 	self.Menu.SpellsOrder.E.EQ:Value(false)
 	self.Menu.SpellsOrder.E.EW:Value(false) 	self.Menu.SpellsOrder.ROnly:Value(false)
