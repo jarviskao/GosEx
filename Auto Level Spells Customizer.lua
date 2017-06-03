@@ -18,11 +18,11 @@ function AutoLevelSpells:LoadFile()
   File:close()
 
   for s in string.gmatch(FileContent,'[^\r\n]+') do   --('+' is for skipping over empty lines
-      local  champion = self:GetChampionName(s)
+      local champion = self:GetChampionName(s)
 			local myHeroName = myHero.charName
       local str = s:sub(1, 1)
       if str ~= "-" and str ~= "/" and str ~= "*" then -- if it's not a comment then
-        if myHeroName:lower():find(champion:lower()) then
+        if champion:lower():find(myHeroName:lower()) then
             self:GetSkillOrder(s)
         end
      end
