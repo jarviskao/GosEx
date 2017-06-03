@@ -4,7 +4,6 @@ lol = 7.11
 ver = 1.2
 
 function AutoLevelSpells:__init()
-
   customSkillOrder = {}
 	currentLvPts = 0
 	LvSpellTimer = nil
