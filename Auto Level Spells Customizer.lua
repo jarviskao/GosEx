@@ -92,10 +92,14 @@ function AutoLevelSpells:LoadMenu()
 	self.Menu.SpellsOrder:MenuElement({id = "ROnly", name = " R Only", value = false, leftIcon = KeyR, onclick = function() self:SetMenuStatus(7) end})
 	--Main Menu --Spells Order -- Recommend
 	self.Menu.SpellsOrder:MenuElement({type = MENU, id = "Default", name = myHero.charName.." - Custom", leftIcon = DefaultIcons})
-	self.Menu.SpellsOrder.Default:MenuElement({id = "Order", name = self:ToString(customSkillOrder[1]).." > "..self:ToString(customSkillOrder[2]).." > "..
-																																	self:ToString(customSkillOrder[3]).." > "..self:ToString(customSkillOrder[4]).." > "..
-																																	self:ToString(customSkillOrder[5]).." > "..self:ToString(customSkillOrder[6]).." > "..
-																																	self:ToString(customSkillOrder[7]).." > "..self:ToString(customSkillOrder[8]), value = false, onclick = function() self:SetMenuStatus(8)	end})
+	if #customSkillOrder == 0 then
+		self.Menu.SpellsOrder.Default:MenuElement({id = "Order", name = "Sorry, didn't find anything!", value = false, onclick = function() self:SetMenuStatus(8)	end})
+	else
+		self.Menu.SpellsOrder.Default:MenuElement({id = "Order", name = self:ToString(customSkillOrder[1]).." > "..self:ToString(customSkillOrder[2]).." > "..
+																																		self:ToString(customSkillOrder[3]).." > "..self:ToString(customSkillOrder[4]).." > "..
+																																		self:ToString(customSkillOrder[5]).." > "..self:ToString(customSkillOrder[6]).." > "..
+																																		self:ToString(customSkillOrder[7]).." > "..self:ToString(customSkillOrder[8]), value = false, onclick = function() self:SetMenuStatus(8)	end})
+	end
 	--Main Menu --Spells Order
 	self.Menu:MenuElement({id = "Start", name = "Start Above Level", value = 2, min = 1, max = 18, step = 1, leftIcon = lvlIcons })
 	self.Menu:MenuElement({id = "Delay", name = "Level Up Spell Delay (seconds)", value = 0.8, min = 0, max = 2.5, step = 0.1, leftIcon = HumanizerIcons})
@@ -223,13 +227,16 @@ function AutoLevelSpells:Tick()
 			if level >= 1 and levelpts >= 1 then
 					if Game.Timer() > LvSpellTimer + self.Menu.Delay: Value() then
 							self:OrderSelected()
-							Control.KeyDown(HK_LUS)
-							if self.Menu.SpellsOrder.Default.Order:Value() then
+							if self.Menu.SpellsOrder.Default.Order:Value() and #customSkillOrder ~= 0 then
+								Control.KeyDown(HK_LUS)
 								Control.CastSpell(self:ToHK(customSkillOrder[(level + 1 - levelpts)]))
+								Control.KeyUp(HK_LUS)
 							elseif SpellOrder ~= nil then
+								Control.KeyDown(HK_LUS)
 								Control.CastSpell(self:ToHK(SpellOrder[(level + 1 - levelpts)]))
+								Control.KeyUp(HK_LUS)
 							end
-							Control.KeyUp(HK_LUS)
+
 					end
 			end
 	end
