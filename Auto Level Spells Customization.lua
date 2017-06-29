@@ -12,6 +12,7 @@ function AutoLevelSpells:__init()
 end
 
 function AutoLevelSpells:LoadFile()
+  if not FileExist(COMMON_PATH.."AutoLevel.txt") then return end
   local File = io.open(COMMON_PATH.."AutoLevel.txt", "r")
   local FileContent = File:read("*all")
   File:close()
@@ -121,13 +122,13 @@ function  AutoLevelSpells:DisplayOrderName(key)
 end
 
 function AutoLevelSpells:ToString(spellNum)
-	local spells = {"Q", "W", "E", "R"}
-	return spells[spellNum+1]
+  	local spells = {"Q", "W", "E", "R"}
+  	return spells[spellNum+1]
 end
 
 function AutoLevelSpells:ToHK(spellNum)
-	local HK = {HK_Q, HK_W, HK_E, HK_R}
-	return HK[spellNum+1]
+  	local HK = {HK_Q, HK_W, HK_E, HK_R}
+  	return HK[spellNum+1]
 end
 
 function AutoLevelSpells:RSpellController()
