@@ -1,6 +1,6 @@
 # GosEx
 
-[Released] Auto Level Spells Customizer (updated for 7.11)
+[Released] Auto Level Spells Customizer (updated for Patch 7.X)
 
 [Released] Garen (updated for 7.9)
 
