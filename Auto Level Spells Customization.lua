@@ -1,11 +1,10 @@
 class "AutoLevelSpells"
---lol = 7.13
+--support Patch 7.X
 --ver = 1.4
 function AutoLevelSpells:__init()
     SkillOrder = {}
     OrderName = {}
-  	currentLvPts = 0
-  	LvSpellTimer = 0
+    Spells = { status = false, pts = 0, time = 0}
   	self:LoadFile()
   	self:Menu()
   	Callback.Add("Tick", function() self:Tick() end)
@@ -141,7 +140,7 @@ function AutoLevelSpells:RSpellController()
 end
 
 function AutoLevelSpells:SpellController()
-    -- Custom order On
+    -- Custom order turn On
     for key,value in pairs(OrderName) do
         if self.Menu.Custom[key]:Value() then
             self.Menu.ROnly:Value(false)
@@ -150,55 +149,54 @@ function AutoLevelSpells:SpellController()
 end
 
 function AutoLevelSpells:Tick()
-  --PrintChat("exp = "..myHero.levelData.exp.."  Current LV = "..myHero.levelData.lvl.."  lvlPts = "..myHero.levelData.lvlPts)
-	if not self.Menu.Enable:Value() then return end
+  	if not self.Menu.Enable:Value() then return end
 
-	local level = myHero.levelData.lvl
-	if level < self.Menu.Start:Value() then return end
+  	local level = myHero.levelData.lvl
+  	if level < self.Menu.Start:Value() then return end
 
-	--local levelpts = myHero.levelData.lvlPts
-  local levelpts = myHero.levelData.lvl - (myHero:GetSpellData(_Q).level + myHero:GetSpellData(_W).level + myHero:GetSpellData(_E).level + myHero:GetSpellData(_R).level)
-  --PrintChat("lvlPts = "..levelpts)
+    local levelpts = myHero.levelData.lvl - (myHero:GetSpellData(_Q).level + myHero:GetSpellData(_W).level + myHero:GetSpellData(_E).level + myHero:GetSpellData(_R).level)
 
-	if levelpts ~= currentLvPts then
-      --PrintChat("levelpts "..levelpts.." ~= currentLvPts in lua "..currentLvPts)
-			currentLvPts = levelpts
-			LvSpellTimer = Game.Timer()
-	end
+  	if levelpts ~= Spells.pts then
+  			Spells.pts = levelpts
+  			Spells.time = Game.Timer()
+        Spells.status = true
+  	end
 
-  if not self.Menu.ROnly:Value() and levelpts >= 1 and Game.Timer() - LvSpellTimer > 5 then
-      PrintChat("Fail to level spells. Please check you setting!")
-  end
+    if not self.Menu.ROnly:Value() and levelpts >= 1 and Game.Timer() - Spells.time > 5 then
+        PrintChat("Fail to level spells. Please check you setting!")
+    end
 
-	if self.Menu.ROnly:Value() then
-      --PrintChat("R Only")
-      if level >= 1 and levelpts >= 1 then
-    			if (level + 1 - levelpts) ==  6 or (level + 1 - levelpts) == 11 or (level + 1 - levelpts) == 16 then
-    					if Game.Timer() > LvSpellTimer + self.Menu.Delay:Value() then
-                --PrintChat("leveling R")
-    						Control.KeyDown(HK_LUS)
-    						Control.KeyDown(HK_R)
-    						Control.KeyUp(HK_R)
-    						Control.KeyUp(HK_LUS)
-    					end
-    			end
-      end
-	elseif not self.Menu.ROnly:Value() then
-      --PrintChat("Custom LV spell")
-			if level >= 1 and levelpts >= 1 then
-					if Game.Timer() > LvSpellTimer + self.Menu.Delay: Value() then
-            for key,value in pairs(OrderName) do
-  							if self.Menu.Custom[key]:Value() then
-    								Control.KeyDown(HK_LUS)
-    								Control.KeyDown(self:ToHK(SkillOrder[OrderName[key]][(level + 1 - levelpts)]))
-                    						Control.KeyUp(self:ToHK(SkillOrder[OrderName[key]][(level + 1 - levelpts)]))
-    								Control.KeyUp(HK_LUS)
-  							end
-            end
-					end
-			end
-	end
-
+  	if self.Menu.ROnly:Value() then
+        if level >= 1 and levelpts >= 1 then
+      			if (level + 1 - levelpts) ==  6 or (level + 1 - levelpts) == 11 or (level + 1 - levelpts) == 16 then
+      					if Game.Timer() > Spells.time + self.Menu.Delay:Value() then
+                    if Spells.status == true then
+                        Spells.status = false
+            						Control.KeyDown(HK_LUS)
+                        Control.KeyDown(HK_R)
+            						Control.KeyUp(HK_R)
+            						Control.KeyUp(HK_LUS)
+                    end
+      					end
+      			end
+        end
+  	elseif not self.Menu.ROnly:Value() then
+  			if level >= 1 and levelpts >= 1 then
+  					if Game.Timer() > Spells.time + self.Menu.Delay: Value() then
+              for key,value in pairs(OrderName) do
+    							if self.Menu.Custom[key]:Value() then
+                      if Spells.status == true then
+                          Spells.status = false
+          								Control.KeyDown(HK_LUS)
+                          Control.KeyDown(self:ToHK(SkillOrder[OrderName[key]][(level + 1 - levelpts)]))
+                          Control.KeyUp(self:ToHK(SkillOrder[OrderName[key]][(level + 1 - levelpts)]))
+          								Control.KeyUp(HK_LUS)
+                      end
+    							end
+              end
+  					end
+  			end
+  	end
 end
 
 function OnLoad()
