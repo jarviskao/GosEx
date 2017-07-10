@@ -1,6 +1,6 @@
 class "AutoLevelSpells"
 --lol = 7.13
---ver = 1.3
+--ver = 1.4
 function AutoLevelSpells:__init()
     SkillOrder = {}
     OrderName = {}
