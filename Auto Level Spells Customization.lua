@@ -177,7 +177,8 @@ function AutoLevelSpells:Tick()
     					if Game.Timer() > LvSpellTimer + self.Menu.Delay:Value() then
                 --PrintChat("leveling R")
     						Control.KeyDown(HK_LUS)
-    						Control.CastSpell(HK_R)
+    						Control.KeyDown(HK_R)
+    						Control.KeyUp(HK_R)
     						Control.KeyUp(HK_LUS)
     					end
     			end
@@ -189,7 +190,8 @@ function AutoLevelSpells:Tick()
             for key,value in pairs(OrderName) do
   							if self.Menu.Custom[key]:Value() then
     								Control.KeyDown(HK_LUS)
-    								Control.CastSpell( self:ToHK( SkillOrder[OrderName[key]][(level + 1 - levelpts)] ) )
+    								Control.KeyDown(self:ToHK(SkillOrder[OrderName[key]][(level + 1 - levelpts)]))
+                    						Control.KeyUp(self:ToHK(SkillOrder[OrderName[key]][(level + 1 - levelpts)]))
     								Control.KeyUp(HK_LUS)
   							end
             end
