@@ -48,10 +48,12 @@ Menu.KillSteal:MenuElement({id="Q",name="Use Q",value=true,leftIcon=Icons.Q})
 Menu.KillSteal:MenuElement({id="E",name="Use E",value=true,leftIcon=Icons.E})
 --Main Menu--Misc
 Menu:MenuElement({id="Misc",name="Misc",type=MENU})
-Menu.Misc:MenuElement({id="AutoR",name="Auto R",value=true})
+Menu.Misc:MenuElement({id="AutoR",name="Auto R",value=true,leftIcon=Icons.R})
 Menu.Misc:MenuElement({id="MinR",name="Min Enemies To Auto R",value=2,min=1,max=5,step=1})
-Menu.Misc:MenuElement({id="AutoQEnemies",name="Auto Q to Enemies",value=false})
-Menu.Misc:MenuElement({id="AutoQMinions",name="Auto Q to Minions",value=false})
+Menu.Misc:MenuElement({id="AutoQEnemies",name="Auto Q Enemies",value=false,leftIcon=Icons.Q})
+Menu.Misc:MenuElement({id="QEnemiesUnder",name="Allow Q Enemies Under Turret",value=false})
+Menu.Misc:MenuElement({id="AutoQMinions",name="Auto Q Minions",value=false,leftIcon=Icons.Q})
+Menu.Misc:MenuElement({id="QMinionsUnder",name="Allow Q Minions Under Turret",value=false})
 --Main Menu--Item Usage
 Menu:MenuElement({type=MENU,id="Item",name="Item Usage"})
 Menu.Item:MenuElement({id="Enable",name="Enable",value=true})
@@ -93,10 +95,80 @@ local Harass=Menu.Key.Harass:Value()
 local Clear=Menu.Key.Clear:Value()
 local LastHit=Menu.Key.LastHit:Value()
 local Flee=Menu.Key.Flee:Value()
---Auto R
 if Menu.Misc.AutoR:Value()and isReady(_R)then
+target=(_G.SDK and _G.SDK.Orbwalker:IsEnabled()and _G.SDK.TargetSelector:GetTarget(1200))or(_G.EOWLoaded and EOW:GetTarget(1200))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(1200))
+if target then
 if CountKnockedUpEnemies(R.range)>=Menu.Misc.MinR:Value()then
 Control.CastSpell(HK_R)
+end
+end
+end
+--Auto Q if not Oncombo
+if not Clear and not Combo then
+if Menu.Misc.AutoQMinions:Value()and isReady(_Q)then
+if isMinionNearBy(600)then
+if not HasBuff(myHero,Q3.name)then
+--Q Closest Target
+target=GetClosestEnemiesMinionsTarget(Q.range)
+if target then
+if myHero.pos:DistanceTo(target.pos)<myHero.range+50 then
+if myHero.attackData.state==STATE_WINDDOWN then
+local pred=GetPred(target,Q.speed,Q.delay)
+if pred then
+Control.CastSpell(HK_Q,pred)
+end
+end
+else
+local pred=GetPred(target,Q.speed,Q.delay)
+if pred then
+Control.CastSpell(HK_Q,pred)
+end
+end
+end
+end
+end
+end
+end
+--Auto Q if not Oncombo
+if not Combo then
+if Menu.Misc.AutoQEnemies:Value()and isReady(_Q)then
+--normal Q3
+if HasBuff(myHero,Q3.name)then
+target=(_G.SDK and _G.SDK.Orbwalker:IsEnabled()and _G.SDK.TargetSelector:GetTarget(Q3.range))or(_G.EOWLoaded and EOW:GetTarget(Q3.range))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(Q3.range))
+if target then
+if myHero.pos:DistanceTo(target.pos)<myHero.range+50 then
+if myHero.attackData.state==STATE_WINDDOWN then
+local pred=target:GetPrediction(Q3.speed,Q3.delay+Game.Latency()/1000)
+if pred then
+Control.CastSpell(HK_Q,pred)
+end
+end
+else
+local pred=target:GetPrediction(Q3.speed,Q3.delay+Game.Latency()/1000)
+if pred then
+Control.CastSpell(HK_Q,pred)
+end
+end
+end
+else
+--normal Q
+target=(_G.SDK and _G.SDK.Orbwalker:IsEnabled()and _G.SDK.TargetSelector:GetTarget(Q.range))or(_G.EOWLoaded and EOW:GetTarget(Q.range))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(Q.range))
+if target then
+if myHero.pos:DistanceTo(target.pos)<myHero.range+50 then
+if myHero.attackData.state==STATE_WINDDOWN then
+local pred=QPred:GetPrediction(target,myHero.pos)
+if pred and pred.hitChance>=0.22 then
+Control.CastSpell(HK_Q,pred.castPos)
+end
+end
+else
+local pred=QPred:GetPrediction(target,myHero.pos)
+if pred and pred.hitChance>=0.22 then
+Control.CastSpell(HK_Q,pred.castPos)
+end
+end
+end
+end
 end
 end
 KillSteal()
