@@ -11,6 +11,7 @@ local R={range=1200,speed=myHero:GetSpellData(_R).speed,delay=0.25,width=myHero:
 --OTHER
 local QPred=Prediction:SetSpell(Q,TYPE_LINE,true)
 local SpellList={"Q","W","E","R"}
+local res=Game.Resolution()
 --icon
 local Icons={Menu="http://static.lolskill.net/img/champions/64/yasuo.png",Q="https://vignette4.wikia.nocookie.net/leagueoflegends/images/e/e5/Steel_Tempest.png",W="https://vignette3.wikia.nocookie.net/leagueoflegends/images/6/61/Wind_Wall.png",E="https://vignette4.wikia.nocookie.net/leagueoflegends/images/f/f8/Sweeping_Blade.png",R="https://vignette1.wikia.nocookie.net/leagueoflegends/images/c/c6/Last_Breath.png",Tiamat="https://vignette2.wikia.nocookie.net/leagueoflegends/images/e/e3/Tiamat_item.png",RavenousHydra="https://vignette1.wikia.nocookie.net/leagueoflegends/images/e/e8/Ravenous_Hydra_item.png",TitanicHydra="https://vignette1.wikia.nocookie.net/leagueoflegends/images/2/22/Titanic_Hydra_item.png",YoumuusGhostblade="https://vignette4.wikia.nocookie.net/leagueoflegends/images/4/41/Youmuu%27s_Ghostblade_item.png",RanduinsOmen="https://vignette1.wikia.nocookie.net/leagueoflegends/images/0/08/Randuin%27s_Omen_item.png",BladeoftheRuinedKing="https://vignette2.wikia.nocookie.net/leagueoflegends/images/2/2f/Blade_of_the_Ruined_King_item.png",HextechGunblade="https://vignette4.wikia.nocookie.net/leagueoflegends/images/6/64/Hextech_Gunblade_item.png"}
 --Main Menu
@@ -28,6 +29,7 @@ Menu:MenuElement({type=MENU,id="Mode",name="Mode Settings"})
 Menu.Mode:MenuElement({type=MENU,id="Combo",name="Combo"})
 Menu.Mode.Combo:MenuElement({id="Q",name="Use Q",value=true,leftIcon=Icons.Q})
 Menu.Mode.Combo:MenuElement({id="E",name="Use E",value=true,leftIcon=Icons.E})
+--Menu.Mode.Combo:MenuElement({id="W",name="Use W",value=true,leftIcon=Icons.W})
 --Menu.Mode.Combo:MenuElement({id="R",name="Use R",value=true,leftIcon=Icons.R})
 Menu.Mode.Combo:MenuElement({id="Gapclose",name="Use Gapclose",value=true})
 --Main Menu--Mode Setting--Harass
@@ -51,6 +53,7 @@ Menu.KillSteal:MenuElement({id="Q",name="Use Q",value=true,leftIcon=Icons.Q})
 Menu.KillSteal:MenuElement({id="E",name="Use E",value=true,leftIcon=Icons.E})
 --Main Menu--Misc
 Menu:MenuElement({id="Misc",name="Misc",type=MENU})
+Menu.Misc:MenuElement({id="AutoW",name="Auto W (Windwall)",value=true,leftIcon=Icons.W})
 Menu.Misc:MenuElement({id="AutoR",name="Auto R",value=true,leftIcon=Icons.R})
 Menu.Misc:MenuElement({id="MinR",name="Min Enemies To Auto R",value=2,min=1,max=5,step=1})
 Menu.Misc:MenuElement({id="AutoQEnemies",name="Auto Q Enemies",value=false,leftIcon=Icons.Q})
@@ -81,6 +84,7 @@ end
 ---------
 function OnDraw()
 if myHero.dead or Menu.Drawing.DisableAll:Value()then return end
+--Draw.Circle(myHero.pos,myHero.boundingRadius,1,Draw.Color(120,255,0,220))
 --Draw Range
 for i=1,4 do
 if Menu.Drawing[SpellList[i]].Enabled:Value()then
@@ -98,6 +102,7 @@ local Harass=Menu.Key.Harass:Value()
 local Clear=Menu.Key.Clear:Value()
 local LastHit=Menu.Key.LastHit:Value()
 local Flee=Menu.Key.Flee:Value()
+AutoWindwall()
 if Menu.Misc.AutoR:Value()and isReady(_R)then
 target=(_G.SDK and _G.SDK.Orbwalker:IsEnabled()and _G.SDK.TargetSelector:GetTarget(1200))or(_G.EOWLoaded and EOW:GetTarget(1200))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(1200))
 if target then
@@ -217,6 +222,33 @@ elseif Clear then
 OnClear()
 elseif Flee then
 OnFlee()
+end
+end
+---------
+--AutoWindwall--
+---------
+function AutoWindwall()
+if not Menu.Misc.AutoW:Value()then return end
+--W
+if isReady(_W)then
+for i=1,Game.MissileCount()do
+local missile=Game.Missile(i)
+local data=missile.missileData
+if missile and missile.isEnemy and(missile.team<300)and(data.owner>0)and(data.target==0)and(data.speed>0)and(data.width>10)and(data.range>0)then
+if(res.x*2>=missile.pos2D.x)and(res.x*-1<=missile.pos2D.x)and(res.y*2>=missile.pos2D.y)and(res.y*-1<=missile.pos2D.y)then
+local endPos=data.endPos
+local myPos=myHero.pos
+local pointSegment,pointLine,isOnSegment=VectorPointProjectionOnLineSegment(missile.pos,endPos,myPos)--(posStart,posEnd,target)
+local width=data.width+myHero.boundingRadius
+if isOnSegment and GetDistanceSqr(pointSegment,myPos)<width*width then
+local TimeToHit=((myPos:DistanceTo(missile.pos)-myHero.boundingRadius)/data.speed)
+if TimeToHit<0.3 and TimeToHit>0.05 then
+Control.CastSpell(HK_W,myPos:Extended(data.startPos,200))
+end
+end
+end
+end
+end
 end
 end
 ---------
