@@ -1,11 +1,9 @@
 # GosEx
 
-[Released] Auto Level Spells Customization (updated for Patch 7.X)
-
-[Released] Garen (updated for 7.9)
-
-[Released] Pantheon (updated for 7.9)
-
-[Released] Wukong (Monkey King) (updated for 7.5)
-
-[Released] LeeSin (updated for 7.6)
+[Released] Auto Level Spells Customization (Support Patch 7.X)
+[Released] Yasuo - Easier to play (Support Patch 7.X)
+---------------------------------------------------------------------
+[Outdated] Garen (updated for 7.9)
+[Outdated] Pantheon (updated for 7.9)
+[Outdated] Wukong (Monkey King) (updated for 7.5)
+[Outdated] LeeSin (updated for 7.6)
