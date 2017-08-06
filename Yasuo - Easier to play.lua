@@ -13,7 +13,7 @@ local QPred=Prediction:SetSpell(Q,TYPE_LINE,true)
 local SpellList={"Q","W","E","R"}
 local res=Game.Resolution()
 --icon
-local Icons={Menu="http://static.lolskill.net/img/champions/64/yasuo.png",Q="https://vignette4.wikia.nocookie.net/leagueoflegends/images/e/e5/Steel_Tempest.png",W="https://vignette3.wikia.nocookie.net/leagueoflegends/images/6/61/Wind_Wall.png",E="https://vignette4.wikia.nocookie.net/leagueoflegends/images/f/f8/Sweeping_Blade.png",R="https://vignette1.wikia.nocookie.net/leagueoflegends/images/c/c6/Last_Breath.png",Tiamat="https://vignette2.wikia.nocookie.net/leagueoflegends/images/e/e3/Tiamat_item.png",RavenousHydra="https://vignette1.wikia.nocookie.net/leagueoflegends/images/e/e8/Ravenous_Hydra_item.png",TitanicHydra="https://vignette1.wikia.nocookie.net/leagueoflegends/images/2/22/Titanic_Hydra_item.png",YoumuusGhostblade="https://vignette4.wikia.nocookie.net/leagueoflegends/images/4/41/Youmuu%27s_Ghostblade_item.png",RanduinsOmen="https://vignette1.wikia.nocookie.net/leagueoflegends/images/0/08/Randuin%27s_Omen_item.png",BladeoftheRuinedKing="https://vignette2.wikia.nocookie.net/leagueoflegends/images/2/2f/Blade_of_the_Ruined_King_item.png",HextechGunblade="https://vignette4.wikia.nocookie.net/leagueoflegends/images/6/64/Hextech_Gunblade_item.png"}
+local Icons={Menu="http://static.lolskill.net/img/champions/64/yasuo.png",Q="https://vignette4.wikia.nocookie.net/leagueoflegends/images/e/e5/Steel_Tempest.png",W="https://vignette3.wikia.nocookie.net/leagueoflegends/images/6/61/Wind_Wall.png",E="https://vignette4.wikia.nocookie.net/leagueoflegends/images/f/f8/Sweeping_Blade.png",R="https://vignette1.wikia.nocookie.net/leagueoflegends/images/c/c6/Last_Breath.png",Tiamat="https://vignette2.wikia.nocookie.net/leagueoflegends/images/e/e3/Tiamat_item.png",RavenousHydra="https://vignette1.wikia.nocookie.net/leagueoflegends/images/e/e8/Ravenous_Hydra_item.png",TitanicHydra="https://vignette1.wikia.nocookie.net/leagueoflegends/images/2/22/Titanic_Hydra_item.png",YoumuusGhostblade="https://vignette4.wikia.nocookie.net/leagueoflegends/images/4/41/Youmuu%27s_Ghostblade_item.png",RanduinsOmen="https://vignette1.wikia.nocookie.net/leagueoflegends/images/0/08/Randuin%27s_Omen_item.png",BilgewaterCutlass="https://vignette1.wikia.nocookie.net/leagueoflegends/images/4/44/Bilgewater_Cutlass_item.png",BladeoftheRuinedKing="https://vignette2.wikia.nocookie.net/leagueoflegends/images/2/2f/Blade_of_the_Ruined_King_item.png",HextechGunblade="https://vignette4.wikia.nocookie.net/leagueoflegends/images/6/64/Hextech_Gunblade_item.png"}
 --Main Menu
 local Menu=MenuElement({type=MENU,id="Menu",name="Yasuo - Easier to play",leftIcon=Icons.Menu})
 --Main Menu--Key Setting
@@ -30,7 +30,7 @@ Menu.Mode:MenuElement({type=MENU,id="Combo",name="Combo"})
 Menu.Mode.Combo:MenuElement({id="Q",name="Use Q",value=true,leftIcon=Icons.Q})
 Menu.Mode.Combo:MenuElement({id="E",name="Use E",value=true,leftIcon=Icons.E})
 --Menu.Mode.Combo:MenuElement({id="W",name="Use W",value=true,leftIcon=Icons.W})
---Menu.Mode.Combo:MenuElement({id="R",name="Use R",value=true,leftIcon=Icons.R})
+Menu.Mode.Combo:MenuElement({id="R",name="Use R",value=false,leftIcon=Icons.R})
 Menu.Mode.Combo:MenuElement({id="Gapclose",name="Use Gapclose",value=true})
 --Main Menu--Mode Setting--Harass
 --Menu.Mode:MenuElement({type=MENU,id="Harass",name="Harass"})
@@ -51,15 +51,24 @@ Menu.Mode.Flee:MenuElement({id="E",name="Use E",value=true,leftIcon=Icons.E})
 Menu:MenuElement({type=MENU,id="KillSteal",name="KillSteal"})
 Menu.KillSteal:MenuElement({id="Q",name="Use Q",value=true,leftIcon=Icons.Q})
 Menu.KillSteal:MenuElement({id="E",name="Use E",value=true,leftIcon=Icons.E})
+Menu.KillSteal:MenuElement({id="R",name="Use R",value=false,leftIcon=Icons.R})
+Menu.KillSteal:MenuElement({type=MENU,id="WhiteList",name="White List",leftIcon=Icons.R})
+Menu.KillSteal.WhiteList:MenuElement({type=SPACE,id="info",name="Detecting Heroes, Please Wait..."})
+Menu.KillSteal:MenuElement({id="Gapclose",name="Use Gapclose",value=true})
+if Game.Timer()>30 then DelayAction(function()WhiteList()end,5)else DelayAction(function()WhiteList()end,30)end
+--Main Menu--KillSteal
+Menu:MenuElement({type=MENU,id="WindWall",name="WindWall"})
+Menu.WindWall:MenuElement({id="AutoW",name="Auto W Missile Spell",value=true,leftIcon=Icons.W})
+Menu.WindWall:MenuElement({id="AutoWAA",name="Auto W Auto Attack",value=true,leftIcon=Icons.W})
+Menu.WindWall:MenuElement({id="AutoWAAHp",name="Auto W AA if health is below:",value=20,min=5,max=95,identifier="%"})
 --Main Menu--Misc
 Menu:MenuElement({id="Misc",name="Misc",type=MENU})
-Menu.Misc:MenuElement({id="AutoW",name="Auto W (Windwall)",value=true,leftIcon=Icons.W})
 Menu.Misc:MenuElement({id="AutoR",name="Auto R",value=true,leftIcon=Icons.R})
 Menu.Misc:MenuElement({id="MinR",name="Min Enemies To Auto R",value=2,min=1,max=5,step=1})
 Menu.Misc:MenuElement({id="AutoQEnemies",name="Auto Q Enemies",value=false,leftIcon=Icons.Q})
 Menu.Misc:MenuElement({id="DontQEnemiesUnder",name="Don't Q Enemies Under Turret",value=true})
 Menu.Misc:MenuElement({id="AutoQMinions",name="Auto Q Minions",value=false,leftIcon=Icons.Q})
-Menu.Misc:MenuElement({id="DontQMinionsUnder",name="Don't Minions Under Turret",value=true})
+Menu.Misc:MenuElement({id="DontQMinionsUnder",name="Don't Q Minions Under Turret",value=true})
 --Main Menu--Item Usage
 Menu:MenuElement({type=MENU,id="Item",name="Item Usage"})
 Menu.Item:MenuElement({id="Enable",name="Enable",value=true})
@@ -68,6 +77,7 @@ Menu.Item:MenuElement({id="RavenousHydra",name="Ravenous Hydra",value=true,leftI
 Menu.Item:MenuElement({id="TitanicHydra",name="Titanic Hydra",value=true,leftIcon=Icons.TitanicHydra})
 Menu.Item:MenuElement({id="YoumuusGhostblade",name="Youmuu's Ghostblade",value=true,leftIcon=Icons.YoumuusGhostblade})
 Menu.Item:MenuElement({id="RanduinsOmen",name="Randuin's Omen",value=true,leftIcon=Icons.RanduinsOmen})
+Menu.Item:MenuElement({id="BilgewaterCutlass",name="Bilgewater Cutlass",value=true,leftIcon=Icons.BilgewaterCutlass})
 Menu.Item:MenuElement({id="BladeoftheRuinedKing",name="Blade of the Ruined King",value=true,leftIcon=Icons.BladeoftheRuinedKing})
 Menu.Item:MenuElement({id="HextechGunblade",name="Hextech Gunblade",value=true,leftIcon=Icons.HextechGunblade})
 --Main Menu--Drawing
@@ -78,6 +88,15 @@ Menu.Drawing:MenuElement({id=SpellList[i],name="Draw "..SpellList[i].." Range",t
 Menu.Drawing[SpellList[i]]:MenuElement({id="Enabled",name="Enabled",value=true})
 Menu.Drawing[SpellList[i]]:MenuElement({id="Width",name="Width",value=2,min=1,max=5,step=1})
 Menu.Drawing[SpellList[i]]:MenuElement({id="Color",name="Color",color=Draw.Color(255,255,255,255)})
+end
+function WhiteList()
+for i=1,Game.HeroCount()do
+local hero=Game.Hero(i)
+if hero.isEnemy then
+Menu.KillSteal.WhiteList:MenuElement({id=hero.networkID,name="Use R On: "..hero.charName,value=true})
+end
+end
+Menu.KillSteal.WhiteList.info:Remove()
 end
 ---------
 --DRAW--
@@ -103,6 +122,65 @@ local Clear=Menu.Key.Clear:Value()
 local LastHit=Menu.Key.LastHit:Value()
 local Flee=Menu.Key.Flee:Value()
 AutoWindwall()
+AutoCast()
+KillSteal()
+if Combo then
+OnCombo()
+elseif Clear then
+OnClear()
+elseif Flee then
+OnFlee()
+end
+end
+---------
+--AutoWindwall--
+---------
+function AutoWindwall()
+if isReady(_W)then
+for i=1,Game.MissileCount()do
+local missile=Game.Missile(i)
+local data=missile.missileData
+--W Missile
+if Menu.WindWall.AutoW:Value()then
+if missile and missile.isEnemy and(missile.team<300)and(data.owner>0)and(data.target==0)and(data.speed>0)and(data.width>0)and(data.range>0)then
+if(res.x*2>=missile.pos2D.x)and(res.x*-1<=missile.pos2D.x)and(res.y*2>=missile.pos2D.y)and(res.y*-1<=missile.pos2D.y)then
+local endPos=data.endPos
+local myPos=myHero.pos
+local pointSegment,pointLine,isOnSegment=VectorPointProjectionOnLineSegment(missile.pos,endPos,myPos)--(posStart,posEnd,target)
+local width=data.width+myHero.boundingRadius
+if isOnSegment and GetDistanceSqr(pointSegment,myPos)<width*width then
+local TimeToHit=((myPos:DistanceTo(missile.pos)-myHero.boundingRadius)/data.speed)
+if TimeToHit<0.35 and TimeToHit>0.05 then
+Control.CastSpell(HK_W,myPos:Extended(data.startPos,200))
+end
+end
+end
+end
+end
+--W AA
+if Menu.WindWall.AutoWAA:Value()then
+if missile and missile.isEnemy and(missile.team<300)and(data.owner>0)and(data.target==myHero.handle)and(data.speed>0)and(data.range>0)then
+if not data.name:find("SRU_")and(myHero.maxHealth*Menu.WindWall.AutoWAAHp:Value()*0.01)>myHero.health then
+Control.CastSpell(HK_W,myHero.pos:Extended(data.startPos,200))
+end
+end
+end
+end
+--[[--W AA
+for i=1,Game.HeroCount()do
+local hero=Game.Hero(i)
+if hero and hero.isEnemy and hero.visible and hero.valid and hero.alive and hero.isTargetable and myHero.pos:DistanceTo(hero.pos)<=hero.range+50 then
+if hero.attackData.target==myHero.handle and hero.activeSpell.isAutoAttack then
+Control.CastSpell(HK_W,myHero.pos:Extended(hero.activeSpell.startPos,200))
+end
+end
+end]]
+end
+end
+---------
+--AutoCast--
+---------
+function AutoCast()
 if Menu.Misc.AutoR:Value()and isReady(_R)then
 target=(_G.SDK and _G.SDK.Orbwalker:IsEnabled()and _G.SDK.TargetSelector:GetTarget(1200))or(_G.EOWLoaded and EOW:GetTarget(1200))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(1200))
 if target then
@@ -215,41 +293,6 @@ end
 end
 end
 end
-KillSteal()
-if Combo then
-OnCombo()
-elseif Clear then
-OnClear()
-elseif Flee then
-OnFlee()
-end
-end
----------
---AutoWindwall--
----------
-function AutoWindwall()
-if not Menu.Misc.AutoW:Value()then return end
---W
-if isReady(_W)then
-for i=1,Game.MissileCount()do
-local missile=Game.Missile(i)
-local data=missile.missileData
-if missile and missile.isEnemy and(missile.team<300)and(data.owner>0)and(data.target==0)and(data.speed>0)and(data.width>10)and(data.range>0)then
-if(res.x*2>=missile.pos2D.x)and(res.x*-1<=missile.pos2D.x)and(res.y*2>=missile.pos2D.y)and(res.y*-1<=missile.pos2D.y)then
-local endPos=data.endPos
-local myPos=myHero.pos
-local pointSegment,pointLine,isOnSegment=VectorPointProjectionOnLineSegment(missile.pos,endPos,myPos)--(posStart,posEnd,target)
-local width=data.width+myHero.boundingRadius
-if isOnSegment and GetDistanceSqr(pointSegment,myPos)<width*width then
-local TimeToHit=((myPos:DistanceTo(missile.pos)-myHero.boundingRadius)/data.speed)
-if TimeToHit<0.3 and TimeToHit>0.05 then
-Control.CastSpell(HK_W,myPos:Extended(data.startPos,200))
-end
-end
-end
-end
-end
-end
 end
 ---------
 --KillSteal--
@@ -285,6 +328,25 @@ if hero and hero.isEnemy and hero.visible and hero.valid and hero.alive and hero
 if not HasBuff(hero,"YasuoDashWrapper")then
 if CalcMagicalDamage(myHero,hero,Edmg)>=hero.health+hero.shieldAP then
 Control.CastSpell(HK_E,hero)
+end
+end
+end
+end
+end
+end
+--KillSteal R
+if Menu.KillSteal.R:Value()and isReady(_R)then
+if isEnemyNearBy(R.range)then
+--spell data
+local levelR=myHero:GetSpellData(_R).level
+local Rdmg=({200,300,400})[levelR]+1.5*myHero.bonusDamage
+--loop
+for i=1,Game.HeroCount()do
+local hero=Game.Hero(i)
+if hero and hero.isEnemy and hero.visible and hero.valid and hero.alive and hero.isTargetable then
+if Menu.KillSteal.WhiteList[hero.networkID]:Value()and isKnockedUp(hero)and hero.pos:DistanceTo(myHero.pos)<=R.range then
+if CalcPhysicalDamage(myHero,hero,Rdmg)>=hero.health+hero.shieldAD then
+Control.CastSpell(HK_R,hero)
 end
 end
 end
@@ -357,10 +419,22 @@ local TotalDamage=CalcMagicalDamage(myHero,target,Edmg)+CalcPhysicalDamage(myHer
 if TotalDamage>=target.health then
 --GapClose
 local minion=GetGapCloseEnimiesMinions(target.pos,gapDistance-100)
+local hero=GetGapCloseEnimiesHero(target.pos,gapDistance-100,target)
 if minion then
 Control.CastSpell(HK_E,minion)
+elseif hero then
+Control.CastSpell(HK_E,hero)
 end
 end
+end
+end
+end
+--normal R
+if Menu.Mode.Combo.R:Value()and isReady(_R)then
+target=(_G.SDK and _G.SDK.Orbwalker:IsEnabled()and _G.SDK.TargetSelector:GetTarget(R.range))or(_G.EOWLoaded and EOW:GetTarget(R.range))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(R.range))
+if target then
+if isKnockedUp(target)then
+Control.CastSpell(HK_R,target)
 end
 end
 end
@@ -478,8 +552,11 @@ if Menu.Mode.Flee.E:Value()and isReady(_E)then
 local gapDistance=myHero.pos:DistanceTo(mousePos)
 --GapClose
 local minion=GetGapCloseEnimiesMinions(mousePos,gapDistance-100)
+local hero=GetGapCloseEnimiesHero(mousePos,gapDistance-100,target)
 if minion then
 Control.CastSpell(HK_E,minion)
+elseif hero then
+Control.CastSpell(HK_E,hero)
 end
 end
 end
@@ -502,6 +579,10 @@ end
 local item=GetItemSlot(3143)
 if item and Menu.Item.RanduinsOmen:Value()then
 Control.CastSpell(SlotToHotKeys(item))
+end
+local item=GetItemSlot(3144)
+if item and Menu.Item.BilgewaterCutlass:Value()then
+Control.CastSpell(SlotToHotKeys(item),target)
 end
 local item=GetItemSlot(3153)
 if item and Menu.Item.BladeoftheRuinedKing:Value()then
@@ -664,7 +745,7 @@ end
 return false
 end
 function GetPred(unit,speed,delay)
-if IsImmobileTarget(unit)or unit.attackData.state==STATE_WINDUP or(unit.posTo.x==0 and unit.posTo.y==0 and unit.posTo.z==0)then
+if IsImmobileTarget(unit)or unit.attackData.state==STATE_WINDUP or(unit.posTo==unit.pos)or(unit.posTo.x==0 and unit.posTo.y==0 and unit.posTo.z==0)then
 return unit.pos
 else
 return unit:GetPrediction(speed,delay)
@@ -829,6 +910,18 @@ local minion=Game.Minion(i)
 if minion and minion.isEnemy and minion.visible and minion.valid and minion.alive and minion.isTargetable then
 if minion.pos:DistanceTo(pos)<=range and minion.pos:DistanceTo(myHero.pos)<E.range and not HasBuff(minion,"YasuoDashWrapper")then
 return minion
+end
+end
+end
+return false
+end
+function GetGapCloseEnimiesHero(pos,range,target)
+local range=range or 800
+for i=1,Game.HeroCount()do
+local hero=Game.Hero(i)
+if hero and hero.isEnemy and hero~=target and hero.visible and hero.valid and hero.alive and hero.isTargetable then
+if hero.pos:DistanceTo(pos)<=range and hero.pos:DistanceTo(myHero.pos)<E.range and not HasBuff(hero,"YasuoDashWrapper")then
+return hero
 end
 end
 end
