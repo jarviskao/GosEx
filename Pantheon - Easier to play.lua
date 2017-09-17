@@ -10,6 +10,7 @@ local LocalGameHero=Game.Hero
 local LocalGameMinionCount=Game.MinionCount
 local LocalGameMinion=Game.Minion
 local LocalGameCanUseSpell=Game.CanUseSpell
+local LocalDrawCircle=Draw.Circle
 local LocalMathHuge=math.huge
 local CastSpell=Control.CastSpell
 local ITEM_1=_G.ITEM_1
@@ -97,53 +98,53 @@ if myHero.dead or Menu.Drawing.DisableAll:Value()then return end
 if Menu.Drawing.Q.Enabled:Value()then
 if Menu.Drawing.Ready:Value()then
 if isReady(_Q)then
-Draw.Circle(myHero.pos,Q.range,Menu.Drawing.Q.Width:Value(),Menu.Drawing.Q.Color:Value())
+LocalDrawCircle(myHero.pos,Q.range,Menu.Drawing.Q.Width:Value(),Menu.Drawing.Q.Color:Value())
 end
 else
-Draw.Circle(myHero.pos,Q.range,Menu.Drawing.Q.Width:Value(),Menu.Drawing.Q.Color:Value())
+LocalDrawCircle(myHero.pos,Q.range,Menu.Drawing.Q.Width:Value(),Menu.Drawing.Q.Color:Value())
 end
 end
 if Menu.Drawing.W.Enabled:Value()then
 if Menu.Drawing.Ready:Value()then
 if isReady(_W)then
-Draw.Circle(myHero.pos,W.range,Menu.Drawing.W.Width:Value(),Menu.Drawing.W.Color:Value())
+LocalDrawCircle(myHero.pos,W.range,Menu.Drawing.W.Width:Value(),Menu.Drawing.W.Color:Value())
 end
 else
-Draw.Circle(myHero.pos,W.range,Menu.Drawing.W.Width:Value(),Menu.Drawing.W.Color:Value())
+LocalDrawCircle(myHero.pos,W.range,Menu.Drawing.W.Width:Value(),Menu.Drawing.W.Color:Value())
 end
 end
 if Menu.Drawing.E.Enabled:Value()then
 if Menu.Drawing.Ready:Value()then
 if isReady(_E)then
-Draw.Circle(myHero.pos,E.range,Menu.Drawing.E.Width:Value(),Menu.Drawing.E.Color:Value())
+LocalDrawCircle(myHero.pos,E.range,Menu.Drawing.E.Width:Value(),Menu.Drawing.E.Color:Value())
 end
 else
-Draw.Circle(myHero.pos,E.range,Menu.Drawing.E.Width:Value(),Menu.Drawing.E.Color:Value())
+LocalDrawCircle(myHero.pos,E.range,Menu.Drawing.E.Width:Value(),Menu.Drawing.E.Color:Value())
 end
 end
 if Menu.Drawing.R.Enabled:Value()then
 local distance=mousePos:DistanceTo(myHero.pos)
 if Menu.Drawing.Ready:Value()then
 if isReady(_R)then
-Draw.Circle(myHero.pos,R.range,Menu.Drawing.R.Width:Value(),Menu.Drawing.R.Color:Value())
+LocalDrawCircle(myHero.pos,R.range,Menu.Drawing.R.Width:Value(),Menu.Drawing.R.Color:Value())
 if distance>3500 and distance<R.range then
-Draw.Circle(mousePos,R.attackRange,1,Draw.Color(80,255,255,255))
+LocalDrawCircle(mousePos,R.attackRange,1,Draw.Color(80,255,255,255))
 end
 end
 else
-Draw.Circle(myHero.pos,R.range,Menu.Drawing.R.Width:Value(),Menu.Drawing.R.Color:Value())
+LocalDrawCircle(myHero.pos,R.range,Menu.Drawing.R.Width:Value(),Menu.Drawing.R.Color:Value())
 if distance>3500 and distance<R.range then
-Draw.Circle(mousePos,R.attackRange,1,Draw.Color(80,255,255,255))
+LocalDrawCircle(mousePos,R.attackRange,1,Draw.Color(80,255,255,255))
 end
 end
 end
 if Menu.Drawing.RMiniMap.Enabled:Value()then
 if Menu.Drawing.Ready:Value()then
 if isReady(_R)then
-Draw.CircleMinimap(myHero.pos,R.range,Menu.Drawing.RMiniMap.Width:Value(),Menu.Drawing.RMiniMap.Color:Value())
+LocalDrawCircleMinimap(myHero.pos,R.range,Menu.Drawing.RMiniMap.Width:Value(),Menu.Drawing.RMiniMap.Color:Value())
 end
 else
-Draw.CircleMinimap(myHero.pos,R.range,Menu.Drawing.RMiniMap.Width:Value(),Menu.Drawing.RMiniMap.Color:Value())
+LocalDrawCircleMinimap(myHero.pos,R.range,Menu.Drawing.RMiniMap.Width:Value(),Menu.Drawing.RMiniMap.Color:Value())
 end
 end
 end
@@ -282,7 +283,7 @@ end
 end
 end
 --W
-if Menu.Mode.Combo.W:Value()and isReady(_W)then
+if Menu.Mode.Combo.W:Value()and isReady(_W)and not myHero.activeSpell.valid then
 target=(LocalSDK and LocalSDK.Orbwalker:IsEnabled()and LocalSDK.TargetSelector:GetTarget(W.range))or(LocalEOW and EOW:GetTarget(W.range))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(W.range))
 --W if do not have sheild or Ally is nearby 800 range or Enemies AA range<300
 if target then
