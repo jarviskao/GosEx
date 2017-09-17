@@ -1,340 +1,662 @@
-class "Pantheon"
-
-lol = 7.9
-ver = 1.8
-
-function Pantheon:__init()
-	ICLoaded = _G.SDK and true
-	self:LoadSpells()
-	self:LoadMenu()
-	Callback.Add("Tick", function() self:Tick() end)
-	Callback.Add("Draw", function() self:Draw() end)
+--Hero
+if myHero.charName~="Pantheon"then return end
+--Localize
+local myHero=_G.myHero
+local LocalSDK=_G.SDK
+local LocalEOW=_G.EOWLoaded
+local LocalGOS=_G.GOS
+local LocalGameHeroCount=Game.HeroCount
+local LocalGameHero=Game.Hero
+local LocalGameMinionCount=Game.MinionCount
+local LocalGameMinion=Game.Minion
+local LocalGameCanUseSpell=Game.CanUseSpell
+local LocalMathHuge=math.huge
+local CastSpell=Control.CastSpell
+local ITEM_1=_G.ITEM_1
+local ITEM_2=_G.ITEM_2
+local ITEM_3=_G.ITEM_3
+local ITEM_4=_G.ITEM_4
+local ITEM_5=_G.ITEM_5
+local ITEM_6=_G.ITEM_6
+local ITEM_7=_G.ITEM_7
+local _Q=_G._Q
+local _W=_G._W
+local _E=_G._E
+local _R=_G._R
+local STATE_WINDUP=_G.STATE_WINDUP
+local STATE_WINDDOWN=_G.STATE_WINDDOWN
+local TEAM_ALLY=myHero.team
+local TEAM_JUNGLE=300
+local TEAM_ENEMY=300-TEAM_ALLY
+--Spell
+local Q={range=600,speed=1500,delay=0.25,width=0}
+local W={range=600,speed=0,delay=0.25,width=0}
+local E={name="PantheonE",range=650,speed=778,delay=0.25,width=100}
+local R={range=5500,attackRange=700,speed=20,delay=0.25,width=0}
+--OTHER
+local orbStatus=true
+local SpellTable={"Q","W","E","R"}
+--icon
+local Icons={Menu="http://static.lolskill.net/img/champions/64/pantheon.png",Q="https://vignette2.wikia.nocookie.net/leagueoflegends/images/1/1b/Spear_Shot.png",W="https://vignette4.wikia.nocookie.net/leagueoflegends/images/1/1b/Aegis_of_Zeonia.png",E="https://vignette3.wikia.nocookie.net/leagueoflegends/images/e/ea/Heartseeker_Strike.png",R="https://vignette1.wikia.nocookie.net/leagueoflegends/images/d/dd/Grand_Skyfall.png",Tiamat="https://vignette2.wikia.nocookie.net/leagueoflegends/images/e/e3/Tiamat_item.png",RavenousHydra="https://vignette1.wikia.nocookie.net/leagueoflegends/images/e/e8/Ravenous_Hydra_item.png",TitanicHydra="https://vignette1.wikia.nocookie.net/leagueoflegends/images/2/22/Titanic_Hydra_item.png",YoumuusGhostblade="https://vignette4.wikia.nocookie.net/leagueoflegends/images/4/41/Youmuu%27s_Ghostblade_item.png",RanduinsOmen="https://vignette1.wikia.nocookie.net/leagueoflegends/images/0/08/Randuin%27s_Omen_item.png",BilgewaterCutlass="https://vignette1.wikia.nocookie.net/leagueoflegends/images/4/44/Bilgewater_Cutlass_item.png",BladeoftheRuinedKing="https://vignette2.wikia.nocookie.net/leagueoflegends/images/2/2f/Blade_of_the_Ruined_King_item.png",HextechGunblade="https://vignette4.wikia.nocookie.net/leagueoflegends/images/6/64/Hextech_Gunblade_item.png"}
+--Main Menu
+local Menu=MenuElement({type=MENU,id="Menu",name="Pantheon - Easier to play",leftIcon=Icons.Menu})
+--Main Menu--Key Setting
+Menu:MenuElement({type=MENU,id="Key",name="Keys Settings"})
+Menu.Key:MenuElement({id="Combo",name="Combo Key",key=32})
+Menu.Key:MenuElement({id="Harass",name="Harass Key",key=string.byte("C")})
+Menu.Key:MenuElement({id="Clear",name="Clear Key",key=string.byte("V")})
+Menu.Key:MenuElement({id="LastHit",name="Last Hit Key",key=string.byte("X")})
+Menu.Key:MenuElement({id="Flee",name="Flee Key",key=string.byte("A")})
+--Main Menu--Mode Setting
+Menu:MenuElement({type=MENU,id="Mode",name="Mode Settings"})
+--Main Menu--Mode Setting--Combo
+Menu.Mode:MenuElement({type=MENU,id="Combo",name="Combo"})
+Menu.Mode.Combo:MenuElement({id="Q",name="Use Q",value=true,leftIcon=Icons.Q})
+Menu.Mode.Combo:MenuElement({id="W",name="Use W",value=true,leftIcon=Icons.W})
+Menu.Mode.Combo:MenuElement({id="E",name="Use E",value=true,leftIcon=Icons.E})
+--Main Menu--Mode Setting--Clear
+Menu.Mode:MenuElement({type=MENU,id="Clear",name="Clear"})
+Menu.Mode.Clear:MenuElement({id="W",name="Use W",value=true,leftIcon=Icons.W})
+Menu.Mode.Clear:MenuElement({id="E",name="Use E",value=true,leftIcon=Icons.E})
+--Main Menu--KillSteal
+Menu:MenuElement({type=MENU,id="KillSteal",name="KillSteal"})
+Menu.KillSteal:MenuElement({id="Q",name="Use Q",value=true,leftIcon=Icons.Q})
+Menu.KillSteal:MenuElement({id="W",name="Use W",value=true,leftIcon=Icons.W})
+Menu.KillSteal:MenuElement({id="E",name="Use E",value=true,leftIcon=Icons.E})
+--Main Menu--Item Usage
+Menu:MenuElement({type=MENU,id="Item",name="Item Usage"})
+Menu.Item:MenuElement({id="Enable",name="Enable",value=true})
+Menu.Item:MenuElement({id="Tiamat",name="Tiamat",value=true,leftIcon=Icons.Tiamat})
+Menu.Item:MenuElement({id="RavenousHydra",name="Ravenous Hydra",value=true,leftIcon=Icons.RavenousHydra})
+Menu.Item:MenuElement({id="TitanicHydra",name="Titanic Hydra",value=true,leftIcon=Icons.TitanicHydra})
+Menu.Item:MenuElement({id="YoumuusGhostblade",name="Youmuu's Ghostblade",value=true,leftIcon=Icons.YoumuusGhostblade})
+Menu.Item:MenuElement({id="RanduinsOmen",name="Randuin's Omen",value=true,leftIcon=Icons.RanduinsOmen})
+Menu.Item:MenuElement({id="BilgewaterCutlass",name="Bilgewater Cutlass",value=true,leftIcon=Icons.BilgewaterCutlass})
+Menu.Item:MenuElement({id="BladeoftheRuinedKing",name="Blade of the Ruined King",value=true,leftIcon=Icons.BladeoftheRuinedKing})
+Menu.Item:MenuElement({id="HextechGunblade",name="Hextech Gunblade",value=true,leftIcon=Icons.HextechGunblade})
+--Main Menu--Drawing
+Menu:MenuElement({type=MENU,id="Drawing",name="Drawing"})
+Menu.Drawing:MenuElement({id="DisableAll",name="Disable All Drawings",value=true})
+Menu.Drawing:MenuElement({id="Ready",name="Draw Ready Spells Only",value=true})
+for i=1,4 do
+Menu.Drawing:MenuElement({id=SpellTable[i],name="Draw "..SpellTable[i].." Range",type=MENU,leftIcon=Icons[SpellTable[i]]})
+Menu.Drawing[SpellTable[i]]:MenuElement({id="Enabled",name="Enabled",value=true})
+Menu.Drawing[SpellTable[i]]:MenuElement({id="Width",name="Width",value=2,min=1,max=5,step=1})
+Menu.Drawing[SpellTable[i]]:MenuElement({id="Color",name="Color",color=Draw.Color(255,255,255,255)})
 end
-
-function Pantheon:LoadSpells()
-	Q = { range = 600 ,speed = myHero:GetSpellData(_Q).speed, delay = 0.2, width = myHero:GetSpellData(_Q).width }
-	W = { range = 600 ,speed = myHero:GetSpellData(_W).speed, delay = 0.2, width = myHero:GetSpellData(_W).width }
-	E = { range = 400 ,speed = myHero:GetSpellData(_E).speed, delay = 0.2, width = myHero:GetSpellData(_E).width }
-	R = { range = 5500 ,speed = myHero:GetSpellData(_R).speed, delay = 0.2, width = myHero:GetSpellData(_R).width }
+Menu.Drawing:MenuElement({id="RMiniMap",name="Draw R Range on MiniMap",type=MENU,leftIcon=Icons.R})
+Menu.Drawing.RMiniMap:MenuElement({id="Enabled",name="Enabled",value=true})
+Menu.Drawing.RMiniMap:MenuElement({id="Width",name="Width",value=2,min=1,max=5,step=1})
+Menu.Drawing.RMiniMap:MenuElement({id="Color",name="Color",color=Draw.Color(255,255,255,255)})
+---------
+--DRAW--
+---------
+function OnDraw()
+--Draw Range
+if myHero.dead or Menu.Drawing.DisableAll:Value()then return end
+if Menu.Drawing.Q.Enabled:Value()then
+if Menu.Drawing.Ready:Value()then
+if isReady(_Q)then
+Draw.Circle(myHero.pos,Q.range,Menu.Drawing.Q.Width:Value(),Menu.Drawing.Q.Color:Value())
 end
-
-function Pantheon:LoadMenu()
-	local MenuIcons = "http://static.lolskill.net/img/champions/64/pantheon.png"
-	local SpellIcons = { Q = "http://static.lolskill.net/img/abilities/64/Pantheon_SpearShot.png",
-						 W = "http://static.lolskill.net/img/abilities/64/Pantheon_LeapBash.png",
-						 E = "http://static.lolskill.net/img/abilities/64/Pantheon_HSS.png",
-	}
-
-	--Main Menu
-	self.Menu = MenuElement({type = MENU, id = "Menu", name = "Pantheon - Easier to play", leftIcon = MenuIcons})
-
-	--Main Menu-- Mode Setting
-	self.Menu:MenuElement({type = MENU, id = "Mode", name = "Mode Settings"})
-	--Main Menu-- Mode Setting-- Combo
-	self.Menu.Mode:MenuElement({type = MENU, id = "Combo", name = "Combo"})
-	self.Menu.Mode.Combo:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon = SpellIcons.Q})
-	self.Menu.Mode.Combo:MenuElement({id = "W", name = "Use W", value = true, leftIcon = SpellIcons.W})
-	self.Menu.Mode.Combo:MenuElement({id = "E", name = "Use E", value = true, leftIcon = SpellIcons.E})
-	--Main Menu-- Mode Setting-- Harass
-	self.Menu.Mode:MenuElement({type = MENU, id = "Harass", name = "Harass"})
-	self.Menu.Mode.Harass:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon = SpellIcons.Q})
-	self.Menu.Mode.Harass:MenuElement({id = "W", name = "Use W", value = true, leftIcon = SpellIcons.W})
-	self.Menu.Mode.Harass:MenuElement({id = "E", name = "Use E", value = true, leftIcon = SpellIcons.E})
-	--Main Menu-- Mode Setting-- LandClear 
-	self.Menu.Mode:MenuElement({type = MENU, id = "LaneClear", name = "Lane Clear"})
-	self.Menu.Mode.LaneClear:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon = SpellIcons.Q})
-	self.Menu.Mode.LaneClear:MenuElement({id = "QMana", name = "Min Mana to use Q (%)", value = 80, min = 0, max = 100, step = 1, leftIcon = SpellIcons.Q})
-	self.Menu.Mode.LaneClear:MenuElement({id = "E", name = "Use E", value = true, leftIcon = SpellIcons.E})
-	self.Menu.Mode.LaneClear:MenuElement({id = "EMana", name = "Min Mana to use E (%)", value = 80, min = 0, max = 100, step = 1, leftIcon = SpellIcons.E})
-	--Main Menu-- Mode Setting-- Jungle 
-	self.Menu.Mode:MenuElement({type = MENU, id = "JungleClear", name = "Jungle Clear"})
-	self.Menu.Mode.JungleClear:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon = SpellIcons.Q})
-	self.Menu.Mode.JungleClear:MenuElement({id = "QMana", name = "Min Mana to use Q (%)", value = 30, min = 0, max = 100, step = 1, leftIcon = SpellIcons.Q})
-	self.Menu.Mode.JungleClear:MenuElement({id = "W", name = "Use W", value = true, leftIcon = SpellIcons.W})
-	self.Menu.Mode.JungleClear:MenuElement({id = "WMana", name = "Min Mana to use W (%)", value = 30, min = 0, max = 100, step = 1, leftIcon = SpellIcons.W})
-	self.Menu.Mode.JungleClear:MenuElement({id = "E", name = "Use E", value = true, leftIcon = SpellIcons.E})
-	self.Menu.Mode.JungleClear:MenuElement({id = "EMana", name = "Min Mana to use E (%)", value = 30, min = 0, max = 100, step = 1, leftIcon = SpellIcons.E})
-	--Main Menu-- Mode Setting-- LastHit
-	self.Menu.Mode:MenuElement({type = MENU, id = "LastHit", name = "Last Hit"})
-	self.Menu.Mode.LastHit:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon = SpellIcons.Q})
-
-	--Main Menu-- KillSteal Setting
-	self.Menu:MenuElement({type = MENU, id = "KillSteal", name = "KillSteal Settings"})
-	self.Menu.KillSteal:MenuElement({id = "Q", name = "Use Q to KS", value = true})
-
-	--Main Menu-- Drawing 
-	self.Menu:MenuElement({type = MENU, id = "Drawing", name = "Drawing"})
-	self.Menu.Drawing:MenuElement({id = "Q", name = "Draw Q Range", value = true})
-	self.Menu.Drawing:MenuElement({id = "W", name = "Draw W Range", value = true})
-	self.Menu.Drawing:MenuElement({id = "E", name = "Draw E Range", value = true})
-	self.Menu.Drawing:MenuElement({id = "R", name = "Draw R Range (MiniMap)", value = true})
-
+else
+Draw.Circle(myHero.pos,Q.range,Menu.Drawing.Q.Width:Value(),Menu.Drawing.Q.Color:Value())
 end
-
-function Pantheon:Tick()
-	local Combo = 	(_G.Orbwalker.Enabled:Value() and _G.GOS:GetMode() == "Combo") or
-					(ICLoaded and _G.SDK.Orbwalker:IsEnabled() and _G.SDK.Orbwalker.Modes[_G.SDK.ORBWALKER_MODE_COMBO]) or
-					(_G.EOWLoaded and EOW:Mode() == "Combo")
-	local Harass = 	(_G.Orbwalker.Enabled:Value() and _G.GOS:GetMode() == "Harass") or 
-					(ICLoaded and _G.SDK.Orbwalker:IsEnabled() and _G.SDK.Orbwalker.Modes[_G.SDK.ORBWALKER_MODE_HARASS]) or 
-					(_G.EOWLoaded and EOW:Mode() == "Harass")
-	local Clear = (_G.Orbwalker.Enabled:Value()and _G.GOS:GetMode() == "Clear") or
-				  (ICLoaded and _G.SDK.Orbwalker:IsEnabled() and _G.SDK.Orbwalker.Modes[_G.SDK.ORBWALKER_MODE_LANECLEAR]) or
-				  (ICLoaded and _G.SDK.Orbwalker:IsEnabled() and _G.SDK.Orbwalker.Modes[_G.SDK.ORBWALKER_MODE_JUNGLECLEAR]) or
-				  (_G.EOWLoaded and EOW:Mode() == "LaneClear")
-	local LastHit = (_G.Orbwalker.Enabled:Value() and _G.GOS:GetMode() == "Lasthit") or
-					(ICLoaded and _G.SDK.Orbwalker:IsEnabled() and _G.SDK.Orbwalker.Modes[_G.SDK.ORBWALKER_MODE_LASTHIT]) or
-					(_G.EOWLoaded and EOW:Mode() == "LastHit")
-	
-	if  myHero.activeSpell.name == "PantheonE" then
-		self:BlockMove(true)
-		DelayAction(function()
-			self:BlockMove(false)
-		end, 1)
-	end
-
-	if Combo then
-		self:Combo()
-	elseif Harass then
-		self:Harass()
-	elseif Clear then
-		self:Clear()
-	elseif LastHit then
-		self:LastHit()
-	end
-	
-	self:KillSteal()
-	
 end
-
-function Pantheon:HasBuff(unit, buffname)
-	for i = 0, unit.buffCount do
-	local buff = unit:GetBuff(i)
-		if buff.name == buffname and buff.count > 0 then 
-			return true
-		end
-	end
-	return false
+if Menu.Drawing.W.Enabled:Value()then
+if Menu.Drawing.Ready:Value()then
+if isReady(_W)then
+Draw.Circle(myHero.pos,W.range,Menu.Drawing.W.Width:Value(),Menu.Drawing.W.Color:Value())
 end
-
-function  Pantheon:isCasting(spell)
-	if Game.CanUseSpell(spell) == 8 or myHero:GetSpellData(_E).name == "PantheonECancel" then
-		return  true
-	end
-	return false
+else
+Draw.Circle(myHero.pos,W.range,Menu.Drawing.W.Width:Value(),Menu.Drawing.W.Color:Value())
 end
-
-function Pantheon:GetValidEnemy(range)
-    for i = 1,Game.HeroCount() do
-        local enemy = Game.Hero(i)
-        if  enemy.team ~= myHero.team and enemy.valid and enemy.pos:DistanceTo(myHero.pos) < range then
-            return true
-        end
-    end
-    return false
 end
-
-function Pantheon:BlockMove(bool)
-	if Orbwalker.Enabled:Value() then
-		_G.GOS.BlockAttack = bool
-		_G.GOS.BlockMovement = bool
-	elseif ICLoaded and _G.SDK.Orbwalker:IsEnabled()  then
-		_G.SDK.Orbwalker:SetMovement(not bool)
-		_G.SDK.Orbwalker:SetAttack(not bool)
-	end
+if Menu.Drawing.E.Enabled:Value()then
+if Menu.Drawing.Ready:Value()then
+if isReady(_E)then
+Draw.Circle(myHero.pos,E.range,Menu.Drawing.E.Width:Value(),Menu.Drawing.E.Color:Value())
 end
-
-function Pantheon:HpPred(unit, delay)
-	delay = delay or 0
-	if ICLoaded	then
-		hp = _G.SDK.HealthPrediction:GetPrediction(unit, delay)
-	elseif _G.EOWLoaded then
-		hp = EOW:PredictHealth(unit, delay)
-	elseif _G.Orbwalker.Enabled:Value() then
-		hp =  GOS:HP_Pred(unit,delay)
-	else
-		hp = unit.health
-	end
-	return hp
+else
+Draw.Circle(myHero.pos,E.range,Menu.Drawing.E.Width:Value(),Menu.Drawing.E.Color:Value())
 end
-
-function Pantheon:GetValidMinion(range)
-    for i = 1,Game.MinionCount() do
-        local minion = Game.Minion(i)
-        if  minion.team ~= myHero.team and minion.valid and minion.pos:DistanceTo(myHero.pos) < range then
-            return true
-        end
-    end
-    return false
 end
-
-function Pantheon:CountEnemyMinions(range)
-	local minionsCount = 0
-    for i = 1,Game.MinionCount() do
-        local minion = Game.Minion(i)
-        if  minion.team ~= myHero.team and minion.valid and minion.pos:DistanceTo(myHero.pos) < range then
-            minionsCount = minionsCount + 1
-        end
-    end
-    return minionsCount
+if Menu.Drawing.R.Enabled:Value()then
+local distance=mousePos:DistanceTo(myHero.pos)
+if Menu.Drawing.Ready:Value()then
+if isReady(_R)then
+Draw.Circle(myHero.pos,R.range,Menu.Drawing.R.Width:Value(),Menu.Drawing.R.Color:Value())
+if distance>3500 and distance<R.range then
+Draw.Circle(mousePos,R.attackRange,1,Draw.Color(80,255,255,255))
 end
-
-function Pantheon:isReady (spell)
-	return Game.CanUseSpell(spell) == 0 
 end
-
-function Pantheon:IsValidTarget(unit,range)
-    return unit ~= nil and unit.valid and unit.visible and not unit.dead and unit.isTargetable and not unit.isImmortal and unit.pos:DistanceTo(myHero.pos) <= range
+else
+Draw.Circle(myHero.pos,R.range,Menu.Drawing.R.Width:Value(),Menu.Drawing.R.Color:Value())
+if distance>3500 and distance<R.range then
+Draw.Circle(mousePos,R.attackRange,1,Draw.Color(80,255,255,255))
 end
-
-function Pantheon:IsImmobileTarget(unit)
-	for i = 0, unit.buffCount do
-		local buff = unit:GetBuff(i)
-		if buff and (buff.type == 5 or buff.type == 11 or buff.type == 29 or buff.type == 24 or buff.name == "recall") and buff.count > 0 then
-			return true
-		end
-	end
-	return false	
 end
-
-function Pantheon:GetPred(unit,speed,delay)
-	if self:IsImmobileTarget(unit) then
-		return unit.pos
-	end
-	return unit:GetPrediction(speed,delay)
 end
-
-function Pantheon:GetCurrentTarget()
-	if ICLoaded then
-		return _G.SDK.TargetSelector:GetTarget(800, _G.SDK.DAMAGE_TYPE_PHYSICAL)
-	elseif _G.EOWLoaded then
-		return EOW:GetTarget()
-	elseif _G.Orbwalker.Enabled:Value() then
-		return (_G.GOS:GetTarget(800,"AD"))
-	end
+if Menu.Drawing.RMiniMap.Enabled:Value()then
+if Menu.Drawing.Ready:Value()then
+if isReady(_R)then
+Draw.CircleMinimap(myHero.pos,R.range,Menu.Drawing.RMiniMap.Width:Value(),Menu.Drawing.RMiniMap.Color:Value())
 end
-
-function Pantheon:Combo()
-
-	if self:GetValidEnemy(800) == false then return end
-	
-	if (not ICLoaded and not _G.EOWLoaded and not _G.Orbwalker.Enabled:Value()) then return end
-	
-	local target = self:GetCurrentTarget()
-	
-	if self:IsValidTarget(target, Q.range) and self.Menu.Mode.Combo.Q:Value() and self:isReady(_Q) and not myHero.isChanneling then
-		Control.CastSpell(HK_Q, target.pos)
-	end
-
-	if self:IsValidTarget(target, W.range) and self.Menu.Mode.Combo.W:Value() and self:isReady(_W) and not myHero.isChanneling and not self:isReady(_Q) then
-		Control.CastSpell(HK_W, target.pos)
-	end
-
-	if self:IsValidTarget(target, E.range) and self.Menu.Mode.Combo.E:Value() and self:isReady(_E) and not myHero.isChanneling then
-		local Epos = target:GetPrediction(myHero:GetSpellData(_E).speed, E.delay)
-		Control.CastSpell(HK_E, Epos)
-	end
-	
+else
+Draw.CircleMinimap(myHero.pos,R.range,Menu.Drawing.RMiniMap.Width:Value(),Menu.Drawing.RMiniMap.Color:Value())
 end
-
-function Pantheon:Harass()
-
-	if self:GetValidEnemy(800) == false then return end
-	
-	if (not ICLoaded and not _G.EOWLoaded and not _G.Orbwalker.Enabled:Value()) then return end
-	
-	local target = self:GetCurrentTarget()
-	
-	if self:IsValidTarget(target, Q.range) and self.Menu.Mode.Combo.Q:Value() and self:isReady(_Q) and not myHero.isChanneling and not self:isReady(_W) then
-		Control.CastSpell(HK_Q, target.pos)
-	end
-
-	if self:IsValidTarget(target, W.range) and self.Menu.Mode.Combo.W:Value() and self:isReady(_W) and not myHero.isChanneling  then
-		Control.CastSpell(HK_W, target.pos)
-	end
-
-	if self:IsValidTarget(target, E.range) and self.Menu.Mode.Combo.E:Value() and self:isReady(_E) and not myHero.isChanneling then
-		local Epos = self:GetPred(target,E.speed, E.delay)
-		Control.CastSpell(HK_E, Epos)
-	end
-	
 end
-
-function Pantheon:Clear()
-
-	if self:GetValidMinion(600) == false then return end
-
-	for i = 1, Game.MinionCount() do
-		local minion = Game.Minion(i)
-		if  minion.team == 200 then
-			--Q
-			if self:IsValidTarget(minion, Q.range) and self.Menu.Mode.LaneClear.Q:Value() and self:isReady(_Q) and not myHero.isChanneling and (myHero.mana/myHero.maxMana > self.Menu.Mode.LaneClear.QMana:Value() / 100) then
-				Control.CastSpell(HK_Q, minion.pos)
-			end 
-			--E
-			if self:IsValidTarget(minion,E.range) and self.Menu.Mode.LaneClear.E:Value() and self:isReady(_E) and not myHero.isChanneling and (myHero.mana / myHero.maxMana > self.Menu.Mode.LaneClear.EMana:Value() / 100) then
-				Control.CastSpell(HK_E, minion.pos)
-			end
-	
-		elseif minion.team == 300 then
-			--Q
-			if self:IsValidTarget(minion, Q.range) and self.Menu.Mode.JungleClear.Q:Value() and self:isReady(_Q) and not myHero.isChanneling and (myHero.mana/myHero.maxMana > self.Menu.Mode.JungleClear.QMana:Value() / 100) then
-				Control.CastSpell(HK_Q, minion.pos)
-			end 
-			--W
-			if self:IsValidTarget(minion,W.range) and self.Menu.Mode.JungleClear.W:Value() and self:isReady(_W) and not myHero.isChanneling and (myHero.mana / myHero.maxMana > self.Menu.Mode.JungleClear.WMana:Value() / 100) then
-				Control.CastSpell(HK_W, minion.pos)
-			end
-			--E
-			if self:IsValidTarget(minion,E.range) and self.Menu.Mode.JungleClear.E:Value() and self:isReady(_E) and not myHero.isChanneling and (myHero.mana / myHero.maxMana > self.Menu.Mode.JungleClear.EMana:Value() / 100) then
-				Control.CastSpell(HK_E, minion.pos)
-			end
-		end
-	end	
 end
-
-function Pantheon:LastHit()
-	if self.Menu.Mode.LastHit.Q:Value() == false then return end
-	if myHero:GetSpellData(_Q).level == nil then return end
-	if self:GetValidMinion(600) == false then return end
-
-	for i = 1, Game.MinionCount() do
-		local minion = Game.Minion(i)
-		local Qdmg = getdmg("Q",minion,myHero)
-		if minion.isEnemy and self:IsValidTarget(minion,Q.range) then
-			if Qdmg >= self:HpPred(minion) and self:isReady(_Q) then
-				Control.CastSpell(HK_Q, minion.pos)
-			end
-		end
-	end
+---------
+--START--
+---------
+function OnTick()
+if myHero.dead then return end
+local Combo=Menu.Key.Combo:Value()
+local Harass=Menu.Key.Harass:Value()
+local Clear=Menu.Key.Clear:Value()
+local LastHit=Menu.Key.LastHit:Value()
+local Flee=Menu.Key.Flee:Value()
+--local target=(LocalSDK and LocalSDK.Orbwalker:IsEnabled()and LocalSDK.TargetSelector:GetTarget(1200))or(LocalEOW and EOW:GetTarget(1200))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(1200))
+--DisableOrb
+if myHero.activeSpell.name==E.name and myHero.activeSpell.valid then
+orbStatus=false
+--PrintChat("DisableOrb")
+DisableOrb()
 end
-
-function Pantheon:KillSteal()
-	if self.Menu.KillSteal.Q:Value() == false then return end
-	if myHero:GetSpellData(_Q).level == nil then return end
-	if self:GetValidEnemy(600) == false then return end
-	
-	for i = 1, Game.HeroCount() do
-		local target = Game.Hero(i)
-		local Qdmg = getdmg("Q",target,myHero)
-		if target.team ~= myHero.team and  self:IsValidTarget(target,Q.range) and self:isReady(_Q)then
-			if Qdmg >= self:HpPred(target) + target.hpRegen * 2 then 
-				Control.CastSpell(HK_Q,target.pos)
-			end
-		end
-	end
+--EnableOrb
+if orbStatus==false then
+if isCD(_E)then
+local time=myHero:GetSpellData(_E).cd-myHero:GetSpellData(_E).currentCd
+if time>0.75 and time<0.85 then
+--PrintChat("E is done.Moving...")
+orbStatus=true
+EnableOrb()
 end
-
-function Pantheon:Draw()
-	--Draw Range
-	if myHero.dead then return end
-	if self.Menu.Drawing.Q:Value() or self.Menu.Drawing.W:Value() then Draw.Circle(myHero.pos,600,1,Draw.Color(255, 255, 255, 255)) end
-	if self.Menu.Drawing.E:Value() then Draw.Circle(myHero.pos,600,1,Draw.Color(255, 255, 255, 255)) end		
-	if self.Menu.Drawing.R:Value() then Draw.CircleMinimap(Vector(myHero.pos),R.range,1,Draw.Color(255, 255, 255, 255)) end	
+elseif myHero.activeSpell.valid==false then
+--prevent interrupt(someone stop my Spell)
+--PrintChat("Move not activeSpell")
+orbStatus=true
+EnableOrb()
 end
-
-function OnLoad()
-	if myHero.charName ~= "Pantheon" then return end
-	require "DamageLib"
-	Pantheon()
+end
+KillSteal()
+if Combo then
+OnCombo()
+elseif Clear then
+OnClear()
+end
+end
+---------
+--Clear--
+---------
+function OnClear()
+UseClearItem()
+--W to the closest minion if count>=3 and no enemies around
+if not GetEnemiesHeroes(1200)then
+if Menu.Mode.Clear.W:Value()and isReady(_W)and not HasBuff(myHero,"PantheonPassiveShield")then
+local BuffData=GetBuffData(myHero,"PantheonPassiveCounter")
+if BuffData and BuffData.count>=3 then
+local minion=GetClosestMinionTarget(W.range)
+if isValidTarget(minion)then
+if myHero.pos:DistanceTo(minion.pos)<myHero.range+80 then
+if myHero.attackData.state==STATE_WINDDOWN then
+CastSpell(HK_W,minion)
+end
+else
+CastSpell(HK_W,minion)
+end
+end
+end
+end
+end
+end
+---------
+--KillSteal--
+---------
+function KillSteal()
+--KillSteal Q
+if Menu.KillSteal.Q:Value()and isReady(_Q)then
+--spell data
+local levelQ=myHero:GetSpellData(_Q).level
+--Q KS
+for i=1,LocalGameHeroCount()do
+local hero=LocalGameHero(i)
+if hero and hero.team~=TEAM_ALLY and hero.visible and hero.valid and hero.alive and hero.isTargetable and hero.pos:DistanceTo(myHero.pos)<=Q.range then
+--ks with Q(all eneies check except current target)
+if hero~=target then
+local Qdmg=({65,105,145,185,225})[levelQ]+1.4*hero.bonusDamage
+if CalcPhysicalDamage(myHero,hero,Qdmg)>=hero.health+hero.shieldAD+CalculateHpRegen(hero)then
+CastSpell(HK_Q,hero)
+end
+end
+end
+end
+end
+--KillSteal W
+if Menu.KillSteal.W:Value()and isReady(_W)then
+--spell data
+local levelW=myHero:GetSpellData(_W).level
+local levelE=myHero:GetSpellData(_E).level
+--KS with W
+for i=1,LocalGameHeroCount()do
+local hero=LocalGameHero(i)
+if hero and hero.team~=TEAM_ALLY and hero.visible and hero.valid and hero.alive and hero.isTargetable and hero.pos:DistanceTo(myHero.pos)<=W.range then
+--ks with W+AA(all eneies check)
+local Wdmg=({50,75,100,125,150})[levelW]+hero.ap
+if CalcMagicalDamage(myHero,hero,Wdmg)+CalcPhysicalDamage(myHero,hero,myHero.totalDamage)>=hero.health+hero.shieldAP+CalculateHpRegen(hero)then
+CastSpell(HK_W,hero)
+end
+--ks with W+E(all eneies check)
+if Menu.Mode.Combo.E:Value()and isReady(_E)then
+local Edmg=({13,23,33,43,53})[levelE]*2+hero.bonusDamage
+if CalcMagicalDamage(myHero,hero,Wdmg)+CalcPhysicalDamage(myHero,hero,Edmg)>=hero.health+hero.shieldAP+CalculateHpRegen(hero)then
+CastSpell(HK_W,hero)
+end
+end
+end
+end
+end
+end
+---------
+--Combo--
+---------
+function OnCombo()
+UseComboItem()
+--Q
+if Menu.Mode.Combo.Q:Value()and isReady(_Q)and not myHero.activeSpell.valid then
+target=(LocalSDK and LocalSDK.Orbwalker:IsEnabled()and LocalSDK.TargetSelector:GetTarget(Q.range))or(LocalEOW and EOW:GetTarget(Q.range))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(Q.range))
+if target then
+--Q if Counter<3 or have Shield or do not have counter and Shield
+local BuffData1=GetBuffData(myHero,"PantheonPassiveCounter")
+local BuffData2=GetBuffData(myHero,"PantheonPassiveShield")
+if(not BuffData1 and not BuffData2)or(BuffData1 and BuffData1.count<3)or BuffData2 then
+if myHero.pos:DistanceTo(target.pos)<myHero.range+80 then
+if myHero.attackData.state==STATE_WINDDOWN then
+CastSpell(HK_Q,target)
+end
+else
+CastSpell(HK_Q,target)
+end
+end
+end
+end
+--W
+if Menu.Mode.Combo.W:Value()and isReady(_W)then
+target=(LocalSDK and LocalSDK.Orbwalker:IsEnabled()and LocalSDK.TargetSelector:GetTarget(W.range))or(LocalEOW and EOW:GetTarget(W.range))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(W.range))
+--W if do not have sheild or Ally is nearby 800 range or Enemies AA range<300
+if target then
+if not HasBuff(myHero,"PantheonPassiveShield")or isAllyNearBy(800)then
+if myHero.pos:DistanceTo(target.pos)<myHero.range+80 then
+if myHero.attackData.state==STATE_WINDDOWN then
+CastSpell(HK_W,target)
+end
+else
+CastSpell(HK_W,target)
+end
+end
+end
+end
+--E
+if Menu.Mode.Combo.E:Value()and isReady(_E)then
+target=(LocalSDK and LocalSDK.Orbwalker:IsEnabled()and LocalSDK.TargetSelector:GetTarget(E.range-120))or(LocalEOW and EOW:GetTarget(E.range-120))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(E.range-120))
+if target then
+if myHero.pos:DistanceTo(target.pos)<myHero.range+80 then
+if myHero.attackData.state==STATE_WINDDOWN then
+local pred=target:GetPrediction(E.speed,E.delay)
+if pred then
+CastSpell(HK_E,pred)
+end
+end
+else
+local pred=target:GetPrediction(E.speed,E.delay)
+if pred then
+CastSpell(HK_E,pred)
+end
+end
+end
+end
+end
+function UseComboItem()
+if not Menu.Item.Enable:Value()then return end
+--item Usage
+local target=(LocalSDK and LocalSDK.Orbwalker:IsEnabled()and LocalSDK.TargetSelector:GetTarget(450))or(LocalEOW and EOW:GetTarget(450))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(450))
+if target then
+--Use item STATE_WINDDOWN
+if myHero.attackData.state==STATE_WINDDOWN then
+local item=GetItemSlot(3077)
+if item and Menu.Item.Tiamat:Value()then
+CastSpell(SlotToHotKeys(item))
+end
+local item=GetItemSlot(3074)
+if item and Menu.Item.RavenousHydra:Value()then
+CastSpell(SlotToHotKeys(item))
+end
+local item=GetItemSlot(3143)
+if item and Menu.Item.RanduinsOmen:Value()then
+CastSpell(SlotToHotKeys(item))
+end
+local item=GetItemSlot(3144)
+if item and Menu.Item.BilgewaterCutlass:Value()then
+CastSpell(SlotToHotKeys(item),target)
+end
+local item=GetItemSlot(3153)
+if item and Menu.Item.BladeoftheRuinedKing:Value()then
+CastSpell(SlotToHotKeys(item),target)
+end
+local item=GetItemSlot(3146)
+if item and Menu.Item.HextechGunblade:Value()then
+CastSpell(SlotToHotKeys(item),target)
+end
+end
+if myHero.attackData.state==STATE_WINDUP then
+local item=GetItemSlot(3748)
+if item and Menu.Item.TitanicHydra:Value()then
+CastSpell(SlotToHotKeys(item))
+end
+end
+--Use item in range 450
+local item=GetItemSlot(3142)
+if item and Menu.Item.YoumuusGhostblade:Value()then
+CastSpell(SlotToHotKeys(item))
+end
+end
+end
+function UseClearItem()
+if not Menu.Item.Enable:Value()then return end
+--item Usage
+if GetEnemiesMinions(350)then
+if myHero.attackData.state==STATE_WINDDOWN then
+local item=GetItemSlot(3077)
+if item and Menu.Item.Tiamat:Value()then
+CastSpell(SlotToHotKeys(item))
+end
+local item=GetItemSlot(3074)
+if item and Menu.Item.RavenousHydra:Value()then
+CastSpell(SlotToHotKeys(item))
+end
+end
+end
+end
+function EnableOrb()
+if LocalSDK and LocalSDK.Orbwalker then
+LocalSDK.Orbwalker:SetAttack(true)
+LocalSDK.Orbwalker:SetMovement(true)
+end
+if LocalGOS then
+LocalGOS.BlockMovement=false
+LocalGOS.BlockAttack=false
+end
+if LocalEOW then
+EOW:SetMovements(true)
+EOW:SetMovements(true)
+end
+end
+function DisableOrb()
+if LocalSDK and LocalSDK.Orbwalker then
+LocalSDK.Orbwalker:SetAttack(false)
+LocalSDK.Orbwalker:SetMovement(false)
+end
+if LocalGOS then
+LocalGOS.BlockMovement=true
+LocalGOS.BlockAttack=true
+end
+if LocalEOW then
+EOW:SetMovements(false)
+EOW:SetMovements(false)
+end
+end
+function GetMonsterHasBuff(buffName)
+for i=1,LocalGameMinionCount()do
+local minion=LocalGameMinion(i)
+if minion and minion.team==TEAM_JUNGLE and minion.visible and minion.valid and minion.alive and minion.isTargetable then
+if HasBuff(minion,buffName)then
+return minion
+end
+end
+end
+return false
+end
+function SlotToHotKeys(slot)
+local s={ITEM_1,ITEM_2,ITEM_3,ITEM_4,ITEM_5,ITEM_6,ITEM_7}
+local hk={HK_ITEM_1,HK_ITEM_2,HK_ITEM_3,HK_ITEM_4,HK_ITEM_5,HK_ITEM_6,HK_ITEM_7}
+for i=1,#s do
+if slot==s[i]then
+return hk[i]
+end
+end
+end
+function GetItemSlot(itemID)
+for i=ITEM_1,ITEM_6 do--6 to 11;ITEM_1=6
+if myHero:GetItemData(i).itemID~=0 and myHero:GetItemData(i).stacks>0 then--implies that is an item
+if myHero:GetItemData(i).itemID==itemID and myHero:GetSpellData(i).currentCd==0 then--implies that is an ward and ammo>0 and not cd ing
+return i
+end
+end
+end
+return false
+end
+function CalcPhysicalDamage(source,target,amount)
+local ArmorPenPercent=source.armorPenPercent
+local ArmorPenFlat=source.armorPen*(0.6+(0.4*(target.levelData.lvl/18)))
+local BonusArmorPen=source.bonusArmorPenPercent
+local armor=target.armor
+local bonusArmor=target.bonusArmor
+local baseArmor=armor-bonusArmor
+if bonusArmor<0 then print("CalcPhysicalDamage : smth wrong with "..source.charName.." on "..target.charName)end
+local value=nil
+if armor<=0 then
+value=2-100/(100-armor)
+else
+baseArmor=baseArmor*ArmorPenPercent
+bonusArmor=bonusArmor*ArmorPenPercent*BonusArmorPen
+armor=baseArmor+bonusArmor
+if armor>ArmorPenFlat then
+armor=armor-ArmorPenFlat
+end
+value=100/(100+armor)
+end
+if target.type~=myHero.type then
+return value*amount
+end
+if target.charName=="Garen"and HasBuff(target,"GarenW")then
+amount=amount*0.7
+elseif target.charName=="Alistar"and HasBuff(target,"Ferocious Howl")then
+amount=amount*({0.5,0.4,0.3})[target:GetSpellData(_R).level]
+elseif target.charName=="Galio"and HasBuff(target,"GalioIdolOfDurand")then
+amount=amount*0.5
+elseif target.charName=="MaoKai"and HasBuff(target,"MaokaiDrainDefense")then
+amount=amount*0.7
+elseif target.charName=="Gragas"and HasBuff(target,"GragasWSelf")then
+amount=amount*({0.1,0.12,0.14,0.16,0.18})[target:GetSpellData(_W).level]
+elseif target.charName=="Malzahar"and HasBuff(target,"malzaharpassiveshield")then
+amount=amount*0.1
+elseif target.charName=="MasterYi"and HasBuff(target,"Meditate")then
+amount=amount-amount*({0.5,0.55,0.6,0.65,0.7})[target:GetSpellData(_W).level]
+elseif target.charName=="Braum"and HasBuff(target,"BraumShieldRaise")then
+amount=amount*(1-({0.3,0.325,0.35,0.375,0.4})[target:GetSpellData(_E).level])
+elseif target.charName=="Urgot"and HasBuff(target,"urgotswapdef")then
+amount=amount*(1-({0.3,0.4,0.5})[target:GetSpellData(_R).level])
+elseif target.charName=="Amumu"and HasBuff(target,"Tantrum")then
+amount=amount-({2,4,6,8,10})[target:GetSpellData(_E).level]
+elseif target.charName=="Annie"and HasBuff(target,"MoltenShield")then
+amount=amount*(1-({0.16,0.22,0.28,0.34,0.4})[target:GetSpellData(_E).level])
+end
+return value*amount
+end
+function CalcMagicalDamage(source,target,amount)
+local mr=target.magicResist
+local value=100/(100+(mr*source.magicPenPercent)-source.magicPen)
+if mr<0 then
+value=2-100/(100-mr)
+elseif(mr*source.magicPenPercent)-source.magicPen<0 then
+value=1
+end
+return value*amount
+end
+function CalculateHpRegen(target)
+local distance={300,400,500,600,700,800}
+local time={1,1.2,1.4,1.6,1.8,2}
+for i=1,#distance do
+if myHero.pos:DistanceTo(target.pos)<=distance[i]then
+return target.hpRegen*time[i]
+end
+end
+return target.hpRegen*2
+end
+function GetTargetHasBuff(buffName)
+for i=1,LocalGameHeroCount()do
+local hero=LocalGameHero(i)
+if hero and hero.team~=TEAM_ALLY and hero.visible and hero.valid and hero.alive and hero.isTargetable then
+if HasBuff(hero,buffName)then
+return hero
+end
+end
+end
+return false
+end
+function HasBuff(unit,buffName)
+for i=0,unit.buffCount do
+local buff=unit:GetBuff(i)
+if buff.name:lower()==buffName:lower()and buff.count>0 and buff.duration>0.3 then
+return true
+end
+end
+return false
+end
+function GetBuffData(unit,buffName)
+for i=0,unit.buffCount do
+local buff=unit:GetBuff(i)
+if buff.name:lower()==buffName:lower()and buff.count>0 and buff.duration>0.3 then
+return unit:GetBuff(i)
+end
+end
+return false
+end
+function GetAllyWards(range)
+local range=range or 800
+for i=1,Game.WardCount()do
+local ward=Game.Ward(i)
+if ward and ward.team==TEAM_ALLY and ward.visible and ward.valid and ward.alive and ward.isTargetable and ward.pos:DistanceTo(myHero.pos)<=range then
+return true
+end
+end
+return false
+end
+function GetAllyHeroes(range)
+local range=range or 800
+for i=1,LocalGameHeroCount()do
+local hero=LocalGameHero(i)
+if hero and hero.team==TEAM_ALLY and not hero.isMe and hero.visible and hero.valid and hero.alive and hero.isTargetable and hero.pos:DistanceTo(myHero.pos)<=range then
+return true
+end
+end
+return false
+end
+function GetEnemiesHeroes(range)
+local range=range or 800
+for i=1,LocalGameHeroCount()do
+local hero=LocalGameHero(i)
+if hero and hero.team~=TEAM_ALLY and hero.visible and hero.valid and hero.alive and hero.isTargetable and hero.pos:DistanceTo(myHero.pos)<=range then
+return true
+end
+end
+return false
+end
+function GetEnemiesMinions(range)
+local range=range or 800
+for i=1,LocalGameMinionCount()do
+local minion=LocalGameMinion(i)
+if minion and minion.team~=TEAM_ALLY and minion.visible and minion.valid and minion.alive and minion.isTargetable and minion.pos:DistanceTo(myHero.pos)<=range then
+return true
+end
+end
+return false
+end
+function GetAllyMinions(range)
+local range=range or 800
+for i=1,LocalGameMinionCount()do
+local minion=LocalGameMinion(i)
+if minion and minion.team==TEAM_ALLY and minion.visible and minion.valid and minion.alive and minion.isTargetable and minion.pos:DistanceTo(myHero.pos)<=range then
+return true
+end
+end
+return false
+end
+function GetClosestAllyTurretTarget(distance)
+local distance=distance or LocalMathHuge
+local closest
+for i=1,Game.TurretCount()do
+local turret=Game.Turret(i)
+if turret and turret.isAlly and turret.visible and turret.valid and turret.alive and turret.isTargetable then
+if turret.pos:DistanceTo(myHero.pos)<distance then
+distance=turret.pos:DistanceTo(myHero.pos)
+closest=turret
+end
+end
+end
+return closest
+end
+function GetClosestAllyHeroTarget(distance)
+local distance=distance or LocalMathHuge
+local closest
+for i=1,LocalGameHeroCount()do
+local hero=LocalGameHero(i)
+if hero and hero.isAlly and not hero.isMe and hero.visible and hero.valid and hero.alive and hero.isTargetable then
+if hero.pos:DistanceTo(myHero.pos)<distance then
+distance=hero.pos:DistanceTo(myHero.pos)
+closest=hero
+end
+end
+end
+return closest
+end
+function GetClosestMinionTarget(distance)
+local distance=distance or LocalMathHuge
+local closest
+for i=1,LocalGameMinionCount()do
+local minion=LocalGameMinion(i)
+if minion and minion.team~=TEAM_ALLY and minion.visible and minion.valid and minion.alive and minion.isTargetable then
+if minion.pos:DistanceTo(myHero.pos)<distance then
+distance=minion.pos:DistanceTo(myHero.pos)
+closest=minion
+end
+end
+end
+return closest
+end
+function isCD(spell)
+return LocalGameCanUseSpell(spell)==32
+end
+function isReady(spell)
+return LocalGameCanUseSpell(spell)==0
+end
+function GetPred(unit,speed,delay)
+if IsImmobileTarget(unit)then
+return unit.pos
+else
+return unit:GetPrediction(speed,delay)
+end
+end
+function IsImmobileTarget(unit)
+for i=0,unit.buffCount do
+local buff=unit:GetBuff(i)
+if buff and(buff.type==5 or buff.type==11 or buff.type==29 or buff.type==24 or buff.name=="recall")and buff.count>0 then
+return true
+end
+end
+return false
+end
+function isAllyNearBy(range)
+local range=range
+for i=1,LocalGameHeroCount()do
+local hero=LocalGameHero(i)
+if hero and hero.isAlly and not hero.isMe and hero.visible and hero.valid and hero.alive and hero.isTargetable and hero.pos:DistanceTo(myHero.pos)<=range then
+return true
+end
+end
+return false
+end
+function isValidTarget(target)
+return target and target.visible and target.valid and target.alive and target.isTargetable
 end
