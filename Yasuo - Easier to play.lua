@@ -2,12 +2,40 @@
 if myHero.charName~="Yasuo"then return end
 --lib
 require"Eternal Prediction"
+--Localize
+local myHero=_G.myHero
+local LocalSDK=_G.SDK
+local LocalEOW=_G.EOWLoaded
+local LocalGOS=_G.GOS
+local LocalGameHeroCount=Game.HeroCount
+local LocalGameHero=Game.Hero
+local LocalGameMinionCount=Game.MinionCount
+local LocalGameMinion=Game.Minion
+local LocalGameCanUseSpell=Game.CanUseSpell
+local LocalMathHuge=math.huge
+local CastSpell=Control.CastSpell
+local ITEM_1=_G.ITEM_1
+local ITEM_2=_G.ITEM_2
+local ITEM_3=_G.ITEM_3
+local ITEM_4=_G.ITEM_4
+local ITEM_5=_G.ITEM_5
+local ITEM_6=_G.ITEM_6
+local ITEM_7=_G.ITEM_7
+local _Q=_G._Q
+local _W=_G._W
+local _E=_G._E
+local _R=_G._R
+local STATE_WINDUP=_G.STATE_WINDUP
+local STATE_WINDDOWN=_G.STATE_WINDDOWN
+local TEAM_ALLY=myHero.team
+local TEAM_JUNGLE=300
+local TEAM_ENEMY=300-TEAM_ALLY
 --Spell
-local Q={range=475,speed=myHero:GetSpellData(_Q).speed,delay=0.25,width=myHero:GetSpellData(_Q).width}
-local Q3={name="YasuoQ3W",range=1000,speed=myHero:GetSpellData(_Q).speed,delay=0.25,width=90}
-local W={range=400,speed=myHero:GetSpellData(_W).speed,delay=0.25,width=myHero:GetSpellData(_W).width}
-local E={range=475,speed=myHero:GetSpellData(_E).speed,delay=0.25,width=myHero:GetSpellData(_E).width}
-local R={range=1200,speed=myHero:GetSpellData(_R).speed,delay=0.25,width=myHero:GetSpellData(_R).width}
+local Q={range=475,speed=1500,delay=0.25,width=55}
+local Q3={name="YasuoQ3W",range=1000,speed=1500,delay=0.25,width=90}
+local W={range=400,speed=500,delay=0.25,width=0}
+local E={range=475,speed=20,delay=0.25,width=0}
+local R={range=1200,speed=20,delay=0.25,width=0}
 --OTHER
 local QPred=Prediction:SetSpell(Q,TYPE_LINE,true)
 local SpellList={"Q","W","E","R"}
@@ -29,9 +57,10 @@ Menu:MenuElement({type=MENU,id="Mode",name="Mode Settings"})
 Menu.Mode:MenuElement({type=MENU,id="Combo",name="Combo"})
 Menu.Mode.Combo:MenuElement({id="Q",name="Use Q",value=true,leftIcon=Icons.Q})
 Menu.Mode.Combo:MenuElement({id="E",name="Use E",value=true,leftIcon=Icons.E})
+Menu.Mode.Combo:MenuElement({id="Gapclose",name="Gapclose with E",value=false,leftIcon=Icons.E})
+Menu.Mode.Combo:MenuElement({id="DontGapclose",name="Don't Gapclose if Under Turret",value=true,leftIcon=Icons.E})
 --Menu.Mode.Combo:MenuElement({id="W",name="Use W",value=true,leftIcon=Icons.W})
 Menu.Mode.Combo:MenuElement({id="R",name="Use R",value=false,leftIcon=Icons.R})
-Menu.Mode.Combo:MenuElement({id="Gapclose",name="Use Gapclose",value=true})
 --Main Menu--Mode Setting--Harass
 --Menu.Mode:MenuElement({type=MENU,id="Harass",name="Harass"})
 --Menu.Mode.Harass:MenuElement({id="Q",name="Use Q",value=true,leftIcon=Icons.Q})
@@ -51,12 +80,13 @@ Menu.Mode.Flee:MenuElement({id="E",name="Use E",value=true,leftIcon=Icons.E})
 Menu:MenuElement({type=MENU,id="KillSteal",name="KillSteal"})
 Menu.KillSteal:MenuElement({id="Q",name="Use Q",value=true,leftIcon=Icons.Q})
 Menu.KillSteal:MenuElement({id="E",name="Use E",value=true,leftIcon=Icons.E})
+Menu.KillSteal:MenuElement({id="Gapclose",name="Gapclose with E",value=true,leftIcon=Icons.E})
+Menu.KillSteal:MenuElement({id="DontGapclose",name="Don't Gapclose if Under Turret",value=true,leftIcon=Icons.E})
 Menu.KillSteal:MenuElement({id="R",name="Use R",value=false,leftIcon=Icons.R})
 Menu.KillSteal:MenuElement({type=MENU,id="WhiteList",name="White List",leftIcon=Icons.R})
 Menu.KillSteal.WhiteList:MenuElement({type=SPACE,id="info",name="Detecting Heroes, Please Wait..."})
-Menu.KillSteal:MenuElement({id="Gapclose",name="Use Gapclose",value=true})
 if Game.Timer()>30 then DelayAction(function()WhiteList()end,5)else DelayAction(function()WhiteList()end,30)end
---Main Menu--KillSteal
+--Main Menu--WindWall
 Menu:MenuElement({type=MENU,id="WindWall",name="WindWall"})
 Menu.WindWall:MenuElement({id="AutoW",name="Auto W Missile Spell",value=true,leftIcon=Icons.W})
 Menu.WindWall:MenuElement({id="AutoWAA",name="Auto W Auto Attack",value=true,leftIcon=Icons.W})
@@ -90,8 +120,8 @@ Menu.Drawing[SpellList[i]]:MenuElement({id="Width",name="Width",value=2,min=1,ma
 Menu.Drawing[SpellList[i]]:MenuElement({id="Color",name="Color",color=Draw.Color(255,255,255,255)})
 end
 function WhiteList()
-for i=1,Game.HeroCount()do
-local hero=Game.Hero(i)
+for i=1,LocalGameHeroCount()do
+local hero=LocalGameHero(i)
 if hero.isEnemy then
 Menu.KillSteal.WhiteList:MenuElement({id=hero.networkID,name="Use R On: "..hero.charName,value=true})
 end
@@ -103,7 +133,6 @@ end
 ---------
 function OnDraw()
 if myHero.dead or Menu.Drawing.DisableAll:Value()then return end
---Draw.Circle(myHero.pos,myHero.boundingRadius,1,Draw.Color(120,255,0,220))
 --Draw Range
 for i=1,4 do
 if Menu.Drawing[SpellList[i]].Enabled:Value()then
@@ -151,7 +180,7 @@ local width=data.width+myHero.boundingRadius
 if isOnSegment and GetDistanceSqr(pointSegment,myPos)<width*width then
 local TimeToHit=((myPos:DistanceTo(missile.pos)-myHero.boundingRadius)/data.speed)
 if TimeToHit<0.35 and TimeToHit>0.05 then
-Control.CastSpell(HK_W,myPos:Extended(data.startPos,200))
+CastSpell(HK_W,myPos:Extended(data.startPos,200))
 end
 end
 end
@@ -161,20 +190,11 @@ end
 if Menu.WindWall.AutoWAA:Value()then
 if missile and missile.isEnemy and(missile.team<300)and(data.owner>0)and(data.target==myHero.handle)and(data.speed>0)and(data.range>0)then
 if not data.name:find("SRU_")and(myHero.maxHealth*Menu.WindWall.AutoWAAHp:Value()*0.01)>myHero.health then
-Control.CastSpell(HK_W,myHero.pos:Extended(data.startPos,200))
+CastSpell(HK_W,myHero.pos:Extended(data.startPos,200))
 end
 end
 end
 end
---[[--W AA
-for i=1,Game.HeroCount()do
-local hero=Game.Hero(i)
-if hero and hero.isEnemy and hero.visible and hero.valid and hero.alive and hero.isTargetable and myHero.pos:DistanceTo(hero.pos)<=hero.range+50 then
-if hero.attackData.target==myHero.handle and hero.activeSpell.isAutoAttack then
-Control.CastSpell(HK_W,myHero.pos:Extended(hero.activeSpell.startPos,200))
-end
-end
-end]]
 end
 end
 ---------
@@ -182,10 +202,10 @@ end
 ---------
 function AutoCast()
 if Menu.Misc.AutoR:Value()and isReady(_R)then
-target=(_G.SDK and _G.SDK.Orbwalker:IsEnabled()and _G.SDK.TargetSelector:GetTarget(1200))or(_G.EOWLoaded and EOW:GetTarget(1200))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(1200))
+target=(LocalSDK and LocalSDK.Orbwalker:IsEnabled()and LocalSDK.TargetSelector:GetTarget(1200))or(LocalEOW and EOW:GetTarget(1200))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(1200))
 if target then
 if CountKnockedUpEnemies(R.range)>=Menu.Misc.MinR:Value()then
-Control.CastSpell(HK_R)
+CastSpell(HK_R)
 end
 end
 end
@@ -203,10 +223,10 @@ local pred=GetPred(target,Q.speed,Q.delay)
 if pred then
 if Menu.Misc.DontQMinionsUnder:Value()then
 if not IsUnderTurret(myHero.pos)then
-Control.CastSpell(HK_Q,pred)
+CastSpell(HK_Q,pred)
 end
 else
-Control.CastSpell(HK_Q,pred)
+CastSpell(HK_Q,pred)
 end
 end
 end
@@ -215,10 +235,10 @@ local pred=GetPred(target,Q.speed,Q.delay)
 if pred then
 if Menu.Misc.DontQMinionsUnder:Value()then
 if not IsUnderTurret(myHero.pos)then
-Control.CastSpell(HK_Q,pred)
+CastSpell(HK_Q,pred)
 end
 else
-Control.CastSpell(HK_Q,pred)
+CastSpell(HK_Q,pred)
 end
 end
 end
@@ -232,7 +252,7 @@ if not Combo then
 if Menu.Misc.AutoQEnemies:Value()and isReady(_Q)then
 --normal Q3
 if HasBuff(myHero,Q3.name)then
-target=(_G.SDK and _G.SDK.Orbwalker:IsEnabled()and _G.SDK.TargetSelector:GetTarget(Q3.range))or(_G.EOWLoaded and EOW:GetTarget(Q3.range))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(Q3.range))
+target=(LocalSDK and LocalSDK.Orbwalker:IsEnabled()and LocalSDK.TargetSelector:GetTarget(Q3.range))or(LocalEOW and EOW:GetTarget(Q3.range))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(Q3.range))
 if target then
 if myHero.pos:DistanceTo(target.pos)<myHero.range+50 then
 if myHero.attackData.state==STATE_WINDDOWN then
@@ -240,10 +260,10 @@ local pred=target:GetPrediction(Q3.speed,Q3.delay+Game.Latency()/1000)
 if pred then
 if Menu.Misc.DontQEnemiesUnder:Value()then
 if not IsUnderTurret(myHero.pos)then
-Control.CastSpell(HK_Q,pred)
+CastSpell(HK_Q,pred)
 end
 else
-Control.CastSpell(HK_Q,pred)
+CastSpell(HK_Q,pred)
 end
 end
 end
@@ -252,17 +272,17 @@ local pred=target:GetPrediction(Q3.speed,Q3.delay+Game.Latency()/1000)
 if pred then
 if Menu.Misc.DontQEnemiesUnder:Value()then
 if not IsUnderTurret(myHero.pos)then
-Control.CastSpell(HK_Q,pred)
+CastSpell(HK_Q,pred)
 end
 else
-Control.CastSpell(HK_Q,pred)
+CastSpell(HK_Q,pred)
 end
 end
 end
 end
 else
 --normal Q
-target=(_G.SDK and _G.SDK.Orbwalker:IsEnabled()and _G.SDK.TargetSelector:GetTarget(Q.range))or(_G.EOWLoaded and EOW:GetTarget(Q.range))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(Q.range))
+target=(LocalSDK and LocalSDK.Orbwalker:IsEnabled()and LocalSDK.TargetSelector:GetTarget(Q.range))or(LocalEOW and EOW:GetTarget(Q.range))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(Q.range))
 if target then
 if myHero.pos:DistanceTo(target.pos)<myHero.range+50 then
 if myHero.attackData.state==STATE_WINDDOWN then
@@ -270,10 +290,10 @@ local pred=QPred:GetPrediction(target,myHero.pos)
 if pred and pred.hitChance>=0.22 then
 if Menu.Misc.DontQEnemiesUnder:Value()then
 if not IsUnderTurret(myHero.pos)then
-Control.CastSpell(HK_Q,pred.castPos)
+CastSpell(HK_Q,pred.castPos)
 end
 else
-Control.CastSpell(HK_Q,pred.castPos)
+CastSpell(HK_Q,pred.castPos)
 end
 end
 end
@@ -282,10 +302,10 @@ local pred=QPred:GetPrediction(target,myHero.pos)
 if pred and pred.hitChance>=0.22 then
 if Menu.Misc.DontQEnemiesUnder:Value()then
 if not IsUnderTurret(myHero.pos)then
-Control.CastSpell(HK_Q,pred.castPos)
+CastSpell(HK_Q,pred.castPos)
 end
 else
-Control.CastSpell(HK_Q,pred.castPos)
+CastSpell(HK_Q,pred.castPos)
 end
 end
 end
@@ -305,11 +325,11 @@ if isEnemyNearBy(Q.range)then
 local levelQ=myHero:GetSpellData(_Q).level
 local Qdmg=({20,40,60,80,100})[levelQ]+myHero.totalDamage
 --loop
-for i=1,Game.HeroCount()do
-local hero=Game.Hero(i)
+for i=1,LocalGameHeroCount()do
+local hero=LocalGameHero(i)
 if hero and hero.isEnemy and hero.visible and hero.valid and hero.alive and hero.isTargetable and hero.pos:DistanceTo(myHero.pos)<=E.range then
 if CalcPhysicalDamage(myHero,hero,Qdmg)>=hero.health+hero.shieldAD then
-Control.CastSpell(HK_Q,hero)
+CastSpell(HK_Q,hero)
 end
 end
 end
@@ -317,17 +337,48 @@ end
 end
 --KillSteal E
 if Menu.KillSteal.E:Value()and isReady(_E)then
-if isEnemyNearBy(E.range)then
+if isEnemyNearBy(1200)then
 --spell data
 local levelE=myHero:GetSpellData(_E).level
+local levelQ=myHero:GetSpellData(_Q).level
 local Edmg=({60,70,80,90,100})[levelE]+0.2*myHero.bonusDamage+0.6*myHero.ap
+local Qdmg=({20,40,60,80,100})[levelQ]+myHero.totalDamage
 --loop
-for i=1,Game.HeroCount()do
-local hero=Game.Hero(i)
-if hero and hero.isEnemy and hero.visible and hero.valid and hero.alive and hero.isTargetable and hero.pos:DistanceTo(myHero.pos)<=E.range then
-if not HasBuff(hero,"YasuoDashWrapper")then
-if CalcMagicalDamage(myHero,hero,Edmg)>=hero.health+hero.shieldAP then
-Control.CastSpell(HK_E,hero)
+for i=1,LocalGameHeroCount()do
+local hero=LocalGameHero(i)
+local gapDistance=myHero.pos:DistanceTo(hero.pos)
+if hero and hero.isEnemy and hero.visible and hero.valid and hero.alive and hero.isTargetable and gapDistance<=1200 then
+if gapDistance<E.range and not HasBuff(hero,"YasuoDashWrapper")then
+if CalcMagicalDamage(myHero,hero,Edmg)+CalcPhysicalDamage(myHero,hero,myHero.totalDamage*(1+myHero.critChance))>=hero.health+hero.shieldAP then
+CastSpell(HK_E,hero)
+end
+else
+if Menu.KillSteal.Gapclose:Value()then
+local TotalDamage=CalcMagicalDamage(myHero,hero,Edmg)+CalcPhysicalDamage(myHero,hero,Qdmg)+CalcPhysicalDamage(myHero,hero,myHero.totalDamage*(1+myHero.critChance))
+if TotalDamage>=hero.health then
+--GapClose
+local minion=GetGapCloseEnimiesMinions(hero.pos,gapDistance-100)
+local EnimiesHero=GetGapCloseEnimiesHero(hero.pos,gapDistance-100,hero)
+if minion then
+if Menu.KillSteal.DontGapclose:Value()then
+local afterEPos=minion.pos:Shortened(myHero.pos,E.range-myHero.pos:DistanceTo(minion.pos))
+if not IsUnderTurret(afterEPos)then
+CastSpell(HK_E,minion)
+end
+else
+CastSpell(HK_E,minion)
+end
+elseif EnimiesHero then
+if Menu.KillSteal.DontGapclose:Value()then
+local afterEPos=EnimiesHero.pos:Shortened(myHero.pos,E.range-myHero.pos:DistanceTo(EnimiesHero.pos))
+if not IsUnderTurret(afterEPos)then
+CastSpell(HK_E,EnimiesHero)
+end
+else
+CastSpell(HK_E,EnimiesHero)
+end
+end
+end
 end
 end
 end
@@ -341,12 +392,12 @@ if isEnemyNearBy(R.range)then
 local levelR=myHero:GetSpellData(_R).level
 local Rdmg=({200,300,400})[levelR]+1.5*myHero.bonusDamage
 --loop
-for i=1,Game.HeroCount()do
-local hero=Game.Hero(i)
+for i=1,LocalGameHeroCount()do
+local hero=LocalGameHero(i)
 if hero and hero.isEnemy and hero.visible and hero.valid and hero.alive and hero.isTargetable then
 if Menu.KillSteal.WhiteList[hero.networkID]:Value()and isKnockedUp(hero)and hero.pos:DistanceTo(myHero.pos)<=R.range then
 if CalcPhysicalDamage(myHero,hero,Rdmg)>=hero.health+hero.shieldAD then
-Control.CastSpell(HK_R,hero)
+CastSpell(HK_R,hero)
 end
 end
 end
@@ -362,37 +413,37 @@ UseComboItem()
 if Menu.Mode.Combo.Q:Value()and isReady(_Q)then
 --normal Q3
 if HasBuff(myHero,Q3.name)then
-target=(_G.SDK and _G.SDK.Orbwalker:IsEnabled()and _G.SDK.TargetSelector:GetTarget(Q3.range))or(_G.EOWLoaded and EOW:GetTarget(Q3.range))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(Q3.range))
+target=(LocalSDK and LocalSDK.Orbwalker:IsEnabled()and LocalSDK.TargetSelector:GetTarget(Q3.range))or(LocalEOW and EOW:GetTarget(Q3.range))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(Q3.range))
 if target then
 if myHero.pos:DistanceTo(target.pos)<myHero.range+50 then
 if myHero.attackData.state==STATE_WINDDOWN then
 local pred=target:GetPrediction(Q3.speed,Q3.delay+Game.Latency()/1000)
 if pred then
-Control.CastSpell(HK_Q,pred)
+CastSpell(HK_Q,pred)
 end
 end
 else
 local pred=target:GetPrediction(Q3.speed,Q3.delay+Game.Latency()/1000)
 if pred then
-Control.CastSpell(HK_Q,pred)
+CastSpell(HK_Q,pred)
 end
 end
 end
 else
 --normal Q
-target=(_G.SDK and _G.SDK.Orbwalker:IsEnabled()and _G.SDK.TargetSelector:GetTarget(Q.range))or(_G.EOWLoaded and EOW:GetTarget(Q.range))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(Q.range))
+target=(LocalSDK and LocalSDK.Orbwalker:IsEnabled()and LocalSDK.TargetSelector:GetTarget(Q.range))or(LocalEOW and EOW:GetTarget(Q.range))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(Q.range))
 if target then
 if myHero.pos:DistanceTo(target.pos)<myHero.range+50 then
 if myHero.attackData.state==STATE_WINDDOWN then
 local pred=QPred:GetPrediction(target,myHero.pos)
 if pred and pred.hitChance>=0.22 then
-Control.CastSpell(HK_Q,pred.castPos)
+CastSpell(HK_Q,pred.castPos)
 end
 end
 else
 local pred=QPred:GetPrediction(target,myHero.pos)
 if pred and pred.hitChance>=0.22 then
-Control.CastSpell(HK_Q,pred.castPos)
+CastSpell(HK_Q,pred.castPos)
 end
 end
 end
@@ -400,30 +451,40 @@ end
 end
 --normal E
 if Menu.Mode.Combo.E:Value()and isReady(_E)then
-target=(_G.SDK and _G.SDK.Orbwalker:IsEnabled()and _G.SDK.TargetSelector:GetTarget(1200))or(_G.EOWLoaded and EOW:GetTarget(1200))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(1200))
+target=(LocalSDK and LocalSDK.Orbwalker:IsEnabled()and LocalSDK.TargetSelector:GetTarget(1200))or(LocalEOW and EOW:GetTarget(1200))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(1200))
 if target then
 local gapDistance=myHero.pos:DistanceTo(target.pos)
-if gapDistance<E.range and not HasBuff(target,"YasuoDashWrapper")then
+if not HasBuff(target,"YasuoDashWrapper")then
+if gapDistance<E.range then
 --E to target
 local afterEPos=target.pos:Shortened(myHero.pos,E.range-myHero.pos:DistanceTo(target.pos))
 if target.pos:DistanceTo(afterEPos)<=myHero.range+50 then
-Control.CastSpell(HK_E,target)
+CastSpell(HK_E,target)
 end
 else
---spell data
-local levelE=myHero:GetSpellData(_E).level
-local levelQ=myHero:GetSpellData(_Q).level
-local Edmg=({60,70,80,90,100})[levelE]+0.2*myHero.bonusDamage+0.6*myHero.ap
-local Qdmg=({20,40,60,80,100})[levelQ]+myHero.totalDamage
-local TotalDamage=CalcMagicalDamage(myHero,target,Edmg)+CalcPhysicalDamage(myHero,target,Qdmg)+CalcPhysicalDamage(myHero,target,myHero.totalDamage*(1+myHero.critChance))
-if TotalDamage>=target.health then
+if Menu.Mode.Combo.Gapclose:Value()and isReady(_E)then
 --GapClose
 local minion=GetGapCloseEnimiesMinions(target.pos,gapDistance-100)
 local hero=GetGapCloseEnimiesHero(target.pos,gapDistance-100,target)
 if minion then
-Control.CastSpell(HK_E,minion)
+if Menu.Mode.Combo.DontGapclose:Value()then
+local afterEPos=minion.pos:Shortened(myHero.pos,E.range-myHero.pos:DistanceTo(minion.pos))
+if not IsUnderTurret(afterEPos)then
+CastSpell(HK_E,minion)
+end
+else
+CastSpell(HK_E,minion)
+end
 elseif hero then
-Control.CastSpell(HK_E,hero)
+if Menu.Mode.Combo.DontGapclose:Value()then
+local afterEPos=hero.pos:Shortened(myHero.pos,E.range-myHero.pos:DistanceTo(hero.pos))
+if not IsUnderTurret(afterEPos)then
+CastSpell(HK_E,hero)
+end
+else
+CastSpell(HK_E,hero)
+end
+end
 end
 end
 end
@@ -431,10 +492,10 @@ end
 end
 --normal R
 if Menu.Mode.Combo.R:Value()and isReady(_R)then
-target=(_G.SDK and _G.SDK.Orbwalker:IsEnabled()and _G.SDK.TargetSelector:GetTarget(R.range))or(_G.EOWLoaded and EOW:GetTarget(R.range))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(R.range))
+target=(LocalSDK and LocalSDK.Orbwalker:IsEnabled()and LocalSDK.TargetSelector:GetTarget(R.range))or(LocalEOW and EOW:GetTarget(R.range))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(R.range))
 if target then
 if isKnockedUp(target)then
-Control.CastSpell(HK_R,target)
+CastSpell(HK_R,target)
 end
 end
 end
@@ -455,13 +516,13 @@ if myHero.pos:DistanceTo(target.pos)<myHero.range+50 then
 if myHero.attackData.state==STATE_WINDDOWN then
 local pred=GetPred(target,Q.speed,Q.delay)
 if pred then
-Control.CastSpell(HK_Q,pred)
+CastSpell(HK_Q,pred)
 end
 end
 else
 local pred=GetPred(target,Q.speed,Q.delay)
 if pred then
-Control.CastSpell(HK_Q,pred)
+CastSpell(HK_Q,pred)
 end
 end
 end
@@ -473,13 +534,13 @@ if myHero.pos:DistanceTo(target.pos)<myHero.range+50 then
 if myHero.attackData.state==STATE_WINDDOWN then
 local pred=GetPred(target,Q.speed,Q.delay)
 if pred then
-Control.CastSpell(HK_Q,pred)
+CastSpell(HK_Q,pred)
 end
 end
 else
 local pred=GetPred(target,Q.speed,Q.delay)
 if pred then
-Control.CastSpell(HK_Q,pred)
+CastSpell(HK_Q,pred)
 end
 end
 end
@@ -488,19 +549,25 @@ end
 end
 --E
 if Menu.Mode.LaneClear.E:Value()and isReady(_E)then
---no Enemies nearby
-if not isEnemyNearBy(1500)then
+--Enemies nearby
+if isEnemyNearBy(1200)then
+--KS with E
+target=GetLowHPMinionTarget(E.range)
+if target then
+CastSpell(HK_E,target)
+end
+else
 --E to minion if E After Pos near a minion
 target=GetEMinionTarget(E.range)
 if target then
 if myHero.attackData.state==STATE_WINDDOWN then
-Control.CastSpell(HK_E,target)
+CastSpell(HK_E,target)
 end
 end
 --KS with E
 target=GetLowHPMinionTarget(E.range)
 if target then
-Control.CastSpell(HK_E,target)
+CastSpell(HK_E,target)
 end
 end
 end
@@ -515,13 +582,13 @@ if myHero.pos:DistanceTo(target.pos)<myHero.range+50 then
 if myHero.attackData.state==STATE_WINDDOWN then
 local pred=GetPred(target,Q.speed,Q.delay)
 if pred then
-Control.CastSpell(HK_Q,pred)
+CastSpell(HK_Q,pred)
 end
 end
 else
 local pred=GetPred(target,Q.speed,Q.delay)
 if pred then
-Control.CastSpell(HK_Q,pred)
+CastSpell(HK_Q,pred)
 end
 end
 end
@@ -532,13 +599,13 @@ if Menu.Mode.JungleClear.E:Value()and isReady(_E)then
 target=GetEMinionTarget(E.range)
 if target then
 if myHero.attackData.state==STATE_WINDDOWN then
-Control.CastSpell(HK_E,target)
+CastSpell(HK_E,target)
 end
 end
 --KS with E
 target=GetLowHPMinionTarget(E.range)
 if target then
-Control.CastSpell(HK_E,target)
+CastSpell(HK_E,target)
 end
 end
 end
@@ -554,9 +621,9 @@ local gapDistance=myHero.pos:DistanceTo(mousePos)
 local minion=GetGapCloseEnimiesMinions(mousePos,gapDistance-100)
 local hero=GetGapCloseEnimiesHero(mousePos,gapDistance-100,target)
 if minion then
-Control.CastSpell(HK_E,minion)
+CastSpell(HK_E,minion)
 elseif hero then
-Control.CastSpell(HK_E,hero)
+CastSpell(HK_E,hero)
 end
 end
 end
@@ -564,45 +631,45 @@ end
 function UseComboItem()
 if not Menu.Item.Enable:Value()then return end
 --item Usage
-local target=(_G.SDK and _G.SDK.Orbwalker:IsEnabled()and _G.SDK.TargetSelector:GetTarget(450))or(_G.EOWLoaded and EOW:GetTarget(450))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(450))
+local target=(LocalSDK and LocalSDK.Orbwalker:IsEnabled()and LocalSDK.TargetSelector:GetTarget(450))or(LocalEOW and EOW:GetTarget(450))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(450))
 if target then
 --Use item STATE_WINDDOWN
 if myHero.attackData.state==STATE_WINDDOWN then
 local item=GetItemSlot(3077)
 if item and Menu.Item.Tiamat:Value()then
-Control.CastSpell(SlotToHotKeys(item))
+CastSpell(SlotToHotKeys(item))
 end
 local item=GetItemSlot(3074)
 if item and Menu.Item.RavenousHydra:Value()then
-Control.CastSpell(SlotToHotKeys(item))
+CastSpell(SlotToHotKeys(item))
 end
 local item=GetItemSlot(3143)
 if item and Menu.Item.RanduinsOmen:Value()then
-Control.CastSpell(SlotToHotKeys(item))
+CastSpell(SlotToHotKeys(item))
 end
 local item=GetItemSlot(3144)
 if item and Menu.Item.BilgewaterCutlass:Value()then
-Control.CastSpell(SlotToHotKeys(item),target)
+CastSpell(SlotToHotKeys(item),target)
 end
 local item=GetItemSlot(3153)
 if item and Menu.Item.BladeoftheRuinedKing:Value()then
-Control.CastSpell(SlotToHotKeys(item),target)
+CastSpell(SlotToHotKeys(item),target)
 end
 local item=GetItemSlot(3146)
 if item and Menu.Item.HextechGunblade:Value()then
-Control.CastSpell(SlotToHotKeys(item),target)
+CastSpell(SlotToHotKeys(item),target)
 end
 end
 if myHero.attackData.state==STATE_WINDUP then
 local item=GetItemSlot(3748)
 if item and Menu.Item.TitanicHydra:Value()then
-Control.CastSpell(SlotToHotKeys(item))
+CastSpell(SlotToHotKeys(item))
 end
 end
 --Use item in range 450
 local item=GetItemSlot(3142)
 if item and Menu.Item.YoumuusGhostblade:Value()then
-Control.CastSpell(SlotToHotKeys(item))
+CastSpell(SlotToHotKeys(item))
 end
 end
 end
@@ -613,19 +680,19 @@ if isMinionAndJungleNearBy(350)then
 if myHero.attackData.state==STATE_WINDDOWN then
 local item=GetItemSlot(3077)
 if item and Menu.Item.Tiamat:Value()then
-Control.CastSpell(SlotToHotKeys(item))
+CastSpell(SlotToHotKeys(item))
 end
 local item=GetItemSlot(3074)
 if item and Menu.Item.RavenousHydra:Value()then
-Control.CastSpell(SlotToHotKeys(item))
+CastSpell(SlotToHotKeys(item))
 end
 end
 end
 end
 function isMinionAndJungleNearBy(range)
 local range=range
-for i=1,Game.MinionCount()do
-local minion=Game.Minion(i)
+for i=1,LocalGameMinionCount()do
+local minion=LocalGameMinion(i)
 if minion and minion.isEnemy and minion.visible and minion.valid and minion.alive and minion.isTargetable and minion.pos:DistanceTo(myHero.pos)<=range then
 return true
 end
@@ -634,8 +701,8 @@ return false
 end
 function isMinionNearBy(range)
 local range=range
-for i=1,Game.MinionCount()do
-local minion=Game.Minion(i)
+for i=1,LocalGameMinionCount()do
+local minion=LocalGameMinion(i)
 if minion and minion.team==200 and minion.visible and minion.valid and minion.alive and minion.isTargetable and minion.pos:DistanceTo(myHero.pos)<=range then
 return true
 end
@@ -644,8 +711,8 @@ return false
 end
 function isJungleNearBy(range)
 local range=range
-for i=1,Game.MinionCount()do
-local minion=Game.Minion(i)
+for i=1,LocalGameMinionCount()do
+local minion=LocalGameMinion(i)
 if minion and minion.team==300 and minion.visible and minion.valid and minion.alive and minion.isTargetable and minion.pos:DistanceTo(myHero.pos)<=range then
 return true
 end
@@ -654,8 +721,8 @@ return false
 end
 function isEnemyNearBy(range)
 local range=range
-for i=1,Game.HeroCount()do
-local hero=Game.Hero(i)
+for i=1,LocalGameHeroCount()do
+local hero=LocalGameHero(i)
 if hero and hero.isEnemy and hero.visible and hero.valid and hero.alive and hero.isTargetable and hero.pos:DistanceTo(myHero.pos)<=range then
 return true
 end
@@ -693,8 +760,8 @@ return false
 end
 function mCollision(castPos,width)
 local Count=0
-for i=Game.MinionCount(),1,-1 do
-local minion=Game.Minion(i)
+for i=LocalGameMinionCount(),1,-1 do
+local minion=LocalGameMinion(i)
 if minion and minion.isEnemy and minion.visible and minion.valid and minion.alive and minion.isTargetable then
 local pointSegment,pointLine,isOnSegment=VectorPointProjectionOnLineSegment(myHero.pos,castPos,minion.pos)
 local w=width+minion.boundingRadius
@@ -720,10 +787,10 @@ local dx,dz=p1.x-p2.x,p1.z-p2.z
 return dx*dx+dz*dz
 end
 function GetClosestEnemiesMinionsTarget(distance)
-local distance=distance or math.huge
+local distance=distance or LocalMathHuge
 local closest
-for i=1,Game.MinionCount()do
-local minion=Game.Minion(i)
+for i=1,LocalGameMinionCount()do
+local minion=LocalGameMinion(i)
 if minion and minion.isEnemy and minion.visible and minion.valid and minion.alive and minion.isTargetable then
 if minion.pos:DistanceTo(myHero.pos)<distance then
 distance=minion.pos:DistanceTo(myHero.pos)
@@ -734,8 +801,8 @@ end
 return closest
 end
 function GetQ3Target(range)
-for i=1,Game.MinionCount()do
-local minion=Game.Minion(i)
+for i=1,LocalGameMinionCount()do
+local minion=LocalGameMinion(i)
 if minion and minion.isEnemy and minion.visible and minion.valid and minion.alive and minion.isTargetable and minion.pos:DistanceTo(myHero.pos)<=range then
 if mCollision(minion.pos,Q3.width)>=Menu.Mode.LaneClear.Q3:Value()then
 return minion
@@ -761,12 +828,12 @@ end
 return false
 end
 function isReady(spell)
-return Game.CanUseSpell(spell)==0
+return LocalGameCanUseSpell(spell)==0
 end
 function GetEMinionTarget(range)
 local range=range
-for i=1,Game.MinionCount()do
-local minion=Game.Minion(i)
+for i=1,LocalGameMinionCount()do
+local minion=LocalGameMinion(i)
 if minion and minion.isEnemy and minion.visible and minion.valid and minion.alive and minion.isTargetable and minion.pos:DistanceTo(myHero.pos)<=range then
 if not HasBuff(minion,"YasuoDashWrapper")and GetBestEPos(minion)then
 return minion
@@ -778,8 +845,8 @@ end
 function GetBestEPos(minion)
 local afterEPos=minion.pos:Shortened(myHero.pos,E.range-myHero.pos:DistanceTo(minion.pos))
 if not IsUnderTurret(afterEPos)then
-for i=1,Game.MinionCount()do
-local minion=Game.Minion(i)
+for i=1,LocalGameMinionCount()do
+local minion=LocalGameMinion(i)
 if minion and minion.isEnemy and minion.visible and minion.valid and minion.alive and minion.isTargetable and minion.pos:DistanceTo(afterEPos)<=myHero.range+50 then
 return true
 end
@@ -795,7 +862,7 @@ end
 return false
 end
 function GetClosestEnemiesTurretTarget(distance)
-local distance=distance or math.huge
+local distance=distance or LocalMathHuge
 local closest
 for i=1,Game.TurretCount()do
 local turret=Game.Turret(i)
@@ -810,8 +877,8 @@ return closest
 end
 function GetLowHPMinionTarget(range)
 local range=range
-for i=1,Game.MinionCount()do
-local minion=Game.Minion(i)
+for i=1,LocalGameMinionCount()do
+local minion=LocalGameMinion(i)
 if minion and minion.isEnemy and minion.visible and minion.valid and minion.alive and minion.isTargetable and minion.pos:DistanceTo(myHero.pos)<=range then
 local levelE=myHero:GetSpellData(_E).level
 local Edmg=({60,70,80,90,100})[levelE]+0.2*myHero.bonusDamage+0.6*myHero.ap
@@ -826,8 +893,8 @@ end
 function CountKnockedUpEnemies(range)
 local range=range
 local count=0
-for i=1,Game.HeroCount()do
-local hero=Game.Hero(i)
+for i=1,LocalGameHeroCount()do
+local hero=LocalGameHero(i)
 if hero and hero.isEnemy and hero.visible and hero.valid and hero.alive and hero.isTargetable and hero.pos:DistanceTo(myHero.pos)<=range then
 if isKnockedUp(hero)then
 count=count+1
@@ -905,8 +972,8 @@ return value*amount
 end
 function GetGapCloseEnimiesMinions(pos,range)
 local range=range or 800
-for i=1,Game.MinionCount()do
-local minion=Game.Minion(i)
+for i=1,LocalGameMinionCount()do
+local minion=LocalGameMinion(i)
 if minion and minion.isEnemy and minion.visible and minion.valid and minion.alive and minion.isTargetable then
 if minion.pos:DistanceTo(pos)<=range and minion.pos:DistanceTo(myHero.pos)<E.range and not HasBuff(minion,"YasuoDashWrapper")then
 return minion
@@ -917,8 +984,8 @@ return false
 end
 function GetGapCloseEnimiesHero(pos,range,target)
 local range=range or 800
-for i=1,Game.HeroCount()do
-local hero=Game.Hero(i)
+for i=1,LocalGameHeroCount()do
+local hero=LocalGameHero(i)
 if hero and hero.isEnemy and hero~=target and hero.visible and hero.valid and hero.alive and hero.isTargetable then
 if hero.pos:DistanceTo(pos)<=range and hero.pos:DistanceTo(myHero.pos)<E.range and not HasBuff(hero,"YasuoDashWrapper")then
 return hero
