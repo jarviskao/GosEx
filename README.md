@@ -1,14 +1,16 @@
 # GosEx
 _______________________________________________________________
-[Released] 
+[Unities] - Support Patch 7.X
 
-Auto Level Spells Customization (Support Patch 7.X)
+* Auto Level Spells Customization
 
-Yasuo - Easier to play (Support Patch 7.X)
+[Champions] - Support Patch 7.X
 
-Pantheon (Support Patch 7.X)
+* Yasuo - Easier to play
 
-Garen (Support Patch 7.X)
+* Pantheon - Easier to play
+
+* Garen - Easier to play
 _______________________________________________________________
 [Outdated]
 
