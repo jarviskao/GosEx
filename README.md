@@ -12,8 +12,8 @@ _______________________________________________________________
 
 * Garen - Easier to play
 _______________________________________________________________
-[Outdated]
+[Champions] - Outdated
 
-Wukong (updated for 7.5)
+* Wukong - Easier to play 
 
-LeeSin (updated for 7.6)
+* LeeSin - Easier to play
