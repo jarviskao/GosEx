@@ -1,6 +1,6 @@
 # GosEx
 _______________________________________________________________
-[Unities] - Support Patch 7.X
+[Utility] - Support Patch 7.X
 
 * Auto Level Spells Customization
 
