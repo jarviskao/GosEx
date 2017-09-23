@@ -11,6 +11,7 @@ local LocalGameMinionCount=Game.MinionCount
 local LocalGameMinion=Game.Minion
 local LocalGameCanUseSpell=Game.CanUseSpell
 local LocalDrawCircle=Draw.Circle
+local LocalDrawCircleMinimap=Draw.CircleMinimap
 local LocalMathHuge=math.huge
 local CastSpell=Control.CastSpell
 local ITEM_1=_G.ITEM_1
@@ -37,6 +38,7 @@ local R={range=5500,attackRange=700,speed=20,delay=0.25,width=0}
 --OTHER
 local orbStatus=true
 local SpellTable={"Q","W","E","R"}
+local CURRENT_TARGET=nil
 --icon
 local Icons={Menu="http://static.lolskill.net/img/champions/64/pantheon.png",Q="https://vignette2.wikia.nocookie.net/leagueoflegends/images/1/1b/Spear_Shot.png",W="https://vignette4.wikia.nocookie.net/leagueoflegends/images/1/1b/Aegis_of_Zeonia.png",E="https://vignette3.wikia.nocookie.net/leagueoflegends/images/e/ea/Heartseeker_Strike.png",R="https://vignette1.wikia.nocookie.net/leagueoflegends/images/d/dd/Grand_Skyfall.png",Tiamat="https://vignette2.wikia.nocookie.net/leagueoflegends/images/e/e3/Tiamat_item.png",RavenousHydra="https://vignette1.wikia.nocookie.net/leagueoflegends/images/e/e8/Ravenous_Hydra_item.png",TitanicHydra="https://vignette1.wikia.nocookie.net/leagueoflegends/images/2/22/Titanic_Hydra_item.png",YoumuusGhostblade="https://vignette4.wikia.nocookie.net/leagueoflegends/images/4/41/Youmuu%27s_Ghostblade_item.png",RanduinsOmen="https://vignette1.wikia.nocookie.net/leagueoflegends/images/0/08/Randuin%27s_Omen_item.png",BilgewaterCutlass="https://vignette1.wikia.nocookie.net/leagueoflegends/images/4/44/Bilgewater_Cutlass_item.png",BladeoftheRuinedKing="https://vignette2.wikia.nocookie.net/leagueoflegends/images/2/2f/Blade_of_the_Ruined_King_item.png",HextechGunblade="https://vignette4.wikia.nocookie.net/leagueoflegends/images/6/64/Hextech_Gunblade_item.png"}
 --Main Menu
@@ -154,16 +156,12 @@ end
 function OnTick()
 if myHero.dead then return end
 local Combo=Menu.Key.Combo:Value()
-local Harass=Menu.Key.Harass:Value()
 local Clear=Menu.Key.Clear:Value()
-local LastHit=Menu.Key.LastHit:Value()
-local Flee=Menu.Key.Flee:Value()
---local target=(LocalSDK and LocalSDK.Orbwalker:IsEnabled()and LocalSDK.TargetSelector:GetTarget(1200))or(LocalEOW and EOW:GetTarget(1200))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(1200))
 --DisableOrb
 if myHero.activeSpell.name==E.name and myHero.activeSpell.valid then
 orbStatus=false
---PrintChat("DisableOrb")
 DisableOrb()
+--PrintChat("DisableOrb")
 end
 --EnableOrb
 if orbStatus==false then
@@ -181,26 +179,27 @@ orbStatus=true
 EnableOrb()
 end
 end
-KillSteal()
+CURRENT_TARGET=(LocalSDK and LocalSDK.Orbwalker:IsEnabled()and LocalSDK.TargetSelector:GetTarget(800))or(LocalEOW and EOW:GetTarget(800))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(800))
 if Combo then
 OnCombo()
 elseif Clear then
 OnClear()
 end
+KillSteal()
 end
 ---------
 --Clear--
 ---------
 function OnClear()
 UseClearItem()
+if CURRENT_TARGET then return end
 --W to the closest minion if count>=3 and no enemies around
-if not GetEnemiesHeroes(1200)then
 if Menu.Mode.Clear.W:Value()and isReady(_W)and not HasBuff(myHero,"PantheonPassiveShield")then
 local BuffData=GetBuffData(myHero,"PantheonPassiveCounter")
 if BuffData and BuffData.count>=3 then
 local minion=GetClosestMinionTarget(W.range)
-if isValidTarget(minion)then
-if myHero.pos:DistanceTo(minion.pos)<myHero.range+80 then
+if isValidTarget(minion,W.range)then
+if minion.distance<myHero.range+80 then
 if myHero.attackData.state==STATE_WINDDOWN then
 CastSpell(HK_W,minion)
 end
@@ -211,11 +210,11 @@ end
 end
 end
 end
-end
 ---------
 --KillSteal--
 ---------
 function KillSteal()
+if myHero.attackData.state==STATE_WINDUP or not CURRENT_TARGET then end
 --KillSteal Q
 if Menu.KillSteal.Q:Value()and isReady(_Q)then
 --spell data
@@ -223,9 +222,9 @@ local levelQ=myHero:GetSpellData(_Q).level
 --Q KS
 for i=1,LocalGameHeroCount()do
 local hero=LocalGameHero(i)
-if hero and hero.team~=TEAM_ALLY and hero.visible and hero.valid and hero.alive and hero.isTargetable and hero.pos:DistanceTo(myHero.pos)<=Q.range then
+if hero and hero.team~=TEAM_ALLY and hero.visible and hero.valid and hero.alive and hero.isTargetable and hero.distance<=Q.range then
 --ks with Q(all eneies check except current target)
-if hero~=target then
+if hero~=CURRENT_TARGET then
 local Qdmg=({65,105,145,185,225})[levelQ]+1.4*hero.bonusDamage
 if CalcPhysicalDamage(myHero,hero,Qdmg)>=hero.health+hero.shieldAD+CalculateHpRegen(hero)then
 CastSpell(HK_Q,hero)
@@ -242,7 +241,7 @@ local levelE=myHero:GetSpellData(_E).level
 --KS with W
 for i=1,LocalGameHeroCount()do
 local hero=LocalGameHero(i)
-if hero and hero.team~=TEAM_ALLY and hero.visible and hero.valid and hero.alive and hero.isTargetable and hero.pos:DistanceTo(myHero.pos)<=W.range then
+if hero and hero.team~=TEAM_ALLY and hero.visible and hero.valid and hero.alive and hero.isTargetable and hero.distance<=W.range then
 --ks with W+AA(all eneies check)
 local Wdmg=({50,75,100,125,150})[levelW]+hero.ap
 if CalcMagicalDamage(myHero,hero,Wdmg)+CalcPhysicalDamage(myHero,hero,myHero.totalDamage)>=hero.health+hero.shieldAP+CalculateHpRegen(hero)then
@@ -264,53 +263,51 @@ end
 ---------
 function OnCombo()
 UseComboItem()
+if myHero.attackData.state==STATE_WINDUP or not CURRENT_TARGET then end
 --Q
 if Menu.Mode.Combo.Q:Value()and isReady(_Q)and not myHero.activeSpell.valid then
-target=(LocalSDK and LocalSDK.Orbwalker:IsEnabled()and LocalSDK.TargetSelector:GetTarget(Q.range))or(LocalEOW and EOW:GetTarget(Q.range))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(Q.range))
-if target then
+if isValidTarget(CURRENT_TARGET,Q.range)then
 --Q if Counter<3 or have Shield or do not have counter and Shield
 local BuffData1=GetBuffData(myHero,"PantheonPassiveCounter")
 local BuffData2=GetBuffData(myHero,"PantheonPassiveShield")
 if(not BuffData1 and not BuffData2)or(BuffData1 and BuffData1.count<3)or BuffData2 then
-if myHero.pos:DistanceTo(target.pos)<myHero.range+80 then
+if CURRENT_TARGET.distance<myHero.range+80 then
 if myHero.attackData.state==STATE_WINDDOWN then
-CastSpell(HK_Q,target)
+CastSpell(HK_Q,CURRENT_TARGET)
 end
 else
-CastSpell(HK_Q,target)
+CastSpell(HK_Q,CURRENT_TARGET)
 end
 end
 end
 end
 --W
 if Menu.Mode.Combo.W:Value()and isReady(_W)and not myHero.activeSpell.valid then
-target=(LocalSDK and LocalSDK.Orbwalker:IsEnabled()and LocalSDK.TargetSelector:GetTarget(W.range))or(LocalEOW and EOW:GetTarget(W.range))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(W.range))
 --W if do not have sheild or Ally is nearby 800 range or Enemies AA range<300
-if target then
+if isValidTarget(CURRENT_TARGET,W.range)then
 if not HasBuff(myHero,"PantheonPassiveShield")or isAllyNearBy(800)then
-if myHero.pos:DistanceTo(target.pos)<myHero.range+80 then
+if CURRENT_TARGET.distance<myHero.range+80 then
 if myHero.attackData.state==STATE_WINDDOWN then
-CastSpell(HK_W,target)
+CastSpell(HK_W,CURRENT_TARGET)
 end
 else
-CastSpell(HK_W,target)
+CastSpell(HK_W,CURRENT_TARGET)
 end
 end
 end
 end
 --E
 if Menu.Mode.Combo.E:Value()and isReady(_E)then
-target=(LocalSDK and LocalSDK.Orbwalker:IsEnabled()and LocalSDK.TargetSelector:GetTarget(E.range-120))or(LocalEOW and EOW:GetTarget(E.range-120))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(E.range-120))
-if target then
-if myHero.pos:DistanceTo(target.pos)<myHero.range+80 then
+if isValidTarget(CURRENT_TARGET,E.range-120)then
+if CURRENT_TARGET.distance<myHero.range+80 then
 if myHero.attackData.state==STATE_WINDDOWN then
-local pred=target:GetPrediction(E.speed,E.delay)
+local pred=CURRENT_TARGET:GetPrediction(E.speed,E.delay)
 if pred then
 CastSpell(HK_E,pred)
 end
 end
 else
-local pred=target:GetPrediction(E.speed,E.delay)
+local pred=CURRENT_TARGET:GetPrediction(E.speed,E.delay)
 if pred then
 CastSpell(HK_E,pred)
 end
@@ -318,11 +315,13 @@ end
 end
 end
 end
+---------
+--ComboItem--
+---------
 function UseComboItem()
 if not Menu.Item.Enable:Value()then return end
 --item Usage
-local target=(LocalSDK and LocalSDK.Orbwalker:IsEnabled()and LocalSDK.TargetSelector:GetTarget(450))or(LocalEOW and EOW:GetTarget(450))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(450))
-if target then
+if isValidTarget(CURRENT_TARGET,450)then
 --Use item STATE_WINDDOWN
 if myHero.attackData.state==STATE_WINDDOWN then
 local item=GetItemSlot(3077)
@@ -339,15 +338,15 @@ CastSpell(SlotToHotKeys(item))
 end
 local item=GetItemSlot(3144)
 if item and Menu.Item.BilgewaterCutlass:Value()then
-CastSpell(SlotToHotKeys(item),target)
+CastSpell(SlotToHotKeys(item),CURRENT_TARGET)
 end
 local item=GetItemSlot(3153)
 if item and Menu.Item.BladeoftheRuinedKing:Value()then
-CastSpell(SlotToHotKeys(item),target)
+CastSpell(SlotToHotKeys(item),CURRENT_TARGET)
 end
 local item=GetItemSlot(3146)
 if item and Menu.Item.HextechGunblade:Value()then
-CastSpell(SlotToHotKeys(item),target)
+CastSpell(SlotToHotKeys(item),CURRENT_TARGET)
 end
 end
 if myHero.attackData.state==STATE_WINDUP then
@@ -363,6 +362,9 @@ CastSpell(SlotToHotKeys(item))
 end
 end
 end
+---------
+--ClearItem--
+---------
 function UseClearItem()
 if not Menu.Item.Enable:Value()then return end
 --item Usage
@@ -499,7 +501,7 @@ function CalculateHpRegen(target)
 local distance={300,400,500,600,700,800}
 local time={1,1.2,1.4,1.6,1.8,2}
 for i=1,#distance do
-if myHero.pos:DistanceTo(target.pos)<=distance[i]then
+if target.distance<=distance[i]then
 return target.hpRegen*time[i]
 end
 end
@@ -538,7 +540,7 @@ function GetAllyWards(range)
 local range=range or 800
 for i=1,Game.WardCount()do
 local ward=Game.Ward(i)
-if ward and ward.team==TEAM_ALLY and ward.visible and ward.valid and ward.alive and ward.isTargetable and ward.pos:DistanceTo(myHero.pos)<=range then
+if ward and ward.team==TEAM_ALLY and ward.visible and ward.valid and ward.alive and ward.isTargetable and ward.distance<=range then
 return true
 end
 end
@@ -548,7 +550,7 @@ function GetAllyHeroes(range)
 local range=range or 800
 for i=1,LocalGameHeroCount()do
 local hero=LocalGameHero(i)
-if hero and hero.team==TEAM_ALLY and not hero.isMe and hero.visible and hero.valid and hero.alive and hero.isTargetable and hero.pos:DistanceTo(myHero.pos)<=range then
+if hero and hero.team==TEAM_ALLY and not hero.isMe and hero.visible and hero.valid and hero.alive and hero.isTargetable and hero.distance<=range then
 return true
 end
 end
@@ -558,7 +560,7 @@ function GetEnemiesHeroes(range)
 local range=range or 800
 for i=1,LocalGameHeroCount()do
 local hero=LocalGameHero(i)
-if hero and hero.team~=TEAM_ALLY and hero.visible and hero.valid and hero.alive and hero.isTargetable and hero.pos:DistanceTo(myHero.pos)<=range then
+if hero and hero.team~=TEAM_ALLY and hero.visible and hero.valid and hero.alive and hero.isTargetable and hero.distance<=range then
 return true
 end
 end
@@ -568,7 +570,7 @@ function GetEnemiesMinions(range)
 local range=range or 800
 for i=1,LocalGameMinionCount()do
 local minion=LocalGameMinion(i)
-if minion and minion.team~=TEAM_ALLY and minion.visible and minion.valid and minion.alive and minion.isTargetable and minion.pos:DistanceTo(myHero.pos)<=range then
+if minion and minion.team~=TEAM_ALLY and minion.visible and minion.valid and minion.alive and minion.isTargetable and minion.distance<=range then
 return true
 end
 end
@@ -578,7 +580,7 @@ function GetAllyMinions(range)
 local range=range or 800
 for i=1,LocalGameMinionCount()do
 local minion=LocalGameMinion(i)
-if minion and minion.team==TEAM_ALLY and minion.visible and minion.valid and minion.alive and minion.isTargetable and minion.pos:DistanceTo(myHero.pos)<=range then
+if minion and minion.team==TEAM_ALLY and minion.visible and minion.valid and minion.alive and minion.isTargetable and minion.distance<=range then
 return true
 end
 end
@@ -590,8 +592,8 @@ local closest
 for i=1,Game.TurretCount()do
 local turret=Game.Turret(i)
 if turret and turret.isAlly and turret.visible and turret.valid and turret.alive and turret.isTargetable then
-if turret.pos:DistanceTo(myHero.pos)<distance then
-distance=turret.pos:DistanceTo(myHero.pos)
+if turret.distance<distance then
+distance=turret.distance
 closest=turret
 end
 end
@@ -604,8 +606,8 @@ local closest
 for i=1,LocalGameHeroCount()do
 local hero=LocalGameHero(i)
 if hero and hero.isAlly and not hero.isMe and hero.visible and hero.valid and hero.alive and hero.isTargetable then
-if hero.pos:DistanceTo(myHero.pos)<distance then
-distance=hero.pos:DistanceTo(myHero.pos)
+if hero.distance<distance then
+distance=hero.distance
 closest=hero
 end
 end
@@ -618,8 +620,8 @@ local closest
 for i=1,LocalGameMinionCount()do
 local minion=LocalGameMinion(i)
 if minion and minion.team~=TEAM_ALLY and minion.visible and minion.valid and minion.alive and minion.isTargetable then
-if minion.pos:DistanceTo(myHero.pos)<distance then
-distance=minion.pos:DistanceTo(myHero.pos)
+if minion.distance<distance then
+distance=minion.distance
 closest=minion
 end
 end
@@ -652,12 +654,12 @@ function isAllyNearBy(range)
 local range=range
 for i=1,LocalGameHeroCount()do
 local hero=LocalGameHero(i)
-if hero and hero.isAlly and not hero.isMe and hero.visible and hero.valid and hero.alive and hero.isTargetable and hero.pos:DistanceTo(myHero.pos)<=range then
+if hero and hero.isAlly and not hero.isMe and hero.visible and hero.valid and hero.alive and hero.isTargetable and hero.distance<=range then
 return true
 end
 end
 return false
 end
-function isValidTarget(target)
-return target and target.visible and target.valid and target.alive and target.isTargetable
+function isValidTarget(unit,range)
+return unit and unit.visible and unit.valid and unit.alive and unit.isTargetable and unit.distance<range
 end
