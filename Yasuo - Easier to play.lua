@@ -201,6 +201,7 @@ end
 --AutoCast--
 ---------
 function AutoCast()
+if myHero.attackData.state==STATE_WINDUP then return end
 if Menu.Misc.AutoR:Value()and isReady(_R)then
 if isValidTarget(CURRENT_TARGET,R.range)then
 if CountKnockedUpEnemies(R.range)>=Menu.Misc.MinR:Value()then
@@ -315,6 +316,7 @@ end
 --KillSteal--
 ---------
 function KillSteal()
+if myHero.attackData.state==STATE_WINDUP then return end
 --KillSteal Q
 if Menu.KillSteal.Q:Value()and isReady(_Q)then
 if isEnemyNearBy(Q.range)then
@@ -406,8 +408,8 @@ end
 --Combo--
 ---------
 function OnCombo()
-if myHero.attackData.state==STATE_WINDUP or not CURRENT_TARGET then end
 UseComboItem()
+if myHero.attackData.state==STATE_WINDUP or not CURRENT_TARGET then end
 if Menu.Mode.Combo.Q:Value()and isReady(_Q)then
 --normal Q3
 if HasBuff(myHero,Q3.name)then
@@ -499,6 +501,7 @@ end
 ---------
 function OnClear()
 UseClearItem()
+if myHero.attackData.state==STATE_WINDUP then return end
 --LaneClear
 if isMinionNearBy(600)then
 if Menu.Mode.LaneClear.Q:Value()and isReady(_Q)then
