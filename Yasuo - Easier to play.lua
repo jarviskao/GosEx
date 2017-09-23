@@ -149,7 +149,7 @@ if myHero.dead then return end
 local Combo=Menu.Key.Combo:Value()
 local Clear=Menu.Key.Clear:Value()
 local Flee=Menu.Key.Flee:Value()
-CURRENT_TARGET=(LocalSDK and LocalSDK.Orbwalker:IsEnabled()and LocalSDK.TargetSelector:GetTarget())or(LocalEOW and EOW:GetTarget())or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget())
+CURRENT_TARGET=(LocalSDK and LocalSDK.Orbwalker:IsEnabled()and LocalSDK.TargetSelector:GetTarget(1200))or(LocalEOW and EOW:GetTarget(1200))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(1200))
 if Combo then
 OnCombo()
 elseif Clear then
