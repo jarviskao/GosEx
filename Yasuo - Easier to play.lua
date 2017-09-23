@@ -40,6 +40,7 @@ local R={range=1200,speed=20,delay=0.25,width=0}
 local QPred=Prediction:SetSpell(Q,TYPE_LINE,true)
 local SpellList={"Q","W","E","R"}
 local res=Game.Resolution()
+local CURRENT_TARGET=nil
 --icon
 local Icons={Menu="http://static.lolskill.net/img/champions/64/yasuo.png",Q="https://vignette4.wikia.nocookie.net/leagueoflegends/images/e/e5/Steel_Tempest.png",W="https://vignette3.wikia.nocookie.net/leagueoflegends/images/6/61/Wind_Wall.png",E="https://vignette4.wikia.nocookie.net/leagueoflegends/images/f/f8/Sweeping_Blade.png",R="https://vignette1.wikia.nocookie.net/leagueoflegends/images/c/c6/Last_Breath.png",Tiamat="https://vignette2.wikia.nocookie.net/leagueoflegends/images/e/e3/Tiamat_item.png",RavenousHydra="https://vignette1.wikia.nocookie.net/leagueoflegends/images/e/e8/Ravenous_Hydra_item.png",TitanicHydra="https://vignette1.wikia.nocookie.net/leagueoflegends/images/2/22/Titanic_Hydra_item.png",YoumuusGhostblade="https://vignette4.wikia.nocookie.net/leagueoflegends/images/4/41/Youmuu%27s_Ghostblade_item.png",RanduinsOmen="https://vignette1.wikia.nocookie.net/leagueoflegends/images/0/08/Randuin%27s_Omen_item.png",BilgewaterCutlass="https://vignette1.wikia.nocookie.net/leagueoflegends/images/4/44/Bilgewater_Cutlass_item.png",BladeoftheRuinedKing="https://vignette2.wikia.nocookie.net/leagueoflegends/images/2/2f/Blade_of_the_Ruined_King_item.png",HextechGunblade="https://vignette4.wikia.nocookie.net/leagueoflegends/images/6/64/Hextech_Gunblade_item.png"}
 --Main Menu
@@ -146,13 +147,9 @@ end
 function OnTick()
 if myHero.dead then return end
 local Combo=Menu.Key.Combo:Value()
-local Harass=Menu.Key.Harass:Value()
 local Clear=Menu.Key.Clear:Value()
-local LastHit=Menu.Key.LastHit:Value()
 local Flee=Menu.Key.Flee:Value()
-AutoWindwall()
-AutoCast()
-KillSteal()
+CURRENT_TARGET=(LocalSDK and LocalSDK.Orbwalker:IsEnabled()and LocalSDK.TargetSelector:GetTarget())or(LocalEOW and EOW:GetTarget())or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget())
 if Combo then
 OnCombo()
 elseif Clear then
@@ -160,6 +157,9 @@ OnClear()
 elseif Flee then
 OnFlee()
 end
+AutoWindwall()
+AutoCast()
+KillSteal()
 end
 ---------
 --AutoWindwall--
@@ -202,8 +202,7 @@ end
 ---------
 function AutoCast()
 if Menu.Misc.AutoR:Value()and isReady(_R)then
-target=(LocalSDK and LocalSDK.Orbwalker:IsEnabled()and LocalSDK.TargetSelector:GetTarget(1200))or(LocalEOW and EOW:GetTarget(1200))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(1200))
-if target then
+if isValidTarget(CURRENT_TARGET,R.range)then
 if CountKnockedUpEnemies(R.range)>=Menu.Misc.MinR:Value()then
 CastSpell(HK_R)
 end
@@ -252,11 +251,10 @@ if not Combo then
 if Menu.Misc.AutoQEnemies:Value()and isReady(_Q)then
 --normal Q3
 if HasBuff(myHero,Q3.name)then
-target=(LocalSDK and LocalSDK.Orbwalker:IsEnabled()and LocalSDK.TargetSelector:GetTarget(Q3.range))or(LocalEOW and EOW:GetTarget(Q3.range))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(Q3.range))
-if target then
-if target.distance<myHero.range+50 then
+if isValidTarget(CURRENT_TARGET,Q3.range)then
+if CURRENT_TARGET.distance<myHero.range+50 then
 if myHero.attackData.state==STATE_WINDDOWN then
-local pred=target:GetPrediction(Q3.speed,Q3.delay+Game.Latency()/1000)
+local pred=CURRENT_TARGET:GetPrediction(Q3.speed,Q3.delay+Game.Latency()/1000)
 if pred then
 if Menu.Misc.DontQEnemiesUnder:Value()then
 if not IsUnderTurret(myHero.pos)then
@@ -268,7 +266,7 @@ end
 end
 end
 else
-local pred=target:GetPrediction(Q3.speed,Q3.delay+Game.Latency()/1000)
+local pred=CURRENT_TARGET:GetPrediction(Q3.speed,Q3.delay+Game.Latency()/1000)
 if pred then
 if Menu.Misc.DontQEnemiesUnder:Value()then
 if not IsUnderTurret(myHero.pos)then
@@ -282,11 +280,10 @@ end
 end
 else
 --normal Q
-target=(LocalSDK and LocalSDK.Orbwalker:IsEnabled()and LocalSDK.TargetSelector:GetTarget(Q.range))or(LocalEOW and EOW:GetTarget(Q.range))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(Q.range))
-if target then
-if target.distance<myHero.range+50 then
+if isValidTarget(CURRENT_TARGET,Q.range)then
+if CURRENT_TARGET.distance<myHero.range+50 then
 if myHero.attackData.state==STATE_WINDDOWN then
-local pred=QPred:GetPrediction(target,myHero.pos)
+local pred=QPred:GetPrediction(CURRENT_TARGET,myHero.pos)
 if pred and pred.hitChance>=0.22 then
 if Menu.Misc.DontQEnemiesUnder:Value()then
 if not IsUnderTurret(myHero.pos)then
@@ -298,7 +295,7 @@ end
 end
 end
 else
-local pred=QPred:GetPrediction(target,myHero.pos)
+local pred=QPred:GetPrediction(CURRENT_TARGET,myHero.pos)
 if pred and pred.hitChance>=0.22 then
 if Menu.Misc.DontQEnemiesUnder:Value()then
 if not IsUnderTurret(myHero.pos)then
@@ -409,21 +406,21 @@ end
 --Combo--
 ---------
 function OnCombo()
+if myHero.attackData.state==STATE_WINDUP or not CURRENT_TARGET then end
 UseComboItem()
 if Menu.Mode.Combo.Q:Value()and isReady(_Q)then
 --normal Q3
 if HasBuff(myHero,Q3.name)then
-target=(LocalSDK and LocalSDK.Orbwalker:IsEnabled()and LocalSDK.TargetSelector:GetTarget(Q3.range))or(LocalEOW and EOW:GetTarget(Q3.range))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(Q3.range))
-if target then
-if target.distance<myHero.range+50 then
+if isValidTarget(CURRENT_TARGET,Q3.range)then
+if CURRENT_TARGET.distance<myHero.range+50 then
 if myHero.attackData.state==STATE_WINDDOWN then
-local pred=target:GetPrediction(Q3.speed,Q3.delay+Game.Latency()/1000)
+local pred=CURRENT_TARGET:GetPrediction(Q3.speed,Q3.delay+Game.Latency()/1000)
 if pred then
 CastSpell(HK_Q,pred)
 end
 end
 else
-local pred=target:GetPrediction(Q3.speed,Q3.delay+Game.Latency()/1000)
+local pred=CURRENT_TARGET:GetPrediction(Q3.speed,Q3.delay+Game.Latency()/1000)
 if pred then
 CastSpell(HK_Q,pred)
 end
@@ -431,17 +428,16 @@ end
 end
 else
 --normal Q
-target=(LocalSDK and LocalSDK.Orbwalker:IsEnabled()and LocalSDK.TargetSelector:GetTarget(Q.range))or(LocalEOW and EOW:GetTarget(Q.range))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(Q.range))
-if target then
-if target.distance<myHero.range+50 then
+if isValidTarget(CURRENT_TARGET,Q.range)then
+if CURRENT_TARGET.distance<myHero.range+50 then
 if myHero.attackData.state==STATE_WINDDOWN then
-local pred=QPred:GetPrediction(target,myHero.pos)
+local pred=QPred:GetPrediction(CURRENT_TARGET,myHero.pos)
 if pred and pred.hitChance>=0.22 then
 CastSpell(HK_Q,pred.castPos)
 end
 end
 else
-local pred=QPred:GetPrediction(target,myHero.pos)
+local pred=QPred:GetPrediction(CURRENT_TARGET,myHero.pos)
 if pred and pred.hitChance>=0.22 then
 CastSpell(HK_Q,pred.castPos)
 end
@@ -451,21 +447,20 @@ end
 end
 --normal E
 if Menu.Mode.Combo.E:Value()and isReady(_E)then
-target=(LocalSDK and LocalSDK.Orbwalker:IsEnabled()and LocalSDK.TargetSelector:GetTarget(1200))or(LocalEOW and EOW:GetTarget(1200))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(1200))
-if target then
-local gapDistance=target.distance
-if not HasBuff(target,"YasuoDashWrapper")then
+if isValidTarget(CURRENT_TARGET,1200)then
+local gapDistance=CURRENT_TARGET.distance
+if not HasBuff(CURRENT_TARGET,"YasuoDashWrapper")then
 if gapDistance<E.range then
 --E to target
-local afterEPos=target.pos:Shortened(myHero.pos,E.range-target.distance)
-if target.pos:DistanceTo(afterEPos)<=myHero.range+50 then
-CastSpell(HK_E,target)
+local afterEPos=CURRENT_TARGET.pos:Shortened(myHero.pos,E.range-CURRENT_TARGET.distance)
+if CURRENT_TARGET.pos:DistanceTo(afterEPos)<=myHero.range+50 then
+CastSpell(HK_E,CURRENT_TARGET)
 end
 else
 if Menu.Mode.Combo.Gapclose:Value()and isReady(_E)then
 --GapClose
-local minion=GetGapCloseEnimiesMinions(target.pos,gapDistance-100)
-local hero=GetGapCloseEnimiesHero(target.pos,gapDistance-100,target)
+local minion=GetGapCloseEnimiesMinions(CURRENT_TARGET.pos,gapDistance-100)
+local hero=GetGapCloseEnimiesHero(CURRENT_TARGET.pos,gapDistance-100,CURRENT_TARGET)
 if minion then
 if Menu.Mode.Combo.DontGapclose:Value()then
 local afterEPos=minion.pos:Shortened(myHero.pos,E.range-minion.distance)
@@ -492,10 +487,9 @@ end
 end
 --normal R
 if Menu.Mode.Combo.R:Value()and isReady(_R)then
-target=(LocalSDK and LocalSDK.Orbwalker:IsEnabled()and LocalSDK.TargetSelector:GetTarget(R.range))or(LocalEOW and EOW:GetTarget(R.range))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(R.range))
-if target then
-if isKnockedUp(target)then
-CastSpell(HK_R,target)
+if isValidTarget(CURRENT_TARGET,R.range)then
+if isKnockedUp(CURRENT_TARGET)then
+CastSpell(HK_R,CURRENT_TARGET)
 end
 end
 end
@@ -619,7 +613,7 @@ if Menu.Mode.Flee.E:Value()and isReady(_E)then
 local gapDistance=myHero.pos:DistanceTo(mousePos)
 --GapClose
 local minion=GetGapCloseEnimiesMinions(mousePos,gapDistance-100)
-local hero=GetGapCloseEnimiesHero(mousePos,gapDistance-100,target)
+local hero=GetGapCloseEnimiesHero(mousePos,gapDistance-100,CURRENT_TARGET)
 if minion then
 CastSpell(HK_E,minion)
 elseif hero then
@@ -631,8 +625,7 @@ end
 function UseComboItem()
 if not Menu.Item.Enable:Value()then return end
 --item Usage
-local target=(LocalSDK and LocalSDK.Orbwalker:IsEnabled()and LocalSDK.TargetSelector:GetTarget(450))or(LocalEOW and EOW:GetTarget(450))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(450))
-if target then
+if isValidTarget(CURRENT_TARGET,450)then
 --Use item STATE_WINDDOWN
 if myHero.attackData.state==STATE_WINDDOWN then
 local item=GetItemSlot(3077)
@@ -649,15 +642,15 @@ CastSpell(SlotToHotKeys(item))
 end
 local item=GetItemSlot(3144)
 if item and Menu.Item.BilgewaterCutlass:Value()then
-CastSpell(SlotToHotKeys(item),target)
+CastSpell(SlotToHotKeys(item),CURRENT_TARGET)
 end
 local item=GetItemSlot(3153)
 if item and Menu.Item.BladeoftheRuinedKing:Value()then
-CastSpell(SlotToHotKeys(item),target)
+CastSpell(SlotToHotKeys(item),CURRENT_TARGET)
 end
 local item=GetItemSlot(3146)
 if item and Menu.Item.HextechGunblade:Value()then
-CastSpell(SlotToHotKeys(item),target)
+CastSpell(SlotToHotKeys(item),CURRENT_TARGET)
 end
 end
 if myHero.attackData.state==STATE_WINDUP then
@@ -993,4 +986,7 @@ end
 end
 end
 return false
+end
+function isValidTarget(unit,range)
+return unit and unit.visible and unit.valid and unit.alive and unit.isTargetable and unit.distance<range
 end
