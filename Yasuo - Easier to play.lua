@@ -3,36 +3,35 @@ if myHero.charName~="Yasuo"then return end
 --lib
 require"Eternal Prediction"
 --Localize
-local myHero=_G.myHero
-local LocalSDK=_G.SDK
-local LocalEOW=_G.EOWLoaded
-local LocalGOS=_G.GOS
+local myHero=myHero
 local LocalGameHeroCount=Game.HeroCount
 local LocalGameHero=Game.Hero
 local LocalGameMinionCount=Game.MinionCount
 local LocalGameMinion=Game.Minion
 local LocalGameCanUseSpell=Game.CanUseSpell
+local LocalDrawCircle=Draw.Circle
+local LocalDrawCircleMinimap=Draw.CircleMinimap
 local LocalMathHuge=math.huge
 local CastSpell=Control.CastSpell
-local ITEM_1=_G.ITEM_1
-local ITEM_2=_G.ITEM_2
-local ITEM_3=_G.ITEM_3
-local ITEM_4=_G.ITEM_4
-local ITEM_5=_G.ITEM_5
-local ITEM_6=_G.ITEM_6
-local ITEM_7=_G.ITEM_7
-local _Q=_G._Q
-local _W=_G._W
-local _E=_G._E
-local _R=_G._R
-local STATE_WINDUP=_G.STATE_WINDUP
-local STATE_WINDDOWN=_G.STATE_WINDDOWN
+local ITEM_1=ITEM_1
+local ITEM_2=ITEM_2
+local ITEM_3=ITEM_3
+local ITEM_4=ITEM_4
+local ITEM_5=ITEM_5
+local ITEM_6=ITEM_6
+local ITEM_7=ITEM_7
+local _Q=_Q
+local _W=_W
+local _E=_E
+local _R=_R
+local STATE_WINDUP=STATE_WINDUP
+local STATE_WINDDOWN=STATE_WINDDOWN
 local TEAM_ALLY=myHero.team
 local TEAM_JUNGLE=300
 local TEAM_ENEMY=300-TEAM_ALLY
 --Spell
-local Q={range=475,speed=1500,delay=0.25,width=55}
-local Q3={name="YasuoQ3W",range=1000,speed=1500,delay=0.25,width=90}
+local Q={range=475,speed=1500,delay=0.3,width=55}
+local Q3={name="YasuoQ3W",range=1000,speed=1500,delay=0.3,width=90}
 local W={range=400,speed=500,delay=0.25,width=0}
 local E={range=475,speed=20,delay=0.25,width=0}
 local R={range=1200,speed=20,delay=0.25,width=0}
@@ -149,7 +148,10 @@ if myHero.dead then return end
 local Combo=Menu.Key.Combo:Value()
 local Clear=Menu.Key.Clear:Value()
 local Flee=Menu.Key.Flee:Value()
-CURRENT_TARGET=(LocalSDK and LocalSDK.Orbwalker:IsEnabled()and LocalSDK.TargetSelector:GetTarget(1200))or(LocalEOW and EOW:GetTarget(1200))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(1200))
+CURRENT_TARGET=GetTarget(1200)
+if CURRENT_TARGET then
+PrintChat(CURRENT_TARGET.charName)
+end
 if Combo then
 OnCombo()
 elseif Clear then
@@ -316,7 +318,7 @@ end
 --KillSteal--
 ---------
 function KillSteal()
-if myHero.attackData.state==STATE_WINDUP then return end
+if myHero.attackData.state==STATE_WINDUP or not CURRENT_TARGET then return end
 --KillSteal Q
 if Menu.KillSteal.Q:Value()and isReady(_Q)then
 if isEnemyNearBy(Q.range)then
@@ -409,7 +411,7 @@ end
 ---------
 function OnCombo()
 UseComboItem()
-if myHero.attackData.state==STATE_WINDUP or not CURRENT_TARGET then end
+if myHero.attackData.state==STATE_WINDUP or not CURRENT_TARGET then return end
 if Menu.Mode.Combo.Q:Value()and isReady(_Q)then
 --normal Q3
 if HasBuff(myHero,Q3.name)then
@@ -992,4 +994,15 @@ return false
 end
 function isValidTarget(unit,range)
 return unit and unit.visible and unit.valid and unit.alive and unit.isTargetable and unit.distance<range
+end
+function GetTarget(range)
+local LocalSDK=_G.SDK
+local LocalEOW=_G.EOWLoaded
+if(LocalSDK and LocalSDK.Orbwalker:IsEnabled())then
+return LocalSDK.TargetSelector:GetTarget(range)
+elseif LocalEOW then
+return EOW:GetTarget(range)
+elseif _G.Orbwalker.Enabled:Value()then
+return GOS:GetTarget(range)
+end
 end
