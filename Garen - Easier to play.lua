@@ -1,31 +1,29 @@
 --Hero
 if myHero.charName~="Garen"then return end
 --Localize
-local myHero=_G.myHero
-local LocalSDK=_G.SDK
-local LocalEOW=_G.EOWLoaded
-local LocalGOS=_G.GOS
+local myHero=myHero
 local LocalGameHeroCount=Game.HeroCount
 local LocalGameHero=Game.Hero
 local LocalGameMinionCount=Game.MinionCount
 local LocalGameMinion=Game.Minion
 local LocalGameCanUseSpell=Game.CanUseSpell
 local LocalDrawCircle=Draw.Circle
+local LocalDrawCircleMinimap=Draw.CircleMinimap
 local LocalMathHuge=math.huge
 local CastSpell=Control.CastSpell
-local ITEM_1=_G.ITEM_1
-local ITEM_2=_G.ITEM_2
-local ITEM_3=_G.ITEM_3
-local ITEM_4=_G.ITEM_4
-local ITEM_5=_G.ITEM_5
-local ITEM_6=_G.ITEM_6
-local ITEM_7=_G.ITEM_7
-local _Q=_G._Q
-local _W=_G._W
-local _E=_G._E
-local _R=_G._R
-local STATE_WINDUP=_G.STATE_WINDUP
-local STATE_WINDDOWN=_G.STATE_WINDDOWN
+local ITEM_1=ITEM_1
+local ITEM_2=ITEM_2
+local ITEM_3=ITEM_3
+local ITEM_4=ITEM_4
+local ITEM_5=ITEM_5
+local ITEM_6=ITEM_6
+local ITEM_7=ITEM_7
+local _Q=_Q
+local _W=_W
+local _E=_E
+local _R=_R
+local STATE_WINDUP=STATE_WINDUP
+local STATE_WINDDOWN=STATE_WINDDOWN
 local TEAM_ALLY=myHero.team
 local TEAM_JUNGLE=300
 local TEAM_ENEMY=300-TEAM_ALLY
@@ -34,10 +32,20 @@ local Q={range=600}
 local W={range=250}
 local E={range=325}
 local R={range=400}
+--OTHER
+local CURRENT_TARGET=nil
+local AAStatus=true
 --icon
 local Icons={Menu="http://static.lolskill.net/img/champions/64/garen.png",Q="http://vignette3.wikia.nocookie.net/leagueoflegends/images/1/17/Decisive_Strike.png",W="http://vignette1.wikia.nocookie.net/leagueoflegends/images/2/25/Courage.png",E="http://vignette2.wikia.nocookie.net/leagueoflegends/images/1/15/Judgment.png",R="http://vignette1.wikia.nocookie.net/leagueoflegends/images/c/ce/Demacian_Justice.png",whitelist="https://www.richters.com/Issues/whitelist/nowhitelist.png",Tiamat="https://vignette2.wikia.nocookie.net/leagueoflegends/images/e/e3/Tiamat_item.png",RavenousHydra="https://vignette1.wikia.nocookie.net/leagueoflegends/images/e/e8/Ravenous_Hydra_item.png",TitanicHydra="https://vignette1.wikia.nocookie.net/leagueoflegends/images/2/22/Titanic_Hydra_item.png",YoumuusGhostblade="https://vignette4.wikia.nocookie.net/leagueoflegends/images/4/41/Youmuu%27s_Ghostblade_item.png",RanduinsOmen="https://vignette1.wikia.nocookie.net/leagueoflegends/images/0/08/Randuin%27s_Omen_item.png",BilgewaterCutlass="https://vignette1.wikia.nocookie.net/leagueoflegends/images/4/44/Bilgewater_Cutlass_item.png",BladeoftheRuinedKing="https://vignette2.wikia.nocookie.net/leagueoflegends/images/2/2f/Blade_of_the_Ruined_King_item.png",HextechGunblade="https://vignette4.wikia.nocookie.net/leagueoflegends/images/6/64/Hextech_Gunblade_item.png"}
 --Main Menu
 local Menu=MenuElement({type=MENU,id="Menu",name="Garen - Easier to play",leftIcon=Icons.Menu})
+--Main Menu--Key Setting
+Menu:MenuElement({type=MENU,id="Key",name="Keys Settings"})
+Menu.Key:MenuElement({id="Combo",name="Combo Key",key=32})
+Menu.Key:MenuElement({id="Harass",name="Harass Key",key=string.byte("C")})
+Menu.Key:MenuElement({id="Clear",name="Clear Key",key=string.byte("V")})
+Menu.Key:MenuElement({id="LastHit",name="Last Hit Key",key=string.byte("X")})
+Menu.Key:MenuElement({id="Flee",name="Flee Key",key=string.byte("A")})
 --Main Menu--Mode Setting
 Menu:MenuElement({type=MENU,id="Mode",name="Mode Settings"})
 --Main Menu--Mode Setting--Combo
@@ -90,104 +98,83 @@ end
 ---------
 function OnTick()
 if myHero.dead then return end
-local Combo=LocalSDK.Orbwalker:IsEnabled()and LocalSDK.Orbwalker.Modes[LocalSDK.ORBWALKER_MODE_COMBO]
-local Flee=LocalSDK.Orbwalker:IsEnabled()and LocalSDK.Orbwalker.Modes[LocalSDK.ORBWALKER_MODE_FLEE]
-local Clear=LocalSDK.Orbwalker:IsEnabled()and(LocalSDK.Orbwalker.Modes[LocalSDK.ORBWALKER_MODE_JUNGLECLEAR]or LocalSDK.Orbwalker.Modes[LocalSDK.ORBWALKER_MODE_LANECLEAR])
-local LastHit=LocalSDK.Orbwalker:IsEnabled()and LocalSDK.Orbwalker.Modes[LocalSDK.ORBWALKER_MODE_LASTHIT]
-local target=LocalSDK.TargetSelector:GetTarget(1200)
-if Clear then
-UseClearItem()
-local minion=GetEnemiesMinions(E.range-20)
-if minion then
---Lane E
-if Menu.Mode.Lane.E:Value()and isReady(_E)and myHero:GetSpellData(_E).name=="GarenE"and not isCasting(_Q)then
-if CountEnemyMinions(E.range)>=Menu.Mode.Lane.EMinion:Value()then
-CastSpell(HK_E)
-end
-end
-end
-local monster=GetEnemiesMonster(Q.range)
-if monster then
---Jungle Q
-if Menu.Mode.Jungle.Q:Value()and isReady(_Q)and myHero:GetSpellData(_E).name=="GarenE"then
-CastSpell(HK_Q)
-end
-end
-local monster=GetEnemiesMonster(E.range-20)
-if monster then
---Jungle E
-if Menu.Mode.Jungle.E:Value()and isReady(_E)and myHero:GetSpellData(_E).name=="GarenE"and not isCasting(_Q)then
-CastSpell(HK_E)
-end
---Jungle W
-if Menu.Mode.Jungle.W:Value()and isReady(_W)then
-CastSpell(HK_W)
-end
-end
-end
-if LastHit then
-local levelQ=myHero:GetSpellData(_Q).level
-local Qdmg=({30,55,80,105,130})[levelQ]+1.4*myHero.totalDamage
-local minionTarget=GetEnemiesMinionsLowHP(Qdmg,myHero.range+50)
-if minionTarget then
---Use Q
-if Menu.Mode.LastHit.Q:Value()and isReady(_Q)then
-CastSpell(HK_Q)
-end
---Q to minionTarget
-if isCasting(_Q)then
-if LocalSDK.Orbwalker:CanAttack(myHero)then
-Control.SetCursorPos(minionTarget.pos)
-Control.Attack(minionTarget)
-end
-end
-end
-end
-if Flee then
-if Menu.Mode.Flee.Q:Value()and isReady(_Q)then
-CastSpell(HK_Q)
-end
-end
+local Combo=Menu.Key.Combo:Value()
+local Clear=Menu.Key.Clear:Value()
+local LastHit=Menu.Key.LastHit:Value()
+local Flee=Menu.Key.Flee:Value()
+CURRENT_TARGET=GetTarget(800)
 if Combo then
+OnCombo()
+elseif Clear then
+OnClear()
+elseif LastHit then
+OnLastHit()
+elseif Flee then
+OnFlee()
+end
+KillSteal()
+--DisableOrb
+if AAStatus==true and HasBuff(myHero,"GarenE")then
+AAStatus=false
+DisableAA()
+--PrintChat("DisableAA")
+end
+--EnableOrb
+if AAStatus==false and not HasBuff(myHero,"GarenE")then
+AAStatus=true
+EnableAA()
+--PrintChat("EnableAA")
+end
+end
+---------
+--Combo--
+---------
+function OnCombo()
 UseComboItem()
+if myHero.attackData.state==STATE_WINDUP or not CURRENT_TARGET then return end
 --Q
-target=LocalSDK.TargetSelector:GetTarget(Q.range)
-if target then
 if Menu.Mode.Combo.Q:Value()and isReady(_Q)and myHero:GetSpellData(_E).name=="GarenE"then
+if isValidTarget(CURRENT_TARGET,Q.range)then
 CastSpell(HK_Q)
 end
 end
 --W
-target=LocalSDK.TargetSelector:GetTarget(W.range)
-if target then
 if Menu.Mode.Combo.W:Value()and isReady(_W)then
+if isValidTarget(CURRENT_TARGET,W.range)then
 CastSpell(HK_W)
 end
 end
 --E
-target=LocalSDK.TargetSelector:GetTarget(E.range-20)
-if target then
 if Menu.Mode.Combo.E:Value()and isReady(_E)and myHero:GetSpellData(_E).name=="GarenE"and not isCasting(_Q)then
+if isValidTarget(CURRENT_TARGET,E.range-20)then
 CastSpell(HK_E)
 end
 end
 --R
-target=LocalSDK.TargetSelector:GetTarget(R.range)
-if target then
 if Menu.Mode.Combo.R:Value()and isReady(_R)then
+if isValidTarget(CURRENT_TARGET,R.range)then
 local levelR=myHero:GetSpellData(_R).level
-local Rdmg=({175,35,525})[levelR]+(target.maxHealth-target.health)/({3.5,3,2.5})[levelR]
+local Rdmg=({175,35,525})[levelR]+(CURRENT_TARGET.maxHealth-CURRENT_TARGET.health)/({3.5,3,2.5})[levelR]
 ---ks with R(current target)
-if HasBuff(target,"garenpassiveenemytarget")then
-if Rdmg>=target.health+target.shieldAP+CalculateHpRegen(target)then
-CastSpell(HK_R,target)
+if HasBuff(CURRENT_TARGET,"garenpassiveenemytarget")then
+if Rdmg>=CURRENT_TARGET.health+CURRENT_TARGET.shieldAP+CalculateHpRegen(CURRENT_TARGET)then
+CastSpell(HK_R,CURRENT_TARGET)
 end
 else
-if CalcMagicalDamage(myHero,target,Rdmg)>=target.health+target.shieldAP+CalculateHpRegen(target)then
-CastSpell(HK_R,target)
+if CalcMagicalDamage(myHero,CURRENT_TARGET,Rdmg)>=CURRENT_TARGET.health+CURRENT_TARGET.shieldAP+CalculateHpRegen(CURRENT_TARGET)then
+CastSpell(HK_R,CURRENT_TARGET)
 end
 end
-local hero=KS(target,R.range)
+end
+end
+end
+---------
+--KillSteal--
+---------
+function KillSteal()
+if myHero.attackData.state==STATE_WINDUP or not CURRENT_TARGET then return end
+if isReady(_R)then
+local hero=KS(CURRENT_TARGET,R.range)
 if hero then
 --ks with R(all eneies check except current target)
 if HasBuff(hero,"garenpassiveenemytarget")then
@@ -202,6 +189,68 @@ end
 end
 end
 end
+---------
+--Flee--
+---------
+function OnFlee()
+if Menu.Mode.Flee.Q:Value()and isReady(_Q)then
+CastSpell(HK_Q)
+end
+end
+---------
+--LastHit--
+---------
+function OnLastHit()
+if myHero.attackData.state==STATE_WINDUP then return end
+local levelQ=myHero:GetSpellData(_Q).level or 1
+local Qdmg=({30,55,80,105,130})[levelQ]+1.4*myHero.totalDamage
+local minionTarget=GetEnemiesMinionsLowHP(Qdmg,myHero.range+50)
+if minionTarget then
+--Use Q
+if Menu.Mode.LastHit.Q:Value()and isReady(_Q)then
+CastSpell(HK_Q)
+end
+--Q to minionTarget
+if isCasting(_Q)then
+if _G.SDK.Orbwalker:CanAttack(myHero)then
+Control.SetCursorPos(minionTarget.pos)
+Control.Attack(minionTarget)
+end
+end
+end
+end
+---------
+--Clear--
+---------
+function OnClear()
+UseClearItem()
+if myHero.attackData.state==STATE_WINDUP then return end
+--Lane E
+if Menu.Mode.Lane.E:Value()and isReady(_E)and myHero:GetSpellData(_E).name=="GarenE"and not isCasting(_Q)then
+local minion=GetEnemiesMinions(E.range-20)
+if minion then
+if CountEnemyMinions(E.range)>=Menu.Mode.Lane.EMinion:Value()then
+CastSpell(HK_E)
+end
+end
+end
+--Jungle Q
+if Menu.Mode.Jungle.Q:Value()and isReady(_Q)and myHero:GetSpellData(_E).name=="GarenE"then
+local monster=GetEnemiesMonster(Q.range)
+if monster then
+CastSpell(HK_Q)
+end
+end
+--Jungle E
+if Menu.Mode.Jungle.E:Value()and isReady(_E)and myHero:GetSpellData(_E).name=="GarenE"and not isCasting(_Q)then
+local monster=GetEnemiesMonster(E.range-20)
+if monster then
+CastSpell(HK_E)
+--Jungle W
+if Menu.Mode.Jungle.W:Value()and isReady(_W)then
+CastSpell(HK_W)
+end
+end
 end
 end
 function CountEnemyMinions(range)
@@ -209,7 +258,7 @@ local range=range or 800
 local n=0
 for i=1,LocalGameMinionCount()do
 local minion=LocalGameMinion(i)
-if minion and minion.team~=myHero.team and minion.visible and minion.valid and minion.alive and minion.isTargetable and minion.pos:DistanceTo(myHero.pos)<=range then
+if minion and minion.team~=TEAM_ALLY and minion.visible and minion.valid and minion.alive and minion.isTargetable and minion.distance<=range then
 n=n+1
 end
 end
@@ -219,7 +268,7 @@ function GetEnemiesMinionsLowHP(dmg,range)
 local range=range or 800
 for i=1,LocalGameMinionCount()do
 local minion=LocalGameMinion(i)
-if minion and minion.team~=myHero.team and minion.team==200 and minion.visible and minion.valid and minion.alive and minion.isTargetable and minion.pos:DistanceTo(myHero.pos)<=range then
+if minion and minion.team~=TEAM_ALLY and minion.team==200 and minion.visible and minion.valid and minion.alive and minion.isTargetable and minion.distance<=range then
 if dmg>=minion.health then
 return minion
 end
@@ -231,7 +280,7 @@ function KS(target,range)
 local range=range or 800
 for i=1,LocalGameHeroCount()do
 local hero=LocalGameHero(i)
-if hero and hero.team~=myHero.team and hero.visible and hero.valid and hero.alive and hero.isTargetable and hero.pos:DistanceTo(myHero.pos)<=range then
+if hero and hero.team~=TEAM_ALLY and hero.visible and hero.valid and hero.alive and hero.isTargetable and hero.distance<=range then
 if hero~=target then
 return hero
 end
@@ -242,8 +291,7 @@ end
 function UseComboItem()
 if not Menu.Item.Enable:Value()then return end
 --item Usage
-local target=(LocalSDK and LocalSDK.Orbwalker:IsEnabled()and LocalSDK.TargetSelector:GetTarget(450))or(LocalEOW and EOW:GetTarget(450))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(450))
-if target then
+if isValidTarget(CURRENT_TARGET,450)then
 --Use item STATE_WINDDOWN
 if myHero.attackData.state==STATE_WINDDOWN then
 local item=GetItemSlot(3077)
@@ -260,15 +308,15 @@ CastSpell(SlotToHotKeys(item))
 end
 local item=GetItemSlot(3144)
 if item and Menu.Item.BilgewaterCutlass:Value()then
-CastSpell(SlotToHotKeys(item),target)
+CastSpell(SlotToHotKeys(item),CURRENT_TARGET)
 end
 local item=GetItemSlot(3153)
 if item and Menu.Item.BladeoftheRuinedKing:Value()then
-CastSpell(SlotToHotKeys(item),target)
+CastSpell(SlotToHotKeys(item),CURRENT_TARGET)
 end
 local item=GetItemSlot(3146)
 if item and Menu.Item.HextechGunblade:Value()then
-CastSpell(SlotToHotKeys(item),target)
+CastSpell(SlotToHotKeys(item),CURRENT_TARGET)
 end
 end
 if myHero.attackData.state==STATE_WINDUP then
@@ -394,7 +442,7 @@ function CalculateHpRegen(target)
 local distance={300,400,500,600,700,800}
 local time={1,1.2,1.4,1.6,1.8,2}
 for i=1,#distance do
-if myHero.pos:DistanceTo(target.pos)<=distance[i]then
+if target.distance<=distance[i]then
 return target.hpRegen*time[i]
 end
 end
@@ -403,7 +451,7 @@ end
 function GetTargetHasBuff(buffName)
 for i=1,LocalGameHeroCount()do
 local hero=LocalGameHero(i)
-if hero and hero.team~=myHero.team and hero.visible and hero.valid and hero.alive and hero.isTargetable then
+if hero and hero.team~=TEAM_ALLY and hero.visible and hero.valid and hero.alive and hero.isTargetable then
 if HasBuff(hero,buffName)then
 return hero
 end
@@ -433,7 +481,7 @@ function GetAllyWards(range)
 local range=range or 800
 for i=1,Game.WardCount()do
 local ward=Game.Ward(i)
-if ward and ward.team==myHero.team and ward.visible and ward.valid and ward.alive and ward.isTargetable and ward.pos:DistanceTo(myHero.pos)<=range then
+if ward and ward.team==myHero.team and ward.visible and ward.valid and ward.alive and ward.isTargetable and ward.distance<=range then
 return true
 end
 end
@@ -443,7 +491,7 @@ function GetAllyHeroes(range)
 local range=range or 800
 for i=1,LocalGameHeroCount()do
 local hero=LocalGameHero(i)
-if hero and hero.team==myHero.team and not hero.isMe and hero.visible and hero.valid and hero.alive and hero.isTargetable and hero.pos:DistanceTo(myHero.pos)<=range then
+if hero and hero.team==myHero.team and not hero.isMe and hero.visible and hero.valid and hero.alive and hero.isTargetable and hero.distance<=range then
 return true
 end
 end
@@ -453,7 +501,7 @@ function GetEnemiesHeroes(range)
 local range=range or 800
 for i=1,LocalGameHeroCount()do
 local hero=LocalGameHero(i)
-if hero and hero.team~=myHero.team and hero.visible and hero.valid and hero.alive and hero.isTargetable and hero.pos:DistanceTo(myHero.pos)<=range then
+if hero and hero.team~=TEAM_ALLY and hero.visible and hero.valid and hero.alive and hero.isTargetable and hero.distance<=range then
 return true
 end
 end
@@ -463,7 +511,7 @@ function GetEnemiesMinions(range)
 local range=range or 800
 for i=1,LocalGameMinionCount()do
 local minion=LocalGameMinion(i)
-if minion and minion.team~=myHero.team and minion.visible and minion.valid and minion.alive and minion.isTargetable and minion.pos:DistanceTo(myHero.pos)<=range then
+if minion and minion.team~=TEAM_ALLY and minion.visible and minion.valid and minion.alive and minion.isTargetable and minion.distance<=range then
 return true
 end
 end
@@ -473,7 +521,7 @@ function GetEnemiesMonster(range)
 local range=range or 800
 for i=1,LocalGameMinionCount()do
 local minion=LocalGameMinion(i)
-if minion and minion.team~=myHero.team and minion.team==300 and minion.visible and minion.valid and minion.alive and minion.isTargetable and minion.pos:DistanceTo(myHero.pos)<=range then
+if minion and minion.team~=TEAM_ALLY and minion.team==300 and minion.visible and minion.valid and minion.alive and minion.isTargetable and minion.distance<=range then
 return true
 end
 end
@@ -483,7 +531,7 @@ function GetAllyMinions(range)
 local range=range or 800
 for i=1,LocalGameMinionCount()do
 local minion=LocalGameMinion(i)
-if minion and minion.team==myHero.team and minion.visible and minion.valid and minion.alive and minion.isTargetable and minion.pos:DistanceTo(myHero.pos)<=range then
+if minion and minion.team==myHero.team and minion.visible and minion.valid and minion.alive and minion.isTargetable and minion.distance<=range then
 return true
 end
 end
@@ -493,7 +541,7 @@ function isMinionAndJungleNearBy(range)
 local range=range
 for i=1,LocalGameMinionCount()do
 local minion=LocalGameMinion(i)
-if minion and minion.isEnemy and minion.visible and minion.valid and minion.alive and minion.isTargetable and minion.pos:DistanceTo(myHero.pos)<=range then
+if minion and minion.isEnemy and minion.visible and minion.valid and minion.alive and minion.isTargetable and minion.distance<=range then
 return true
 end
 end
@@ -523,4 +571,46 @@ return true
 end
 end
 return false
+end
+function isValidTarget(unit,range)
+return unit and unit.visible and unit.valid and unit.alive and unit.isTargetable and unit.distance<range
+end
+function GetTarget(range)
+local LocalSDK=_G.SDK
+local LocalEOW=_G.EOWLoaded
+if(LocalSDK and LocalSDK.Orbwalker:IsEnabled())then
+return LocalSDK.TargetSelector:GetTarget(range)
+elseif LocalEOW then
+return EOW:GetTarget(range)
+elseif _G.Orbwalker.Enabled:Value()then
+return GOS:GetTarget(range)
+end
+end
+function EnableAA()
+local LocalSDK=_G.SDK
+local LocalEOW=_G.EOWLoaded
+local LocalGOS=_G.GOS
+if LocalSDK and LocalSDK.Orbwalker then
+LocalSDK.Orbwalker:SetAttack(true)
+end
+if LocalGOS then
+LocalGOS.BlockAttack=false
+end
+if LocalEOW then
+EOW:SetAttacks(false)
+end
+end
+function DisableAA()
+local LocalSDK=_G.SDK
+local LocalEOW=_G.EOWLoaded
+local LocalGOS=_G.GOS
+if LocalSDK and LocalSDK.Orbwalker then
+LocalSDK.Orbwalker:SetAttack(false)
+end
+if LocalGOS then
+LocalGOS.BlockAttack=true
+end
+if LocalEOW then
+EOW:SetAttacks(false)
+end
 end
