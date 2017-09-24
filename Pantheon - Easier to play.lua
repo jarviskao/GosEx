@@ -1,10 +1,7 @@
 --Hero
 if myHero.charName~="Pantheon"then return end
 --Localize
-local myHero=_G.myHero
-local LocalSDK=_G.SDK
-local LocalEOW=_G.EOWLoaded
-local LocalGOS=_G.GOS
+local myHero=myHero
 local LocalGameHeroCount=Game.HeroCount
 local LocalGameHero=Game.Hero
 local LocalGameMinionCount=Game.MinionCount
@@ -14,19 +11,19 @@ local LocalDrawCircle=Draw.Circle
 local LocalDrawCircleMinimap=Draw.CircleMinimap
 local LocalMathHuge=math.huge
 local CastSpell=Control.CastSpell
-local ITEM_1=_G.ITEM_1
-local ITEM_2=_G.ITEM_2
-local ITEM_3=_G.ITEM_3
-local ITEM_4=_G.ITEM_4
-local ITEM_5=_G.ITEM_5
-local ITEM_6=_G.ITEM_6
-local ITEM_7=_G.ITEM_7
-local _Q=_G._Q
-local _W=_G._W
-local _E=_G._E
-local _R=_G._R
-local STATE_WINDUP=_G.STATE_WINDUP
-local STATE_WINDDOWN=_G.STATE_WINDDOWN
+local ITEM_1=ITEM_1
+local ITEM_2=ITEM_2
+local ITEM_3=ITEM_3
+local ITEM_4=ITEM_4
+local ITEM_5=ITEM_5
+local ITEM_6=ITEM_6
+local ITEM_7=ITEM_7
+local _Q=_Q
+local _W=_W
+local _E=_E
+local _R=_R
+local STATE_WINDUP=STATE_WINDUP
+local STATE_WINDDOWN=STATE_WINDDOWN
 local TEAM_ALLY=myHero.team
 local TEAM_JUNGLE=300
 local TEAM_ENEMY=300-TEAM_ALLY
@@ -179,7 +176,7 @@ orbStatus=true
 EnableOrb()
 end
 end
-CURRENT_TARGET=(LocalSDK and LocalSDK.Orbwalker:IsEnabled()and LocalSDK.TargetSelector:GetTarget(800))or(LocalEOW and EOW:GetTarget(800))or(_G.Orbwalker.Enabled:Value()and GOS:GetTarget(800))
+CURRENT_TARGET=GetTarget(800)
 if Combo then
 OnCombo()
 elseif Clear then
@@ -192,7 +189,7 @@ end
 ---------
 function OnClear()
 UseClearItem()
-if CURRENT_TARGET then return end
+if myHero.attackData.state==STATE_WINDUP then return end
 --W to the closest minion if count>=3 and no enemies around
 if Menu.Mode.Clear.W:Value()and isReady(_W)and not HasBuff(myHero,"PantheonPassiveShield")then
 local BuffData=GetBuffData(myHero,"PantheonPassiveCounter")
@@ -214,7 +211,7 @@ end
 --KillSteal--
 ---------
 function KillSteal()
-if myHero.attackData.state==STATE_WINDUP or not CURRENT_TARGET then end
+if myHero.attackData.state==STATE_WINDUP or not CURRENT_TARGET then return end
 --KillSteal Q
 if Menu.KillSteal.Q:Value()and isReady(_Q)then
 --spell data
@@ -263,7 +260,7 @@ end
 ---------
 function OnCombo()
 UseComboItem()
-if myHero.attackData.state==STATE_WINDUP or not CURRENT_TARGET then end
+if myHero.attackData.state==STATE_WINDUP or not CURRENT_TARGET then return end
 --Q
 if Menu.Mode.Combo.Q:Value()and isReady(_Q)and not myHero.activeSpell.valid then
 if isValidTarget(CURRENT_TARGET,Q.range)then
@@ -382,6 +379,9 @@ end
 end
 end
 function EnableOrb()
+local LocalSDK=_G.SDK
+local LocalEOW=_G.EOWLoaded
+local LocalGOS=_G.GOS
 if LocalSDK and LocalSDK.Orbwalker then
 LocalSDK.Orbwalker:SetAttack(true)
 LocalSDK.Orbwalker:SetMovement(true)
@@ -392,10 +392,13 @@ LocalGOS.BlockAttack=false
 end
 if LocalEOW then
 EOW:SetMovements(true)
-EOW:SetMovements(true)
+EOW:SetAttacks(true)
 end
 end
 function DisableOrb()
+local LocalSDK=_G.SDK
+local LocalEOW=_G.EOWLoaded
+local LocalGOS=_G.GOS
 if LocalSDK and LocalSDK.Orbwalker then
 LocalSDK.Orbwalker:SetAttack(false)
 LocalSDK.Orbwalker:SetMovement(false)
@@ -406,7 +409,7 @@ LocalGOS.BlockAttack=true
 end
 if LocalEOW then
 EOW:SetMovements(false)
-EOW:SetMovements(false)
+EOW:SetAttacks(false)
 end
 end
 function GetMonsterHasBuff(buffName)
@@ -662,4 +665,15 @@ return false
 end
 function isValidTarget(unit,range)
 return unit and unit.visible and unit.valid and unit.alive and unit.isTargetable and unit.distance<range
+end
+function GetTarget(range)
+local LocalSDK=_G.SDK
+local LocalEOW=_G.EOWLoaded
+if(LocalSDK and LocalSDK.Orbwalker:IsEnabled())then
+return LocalSDK.TargetSelector:GetTarget(range)
+elseif LocalEOW then
+return EOW:GetTarget(range)
+elseif _G.Orbwalker.Enabled:Value()then
+return GOS:GetTarget(range)
+end
 end
