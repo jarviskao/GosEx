@@ -149,9 +149,6 @@ local Combo=Menu.Key.Combo:Value()
 local Clear=Menu.Key.Clear:Value()
 local Flee=Menu.Key.Flee:Value()
 CURRENT_TARGET=GetTarget(1200)
-if CURRENT_TARGET then
-PrintChat(CURRENT_TARGET.charName)
-end
 if Combo then
 OnCombo()
 elseif Clear then
