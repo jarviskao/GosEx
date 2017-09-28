@@ -178,6 +178,8 @@ if isReady(_R)then
 local hero=KS(CURRENT_TARGET,R.range)
 if hero then
 --ks with R(all eneies check except current target)
+local levelR=myHero:GetSpellData(_R).level
+local Rdmg=({175,35,525})[levelR]+(CURRENT_TARGET.maxHealth-CURRENT_TARGET.health)/({3.5,3,2.5})[levelR]
 if HasBuff(hero,"garenpassiveenemytarget")then
 if Rdmg>=hero.health+hero.shieldAP+CalculateHpRegen(hero)then
 CastSpell(HK_R,hero)
