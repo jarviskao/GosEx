@@ -151,6 +151,7 @@ end
 --START--
 ---------
 function OnTick()
+CURRENT_TARGET=nil
 if myHero.dead then return end
 local Combo=Menu.Key.Combo:Value()
 local Clear=Menu.Key.Clear:Value()
