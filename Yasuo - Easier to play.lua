@@ -30,7 +30,7 @@ local TEAM_ALLY=myHero.team
 local TEAM_JUNGLE=300
 local TEAM_ENEMY=300-TEAM_ALLY
 --Spell
-local Q={range=475,speed=1500,delay=0.3,width=55}
+local Q={range=475,speed=1500,delay=0.25,width=55}
 local Q3={name="YasuoQ3W",range=1000,speed=1500,delay=0.3,width=90}
 local W={range=400,speed=500,delay=0.25,width=0}
 local E={range=475,speed=20,delay=0.25,width=0}
@@ -136,7 +136,7 @@ if myHero.dead or Menu.Drawing.DisableAll:Value()then return end
 --Draw Range
 for i=1,4 do
 if Menu.Drawing[SpellList[i]].Enabled:Value()then
-Draw.Circle(myHero.pos,myHero:GetSpellData(i-1).range,Menu.Drawing[SpellList[i]].Width:Value(),Menu.Drawing[SpellList[i]].Color:Value())
+LocalDrawCircle(myHero.pos,myHero:GetSpellData(i-1).range,Menu.Drawing[SpellList[i]].Width:Value(),Menu.Drawing[SpellList[i]].Color:Value())
 end
 end
 end
@@ -144,19 +144,17 @@ end
 --START--
 ---------
 function OnTick()
+CURRENT_TARGET=nil
 if myHero.dead then return end
-local Combo=Menu.Key.Combo:Value()
-local Clear=Menu.Key.Clear:Value()
-local Flee=Menu.Key.Flee:Value()
 CURRENT_TARGET=GetTarget(1200)
-if Combo then
+if Menu.Key.Combo:Value()then
 OnCombo()
-elseif Clear then
+elseif Menu.Key.Clear:Value()then
 OnClear()
-elseif Flee then
+elseif Menu.Key.Flee:Value()then
 OnFlee()
 end
-AutoWindwall()
+--AutoWindwall()
 AutoCast()
 KillSteal()
 end
@@ -209,7 +207,7 @@ end
 end
 end
 --Auto Q Minions if not Oncombo and OnClear
-if not Clear and not Combo then
+if not Menu.Key.Clear:Value()and not Menu.Key.Combo:Value()then
 if Menu.Misc.AutoQMinions:Value()and isReady(_Q)then
 if isMinionNearBy(600)then
 if not HasBuff(myHero,Q3.name)then
@@ -247,7 +245,7 @@ end
 end
 end
 --Auto Q Enemies if not Oncombo
-if not Combo then
+if not Menu.Key.Combo:Value()then
 if Menu.Misc.AutoQEnemies:Value()and isReady(_Q)then
 --normal Q3
 if HasBuff(myHero,Q3.name)then
@@ -318,7 +316,7 @@ function KillSteal()
 if myHero.attackData.state==STATE_WINDUP or not CURRENT_TARGET then return end
 --KillSteal Q
 if Menu.KillSteal.Q:Value()and isReady(_Q)then
-if isEnemyNearBy(Q.range)then
+if isValidTarget(CURRENT_TARGET,Q.range)then
 --spell data
 local levelQ=myHero:GetSpellData(_Q).level
 local Qdmg=({20,40,60,80,100})[levelQ]+myHero.totalDamage
@@ -335,7 +333,7 @@ end
 end
 --KillSteal E
 if Menu.KillSteal.E:Value()and isReady(_E)then
-if isEnemyNearBy(1200)then
+if isValidTarget(CURRENT_TARGET,1200)then
 --spell data
 local levelE=myHero:GetSpellData(_E).level
 local levelQ=myHero:GetSpellData(_Q).level
@@ -385,7 +383,7 @@ end
 end
 --KillSteal R
 if Menu.KillSteal.R:Value()and isReady(_R)then
-if isEnemyNearBy(R.range)then
+if isValidTarget(CURRENT_TARGET,R.range)then
 --spell data
 local levelR=myHero:GetSpellData(_R).level
 local Rdmg=({200,300,400})[levelR]+1.5*myHero.bonusDamage
@@ -546,7 +544,7 @@ end
 --E
 if Menu.Mode.LaneClear.E:Value()and isReady(_E)then
 --Enemies nearby
-if isEnemyNearBy(1200)then
+if isValidTarget(CURRENT_TARGET,1200)then
 --KS with E
 target=GetLowHPMinionTarget(E.range)
 if target then
@@ -996,6 +994,7 @@ function GetTarget(range)
 local LocalSDK=_G.SDK
 local LocalEOW=_G.EOWLoaded
 if(LocalSDK and LocalSDK.Orbwalker:IsEnabled())then
+--return LocalSDK.Orbwalker:GetTarget()or LocalSDK.TargetSelector:GetTarget(range)
 return LocalSDK.TargetSelector:GetTarget(range)
 elseif LocalEOW then
 return EOW:GetTarget(range)
