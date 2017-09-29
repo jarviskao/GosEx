@@ -30,7 +30,7 @@ local TEAM_ENEMY=300-TEAM_ALLY
 --Spell
 local Q={range=600,speed=1500,delay=0.25,width=0}
 local W={range=600,speed=0,delay=0.25,width=0}
-local E={name="PantheonE",range=650,speed=778,delay=0.25,width=100}
+local E={name="PantheonE",range=650,speed=780,delay=0.25,width=100}
 local R={range=5500,attackRange=700,speed=20,delay=0.25,width=0}
 --OTHER
 local orbStatus=true
@@ -177,7 +177,7 @@ orbStatus=true
 EnableOrb()
 end
 end
-CURRENT_TARGET=GetTarget(800)
+CURRENT_TARGET=GetTarget(650)
 if Combo then
 OnCombo()
 elseif Clear then
