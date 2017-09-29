@@ -103,7 +103,7 @@ local Combo=Menu.Key.Combo:Value()
 local Clear=Menu.Key.Clear:Value()
 local LastHit=Menu.Key.LastHit:Value()
 local Flee=Menu.Key.Flee:Value()
-CURRENT_TARGET=GetTarget(800)
+CURRENT_TARGET=GetTarget(650)
 if Combo then
 OnCombo()
 elseif Clear then
@@ -175,8 +175,11 @@ end
 function KillSteal()
 if myHero.attackData.state==STATE_WINDUP or not CURRENT_TARGET then return end
 if isReady(_R)then
-local hero=KS(CURRENT_TARGET,R.range)
-if hero then
+--if isValidTarget(CURRENT_TARGET,R.range)then
+for i=1,LocalGameHeroCount()do
+local hero=LocalGameHero(i)
+if hero and hero.team~=TEAM_ALLY and hero.visible and hero.valid and hero.alive and hero.isTargetable and hero.distance<=R.range then
+if hero~=target then
 --ks with R(all eneies check except current target)
 local levelR=myHero:GetSpellData(_R).level
 local Rdmg=({175,35,525})[levelR]+(CURRENT_TARGET.maxHealth-CURRENT_TARGET.health)/({3.5,3,2.5})[levelR]
@@ -190,6 +193,9 @@ CastSpell(HK_R,hero)
 end
 end
 end
+end
+end
+--end
 end
 end
 ---------
@@ -281,14 +287,6 @@ return false
 end
 function KS(target,range)
 local range=range or 800
-for i=1,LocalGameHeroCount()do
-local hero=LocalGameHero(i)
-if hero and hero.team~=TEAM_ALLY and hero.visible and hero.valid and hero.alive and hero.isTargetable and hero.distance<=range then
-if hero~=target then
-return hero
-end
-end
-end
 return false
 end
 function UseComboItem()
