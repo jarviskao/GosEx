@@ -1,9 +1,11 @@
-Version 1.00
+Version 1.01
 
 ChangeLog:
+1.01
+  - Improve CastSpell()
 1.00
   - Increase Melee Hero AA Range in Jungle
   - Add Extra Range for "KogMaw" and "Twitch"
   - Add GOSPlus:CastSpell()
-  - Block AA while "Garen" is casting E
+  --Block AA while "Garen" is casting E
   - Miscellaneous fix
