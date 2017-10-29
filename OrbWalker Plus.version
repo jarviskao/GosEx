@@ -1,0 +1,8 @@
+Version 1.00
+
+ChangeLog:
+1.00
+  - Increase Melee Hero AA Range in Jungle
+  - Add Extra Range for "KogMaw" and "Twitch"
+  - Add GOSPlus:CastSpell()
+  - Miscellaneous fix
