@@ -800,11 +800,10 @@ function GOSPlus:CastAttack(pos, range, delay)
 end
 
 function GOSPlus:CastSpell(hotkey, pos, delay)
-  local delay = delay or 50
+  local delay = delay or 100
   local ticker = GetTickCount()
-  local pos = pos.pos or pos
 
-  if self.castSpell.state == 0 and self.castAttack.state == 0 and ticker - self.castSpell.casting > delay + GameLatency() and self:CanAttack()  then
+  if self.castSpell.state == 0 and self.castAttack.state == 0 and ticker - self.castSpell.casting > delay + GameLatency() and self.AA.state ~= 2 and self:IsChanneling() == false  then
     self.BlockAttack = true
     self.castSpell.state = 1
 		self.castSpell.mouse = mousePos
@@ -812,7 +811,8 @@ function GOSPlus:CastSpell(hotkey, pos, delay)
 	end
 
 	if self.castSpell.state == 1 then
-		if ticker - self.castSpell.tick < GameLatency() and self.AA.state == 1 then
+		if ticker - self.castSpell.tick < GameLatency() then
+      local pos = pos.pos or pos or self.castSpell.mouse
 			ControlSetCursorPos(pos)
 			ControlKeyDown(hotkey)
 			ControlKeyUp(hotkey)
@@ -827,7 +827,7 @@ function GOSPlus:CastSpell(hotkey, pos, delay)
 				end
 			end,GameLatency() * 0.001)
 		end
-		if ticker - self.castSpell.casting > GameLatency() and self.castSpell.state == 1 then
+		if ticker - self.castSpell.casting > GameLatency() then
 			ControlSetCursorPos(self.castSpell.mouse)
 			self.castSpell.state = 0
       self.BlockAttack = false
