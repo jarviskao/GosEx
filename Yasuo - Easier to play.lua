@@ -1000,3 +1000,4 @@ function VectorPointProjectionOnLineSegment(v1, v2, v)
   local pointSegment = isOnSegment and pointLine or {x = ax + rS * (bx - ax), z = ay + rS * (by - ay)}
   return pointSegment, pointLine, isOnSegment
 end
+--
