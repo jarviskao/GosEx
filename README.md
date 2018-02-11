@@ -1,8 +1,8 @@
 # GOS External
 _______________________________________________________________
-[Utility] - Support Patch 7.X
+[Utility] - Support All Patch
 
-* Auto Level Spells Customization
+* Auto Level Spells
 
 [Champions] - Support Patch 7.X
 
