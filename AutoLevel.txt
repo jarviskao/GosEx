@@ -1,108 +1,161 @@
---updated to Lux for Patch 7.11
-Aatrox             wewqwrwewereeqqrqq
-Ahri               qeqwqrqwqwrwweeree
-Akali              qeeqwrqeqerqewwrww
-Alistar            qweqqrqqwwrwweeree
-Amumu              weqeereqeqrqqwwrww
-Anivia             qeewereqeqrqqwwrww
-Annie              qwqwerqqqwrwweeree
-Ashe               wqewwrwqwqrqqeeree
-AurelionSol        wqewwrwqwqrqqeeree
-Azir               wqeqqrqwqwrwweeree
-Bard               qwqeqrqeqereewwrww
-Blitzcrank         qewqqrqewqreeewrww
-Brand              wqewwrwqwqrqqeeree
-Braum              qewqqrqeqereewwrww
-Caitlyn            qweqqrwwwwrqqeeree
-Camille            qweeereqeqrqqwwrww
-Cassiopeia         qeewereqeqrqqwwrww
-Chogath            qeqwqrqwqwrwweeree
-Corki              qwqeqrqeqereewwrww
-Darius             qwqeqrqeqerewewrww
-Diana              wqqeqrqwqwrwweeree
-DrMundo            wqeeereeqqrwqqwrww
-Draven             qweqqrqwqwrwweeree
-Ekko               qewqqrqeqereewwrww
-Elise              wqeqqrqwqqrwweeree
-Evelynn            qewqqrqeqereewwrww
-Ezreal             qeqwqrqeqereewwrww
-FiddleSticks       weqwwrwqwqrqeqeree
-Fiora              qweqqrqwqwrwweeree
-Fizz               ewqeerewewrwqwqrqq
-Galio              qewqqrqqeereewwrww
-Gangplank          qewqqrqeqereewwrww
-Garen              qeweqreqqerqewwrww
-Gnar               qweqqrqwqwrwweeree
-Gragas             qweqqrqeqereewwrww
-Graves             eqqwqrqeqereewwrww
-Hecarim            qweqqrqeqereewwrww
-Heimerdinger       qweqqrwwwqrqweeree
-Illaoi             qweeereqeqrqqwwrww
-Irelia             eqwwwrwewereeqqrqq
-Ivern              qeweereqeqrqqwwrww
-Janna              eqewerewewrwwqqrqq
-JarvanIV           eqwqqrqeqereewwrww
-Jax                ewqwwrwqwqrqqeeree
-Jayce              qwqeqwqwqwqwweeeee
-Jinx               qwqeqrqwqwrwweeree
-Jhin               qweqqrqwqwrwweeree
-Kalista            ewqeereqeqrqqwwrww
-Karma              qewqqrqeqereewwrww
-Karthus            qeeqerweeqrqqwwrww
-Kassadin           qwqeqreeeerqqwwrww
-Katarina           qeweerqqqerqewwrww
-Kayle              eqweereqeqrqqwwrww
-Kennen             qweqqrqwqwrwweeree
-Khazix             qweqqrqwqwrwweeree
-Kindred            wqeqqrqwqwrwweeree
-Kled               qweqqrqwqwrwweeree
-KogMaw             wqewwrwqwqrqqeeree
-Leblanc            wqewwrwqwqrqqeeree
-LeeSin             qweqqrqwqwrwweeree
-Leona              qewqqrqwqwrwweeree
-Lissandra          qewqqrqwqwrwweeree
-Lucian             qeqwqrqeqereewwrww
-Lulu               eqwqqrqwqwrwweeree
-Lux                eqewereqeqrqqwwrww
-Malphite              132114131343322422
-Malzahar              312334313242211411
-Maokai              312114121242233433
-MasterYi              312114131343322422
-MissFortune              123114121242233433
-MonkeyKing              312334313141122422
-Mordekaiser              312334313141122422
-Morgana              123114131343322422
-Nami              123224232343311411
-Nasus              123114121242323433
-Nautilus              231224232343311411
-Nidalee              132114131343322422
-Nocturne              213114131343322422
-Nunu              312334313141122422
-Olaf              132334323242211411
-Orianna              132114121242233433
-Pantheon              123114131343232422
-Poppy              123114131343322422
-Quinn              312114131343322422
-Rakan              321224232343311411
-Rammus              213224212141133433
-RekSai              123114131343322422
-Renekton              123114121242233433
-Rengar              123114121242233433
-Riven              123114131343322422
-Rumble              123114131343322422
-Ryze              123114121242233433
-Sejuani              213334313141122422
-Shaco              231334313141122422
-Shen              123114121242233433
-Shyvana              213114121242233433
-Singed              132114131343322422
-Sion              123114121242233433
-Sivir              132114121242233433
-Skarner              123114121242233433
-Sona              123114121242233433
-Soraka              123224212141133433
-Swain              312334313141122422
-Syndra              132114131343322422
+@Created by Jarkao (GamingOnSteroids)
+#version 20180211
+#bulid from metasrc
+Aatrox		,	Top			wqeeerewewrwwqqrqq
+Aatrox		,	Jungle		wqewwrwewereeqqrqq
+Ahri		,	Mid			qewqqrqwqwrwweeree
+Akali		,	Top			qweqqrqeqereewwrww
+Akali		,	Mid			qweqqrqeqereewwrww
+Alistar		,	Support		qweqqrqwqwrwweeree
+Amumu		,	Jungle		weqeereqeqrqqwwrww
+Anivia		,	Mid			qeewereqeqrqqwwrww
+Annie		,	Mid			qweqqrqwqwrwweeree
+Annie		,	Support		qweqqrqwqwrwweeree
+Ashe		,	ADC			wqwewrwqwqrqqeeree
+AurelionSol	,	Mid			wqewwrwqwqrqqeeree
+Azir		,	Mid			wqeqqrqwqwrwweeree
+Bard		,	Support		qweqqrqwqwrwweeree
+Blitzcrank	,	Support		qewqqrqeqereewwrww
+Brand		,	Support		wqewwrwqwqrqqeeree
+Brand		,	Mid			wqewwrwqwqrqqeeree
+Braum		,	Support		qewqqrqeqereewwrww
+Caitlyn		,	ADC			qeewqrqwqwrwweereq
+Camille		,	Top			weqqqrqeqereewwrww
+Camille		,	Jungle		qeweereqeqrqqwwrww
+Cassiopeia	,	Mid			eqweereqeqrqqwwrww
+Chogath		,	Top			eweqerewewrwqqqrqe
+Chogath		,	Jungle		eqweereqewrwwwqrqq
+Chogath		,	Mid			qwweqrqwqwrwqeeree
+Corki		,	Mid			qewqqrqeqereewwrww
+Corki		,	ADC			qewqqrqeqereewwrww
+Darius		,	Top			qeewqrqeqerewwwrwq
+Diana		,	Mid			qweqqrqwqwrwweeree
+Diana		,	Jungle		wqeqqrqwqwrwweeree
+DrMundo		,	Top			qewqqrqeqereewwrww
+DrMundo		,	Jungle		qewqqrqeqereewwrww
+Draven		,	ADC			qweqqrqwqwrwweeree
+Ekko		,	Mid			qewqqrqeqereewwrww
+Ekko		,	Jungle		wqeqqrqeqereewwrww
+Elise		,	Jungle		wqeqqrqwqwrwweeree
+Evelynn		,	Jungle		qweqqrqwqwrwweeree
+Ezreal		,	ADC			qeqwqrqeqereewwwwr
+FiddleSticks,	Mid			ewqeereweqrwwqqrqw
+FiddleSticks,	Support		eqweereqeqrqqwwrww
+FiddleSticks,	Jungle		weqwwrwqwqrqqeeree
+Fiora		,	Top			qweqqrqeqereewwrww
+Fizz		,	Mid			ewqeerewewrwwqqrqq
+Galio		,	Mid			qewqqrqwqwrwweeree
+Galio		,	Top			qewqqrqwqwrwweeree
+Galio		,	Support		qewqqrqeqwrweeerww
+Gangplank	,	Top			qewqqrqeqereewwrww
+Gangplank	,	Mid			qewqqrqeqereewwrww
+Garen		,	Top			qeweereqeqrqqwwrww
+Gnar		,	Top			qweqqrqwqwrwweeree
+Gragas		,	Top			qewqqrqeqereewwrww
+Gragas		,	Mid			qewqqrqeqereewwrww
+Gragas		,	Jungle		qweqqrqeqereewwrww
+Graves		,	Jungle		eqwqqrqeqereewwrww
+Hecarim		,	Jungle		qweqqrqeqereewwrww
+Heimerdinger,	Mid			qewqqrqwqwrwweeree
+Heimerdinger,	Top			qewqqrqwqwrwweeree
+Illaoi		,	Top			qeewereqeqrqqwwrww
+Irelia		,	Top			qewwwrwqwqrqqeeree
+Ivern		,	Jungle		qeweereqeqrqqwwrww
+Janna		,	Support		eeqwerewewrwwqqrqq
+JarvanIV	,	Jungle		eqwqqrqeqereewwrww
+JarvanIV	,	Top			qewqqrqeqereewwrww
+Jax			,	Jungle		ewqwwrwqwqrqqeeree
+Jax			,	Top			eqwwwrwqwqrqqeeree
+Jayce		,	Top			qewqqwqwqwqwweeeee
+Jayce		,	Mid			qewqqwqwqwqwweeeee
+Jinx		,	ADC			qwqeqrqwqwrwweeree
+Jhin		,	ADC			qweqqrqwqwrwweeree
+Kalista		,	ADC			eqweereqeqrqqwwrww
+Karma		,	Support		qewqqrqeqereewwrww
+Karma		,	Mid			qewqqrqeqereewwrww		
+Karthus		,	Mid			qeqwqrqeqereewwrww
+Karthus		,	Top			qeqwqrqeqereewwrww
+Kassadin	,	Mid			qweqqrqeqereewwrww
+Katarina	,	Mid			qewqqrqeqereewwrww
+Kayle		,	Top			eqweereqeqrqqwwrww
+Kayle		,	Mid			eqweereqeqrqqwwrww
+Kayle		,	Support		ewwqwrwqwerqqqeree
+Kayn		,	Jungle		qweqqrqwqwrwweeree
+Kennen		,	Mid			qweqqrqwqwrwweeree
+Kennen		,	Top			qweqqrqwqwrwweeree
+Khazix		,	Jungle		qweqqrqwqwrwweeree
+Kindred		,	Jungle		wqeqqrqwqwrwweeree
+Kled		,	Top			qweqqrqwqwrwweeree
+KogMaw		,	ADC			wqewwrwqwqrqqeeree
+Leblanc		,	Mid			qweqqrqwqwrwweeree
+LeeSin		,	Jungle		qweqqrqwqwrwweeree
+Leona		,	Support		qewwwrwqwqrqqeeree
+Lissandra	,	Top			qweqqrqwqwrwweeree
+Lissandra	,	Mid			qweqqrqwqwrwweeree
+Lucian		,	ADC			qewqqrqeqereewwrww
+Lulu		,	Support		eqweerewewrwwqqrqq
+Lux			,	Mid			eqweereqeqrqqwwrww
+Lux			,	Support		eqweereqeqrqqwwrww
+Malphite	,	Top			qewqqrqeqereewwrww
+Malphite	,	Jungle		weqqereeewrwwqwrqq
+Malphite	,	Support		qeqwqrqeqereewwrww
+Malzahar	,	Mid			ewqeereqeqrqqwwrww
+Maokai		,	Top			qweqqrqwqwrwweeree
+Maokai		,	Support		ewqqqrqwqwrwweeree
+Maokai		,	Jungle		eqwqqrqwqwrwweeree
+MasterYi	,	Jungle		qewqqrqeqereewwrww
+MissFortune	,	ADC			qewqqrqwqwrwweeree
+MonkeyKing	,	Top			eqweereqeqrqqwwrww
+MonkeyKing	,	Jungle		ewqeereqeqrqqwwrww
+Mordekaiser	,	Top			weqwwrwqwqrqqeeree
+Morgana		,	Support		qweqqrqwqwrwweeree
+Morgana		,	Mid			wqewwrwqwqrqqeeree
+Nami		,	Support		wqewwrwewereeqqrqq
+Nasus		,	Top			qewqqrqeqereewwrww
+Nautilus	,	Top			weqeerewewrwwqqrqq
+Nautilus	,	Support		qeweerewewrwwqqrqq
+Nidalee		,	Jungle		qweqqrqeqereewwrww
+Nocturne	,	Jungle		qweqqrqeqereewwrww
+Nunu		,	Jungle		qweqqrqwqwrwweeree
+Olaf		,	Jungle		qweqqrqeqereewwrww
+Olaf		,	Top			qewqqrqeqereewwrww
+Orianna		,	Mid			qweqqrqwqwrwweeree
+Ornn 		,	Top			wqewwrwqwqrqqeeree
+Ornn 		,	Support		wqewwrwqwqrqqeeree		
+Pantheon	,	Top 		qweqqrqeqereewwrww
+Pantheon	,	Jungle		qweqqrqeqereewwrww
+Pantheon	,	Mid			qweqqrqeqereewwrww
+Poppy		,	Top			qewqqrqeqereewwrww
+Poppy		,	Support		eqwqqrqeqereewwrww
+Poppy		,	Jungle		qewqqrqeqereewwrww
+Quinn		,	ADC			qewqqrqeqereewwrww
+Quinn		,	ADC			eqwqqrqeqereewwrww
+Rakan		,	Support		weeqwrwewerewqqrqq
+Rammus		,	Jungle		wqeqqrqeqereewwrww
+RekSai		,	Jungle		qweqqrqeqereewwrww
+Renekton	,	Top			qweqqrqeqereewwrww
+Rengar		,	Jungle		qweqqrqeqereewwrww
+Rengar		,	Top			qweqqrqwqwrwweeree
+Riven		,	Top			qewqqrqeqereewwrww
+Riven		,	Jungle		qwweqrqeqereewwrwq
+Rumble		,	Top			qewqqrqeqereewwrww
+Ryze		,	Mid			eqwqqrqeeerqqewwww
+Ryze		,	Top			eqwqqrqeqerqeewwww
+Sejuani		,	Jungle		ewqwwrwewereeqqrqq
+Shaco		,	Jungle		wqeqqreeeerqqwwrww
+Shen		,	Top			qewqqrqeqereewwrww
+Shen		,	Support		eqweereqeqrqqwwrww
+Shyvana		,	Jungle		weqwwrwewereeqqrqq
+Singed		,	Top			qeqwqrqeqereewwrww
+Sion		,	Top			qeweerewewrwwqqrqq
+Sion		,	Support		qeweerewewrwwqqrqq
+Sivir		,	ADC			qeewqrqwqwrwweereq
+Skarner		,	Jungle		qeweerewewrwwqqrqq
+Sona		,	Support		qweeqrqwqwrwweereq
+Soraka		,	Support		qwewwrwqwqrqqeeree
+Swain		,	Top			qewqqrqeqereewwrww
+Swain		,	Mid			qewqqrqeqereewwrww
+Syndra		,	Mid			qewqqrqwqwrwweeree
 Taliyah              132114131343322422
 TahmKench              123114131343322422
 Talon              231224212141133433
