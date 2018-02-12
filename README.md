@@ -2,7 +2,7 @@
 _______________________________________________________________
 [Utility] - Support All Patch
 
-* Auto Level Spells
+* Auto Level Spells (+ AutoLevel.txt)
 
 [Champions] - Support Patch 7.X
 
