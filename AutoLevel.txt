@@ -156,35 +156,52 @@ Soraka		,	Support		qwewwrwqwqrqqeeree
 Swain		,	Top			qewqqrqeqereewwrww
 Swain		,	Mid			qewqqrqeqereewwrww
 Syndra		,	Mid			qewqqrqwqwrwweeree
-Taliyah              132114131343322422
-TahmKench              123114131343322422
-Talon              231224212141133433
-Taric              313114131343322422
-Teemo              132334313141122422
-Thresh              312334313141122422
-Tristana              321334313141122422
-Trundle              123114121242233433
-Tryndamere              132334313141122422
-TwistedFate              213114121242233433
-Twitch              312334313141122122
-Udyr              132114141333324444
-Urgot              132114131343322422
-Varus              123114121242233433
-Vayne              123224212141133433
-Veigar              123314121242223433
-Velkoz              213114121242233433
-Vi              231114131343322422
-Viktor              312334313141122422
-Vladimir              132114131343322422
-Volibear              231224232343311411
-Warwick              213214212142133433
-Xayah	              132114311343322422
-Xerath              132114121242233433
-XinZhao              213114131343322422
-Yorick              323134323242211411
-Zac              213334323242233433
-Zed              132114131343322422
-Ziggs              123114131343322422
-Zilean              123114131343322422
-Zyra              123114131343322422
-Yasuo              312334313141122422
+TahmKench	,	Support		qweqqrqwqwrwweeree
+TahmKench	,	Top			qweqqrqwqwrwweeree
+Taliyah		,	Mid			qewqqrqeqereewwrww
+Talon		,	Mid			wqewwrwqwqrqqeeree
+Talon		,	Top			wqewwrwqwqrqqeeree
+Taric		,	Support		ewqqereeeqrqqwwrww
+Teemo		,	Top			eqweereqeqrqqwwrww
+Thresh		,	Support		eqwqqrqqeereewwrww
+Tristana	,	ADC			ewqeereqeqrqqwwrww
+Trundle		,	Jungle		qweqqrqwqwrwweeree
+Trundle		,	Top			qweqqrqwqwrwweeree
+Trundle		,	Support		qewqerewewrwweqrqq
+Tryndamere	,	Top			eqwqqrqeqereewwrww
+Tryndamere	,	Jungle		qewqqrqeqereewwrww
+TwistedFate	,	Mid			wqeqqrqwqwrwweeree
+Twitch		,	ADC			ewqeereqeqrqqwwrww
+Twitch		,	Jungle		eqweereqeqrqqwwrww
+Udyr		,	Jungle		qweqqeqeqeewwwwrrr
+Urgot		,	Top			qweqqrqwqwrwweeree
+Varus		,	ADC			ewqeerewewrwwqqrqq
+Vayne		,	ADC			qweqqrqwqwrwweeree
+Veigar		,	Mid			qweqqrqwqwrwweeree
+Veigar		,	Support		qewqqrqwqwrwweeree
+Velkoz		,	Mid			qwewwrwqqqrqweeree
+Velkoz		,	Support		qweqqrqwqwrwweeree
+Vi 			,	Jungle		weqqqrqeqereewwrww
+Viktor		,	Mid			qeewereqeqrqqwwrww
+Vladimir	,	Mid			qewqqrqeqereewwrww
+Vladimir	,	Top			qewqqrqeqereewwrww
+Volibear	,	Top			wqewwrwewqreeqqrqe
+Volibear	,	Jungle		weqwwrwqwqrqqeeree
+Volibear	,	Support		qewwwrwewereeqqrqq
+Warwick		,	Jungle		qweqqrqqwwrwweeree
+Xayah		,	ADC			qeweerewewrwwqqrqq
+Xerath		,	Mid			qweqqrqwqwrwweeree
+Xerath		,	Support		qweqqrqwqwrwweeree
+XinZhao		,	Jungle		eqwwwrwewereeqqrqq
+Yasuo		,	Mid			qewqqrqeqereewwrww
+Yasuo		,	Top			qewqqrqeqereewwrww
+Yorick		,	Top			qewqqrqeqereewwrww
+Zac			,	Jungle		wqeeerewewrwwqqrqq
+Zed			,	Mid			qweqqrqeqereewwrww
+Ziggs		,	Mid			qewqqrqeqereewwrww
+Zilean		,	Mid			qweqqrqwqwrwweeree
+Zilean		,	Support		qweqqrqeqwrwwweree
+Zoe			,	Mid			qewqqrqeqereewwrww
+Zoe			,	Support		qewqqrqeqereewwrww
+Zyra		,	Support		qweqqreeeerqqwwrww
+Zyra		,	Mid			qweqqrqeqereewwrww
