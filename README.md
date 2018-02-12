@@ -4,7 +4,7 @@ _______________________________________________________________
 
 * Auto Level Spells (+ AutoLevel.txt)
 
-[Champions] - Support Patch 7.X
+[Champions] - Support Patch 7.X (Outdated???)
 
 * Yasuo - Easier to play
 
