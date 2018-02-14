@@ -1,7 +1,7 @@
 --Created by Jarkao (GamingOnSteroids)
---Version = 1.42
 --Support All Patch version
 
+local VERSION = 1.42
 local LocalControlKeyDown = Control.KeyDown
 local LocalControlKeyUp = Control.KeyUp
 local pairs = pairs
@@ -32,7 +32,7 @@ end
 
 function AutoLevelSpells:LoadFile()
   if not FileExist(COMMON_PATH.."AutoLevel.txt") then return end
-  PrintChat("Custom Spells Order Loaded!")
+  PrintChat("Auto Level Spells v" .. VERSION .. " loaded.")
   local File = io.open(COMMON_PATH.."AutoLevel.txt", "r")
   local FileContent = File:read("*all")
   File:close()
@@ -179,8 +179,8 @@ function AutoLevelSpells:Tick()
   if self.Levelup then
     if LocalGameTimer() > self.Timer + self.Menu.Delay:Value() then
       if self.Menu.ROnly:Value() then
-        local R_Level = myHero:GetSpellData(_R).level
-        if mylevel >= 6 and R_Level == 0 or mylevel >= 11 and R_Level == 1 or mylevel >= 16 and R_Level == 2 then
+      	local lv = mylevel + 1 - mylevelpts
+        if lv ==  6 or lv == 11 or lv == 16 then
           LocalControlKeyDown(HK_LUS)
           LocalControlKeyDown(HK_R)
           LocalControlKeyUp(HK_R)
