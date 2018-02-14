@@ -1,7 +1,7 @@
 --Created by Jarkao (GamingOnSteroids)
 --Support All Patch version
 
-local VERSION = 1.42
+local VERSION = 1.43
 local LocalControlKeyDown = Control.KeyDown
 local LocalControlKeyUp = Control.KeyUp
 local pairs = pairs
@@ -177,7 +177,7 @@ function AutoLevelSpells:Tick()
   end
 
   if self.Levelup then
-    if LocalGameTimer() > self.Timer + self.Menu.Delay:Value() then
+  	if mylevelpts > 0 and LocalGameTimer() > self.Timer + self.Menu.Delay:Value() then
       if self.Menu.ROnly:Value() then
       	local lv = mylevel + 1 - mylevelpts
         if lv ==  6 or lv == 11 or lv == 16 then
