@@ -1,14 +1,15 @@
 --Created by Jarkao (GamingOnSteroids)
 --Support All Patch version
+--Date: 20180403
 
-local VERSION = 1.44
+local VERSION = 1.45
 local LocalControlKeyDown = Control.KeyDown
 local LocalControlKeyUp = Control.KeyUp
 local LocalTableInsert = table.insert
 local LocalTableConcat = table.concat
 local LocalGameTimer = Game.Timer
-local ToHotKey = {[_Q] = HK_Q, [_W] = HK_W, [_E] = HK_E, [_R] = HK_R}
-local ToString = {[_Q] = "Q", [_W] = "W", [_E] = "E", [_R] = "R"}
+local SlotToHotKeys = {[_Q] = HK_Q, [_W] = HK_W, [_E] = HK_E, [_R] = HK_R}
+local SlotToString = {[_Q] = "Q", [_W] = "W", [_E] = "E", [_R] = "R"}
 
 class "AutoLevelSpells"
 
@@ -18,7 +19,6 @@ function AutoLevelSpells:__init()
   self.Levelup = false
   self.Timer = 0
   self.Index = 0
-
   Callback.Add("Load", function() self:Load() end)
 end
 
@@ -134,7 +134,7 @@ end
 function AutoLevelSpells:DisplayOrderName(key)
   local spell = {}
   for i = 1, 6 do
-    spell[i] = ToString[self.SkillOrder[self.OrderName[key]][i]]
+    spell[i] = SlotToString[self.SkillOrder[self.OrderName[key]][i]]
   end
   return LocalTableConcat(spell, " > ")
 end
@@ -188,10 +188,12 @@ function AutoLevelSpells:Draw()
       else
         for index, value in pairs(self.OrderName) do
           if self.Menu.Custom[index]:Value() then
-            local _KEY = self.SkillOrder[self.OrderName[index]][(mylevel + 1 - mylevelpts)]
             LocalControlKeyDown(HK_LUS)
-            LocalControlKeyDown(ToHotKey[_KEY])
-            LocalControlKeyUp(ToHotKey[_KEY])
+            local hotKey = SlotToHotKeys[self.SkillOrder[self.OrderName[index]][(mylevel + 1 - mylevelpts)]]
+            if hotKey then
+              LocalControlKeyDown(hotKey)
+              LocalControlKeyUp(hotKey)
+            end
             LocalControlKeyUp(HK_LUS)
             self.Levelup = false
           end
