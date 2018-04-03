@@ -4,16 +4,17 @@ _______________________________________________________________
 
 * Auto Level Spells (+ AutoLevel.txt)
 
-[Champions] - Support Patch 7.X (Outdated???)
+[Champions] - Support All Patch
 
 * Yasuo - Easier to play
 
-* Pantheon - Easier to play
-
-* Garen - Easier to play
 _______________________________________________________________
-[Champions] - Outdated
+[Champions] - Still Work/ Maybe Outdated
 
 * Wukong - Easier to play 
 
 * LeeSin - Easier to play
+
+* Pantheon - Easier to play
+
+* Garen - Easier to play
