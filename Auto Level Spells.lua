@@ -1,10 +1,9 @@
 --Created by Jarkao (GamingOnSteroids)
 --Support All Patch version
 
-local VERSION = 1.43
+local VERSION = 1.44
 local LocalControlKeyDown = Control.KeyDown
 local LocalControlKeyUp = Control.KeyUp
-local pairs = pairs
 local LocalTableInsert = table.insert
 local LocalTableConcat = table.concat
 local LocalGameTimer = Game.Timer
@@ -27,7 +26,7 @@ end
 function AutoLevelSpells:Load()
   self:LoadFile()
   self:Menu()
-  Callback.Add("Tick", function() self:Tick() end)
+  Callback.Add("Draw", function() self:Draw() end)
 end
 
 function AutoLevelSpells:LoadFile()
@@ -104,6 +103,7 @@ function AutoLevelSpells:GetSkillOrder(line, name)
           self.SkillOrder[name][j] = _R
         end
       end
+      return
     end
   end
 end
@@ -128,7 +128,7 @@ function AutoLevelSpells:Menu()
   end
 
   self.Menu:MenuElement({id = "Start", name = "Start Above Level", value = 2, min = 1, max = 18, step = 1, leftIcon = self.Icons.lvl})
-  self.Menu:MenuElement({id = "Delay", name = "Level up Delay in Seconds", value = 0.8, min = 0, max = 1.5, step = 0.05, leftIcon = self.Icons.Humanizer})
+  self.Menu:MenuElement({id = "Delay", name = "Level up Delay in Seconds", value = 0.5, min = 0, max = 1.5, step = 0.05, leftIcon = self.Icons.Humanizer})
   self.Menu:MenuElement({id = "ROnly", name = "R Spell Only", value = false, leftIcon = self.Icons.KeyR, onclick = function() self:DisableCustomSpells() end})
 end
 
@@ -160,15 +160,15 @@ function AutoLevelSpells:DisableRSpell()
   end
 end
 
-function AutoLevelSpells:Tick()
+function AutoLevelSpells:Draw()
   if not self.Menu.Enable:Value() then return end
 
   local mylevel = myHero.levelData.lvl
   if mylevel < self.Menu.Start:Value() then return end
 
-  local mylevelpts = myHero.levelData.lvl - (myHero:GetSpellData(_Q).level + myHero:GetSpellData(_W).level + myHero:GetSpellData(_E).level + myHero:GetSpellData(_R).level)
+  local mylevelpts = mylevel - (myHero:GetSpellData(_Q).level + myHero:GetSpellData(_W).level + myHero:GetSpellData(_E).level + myHero:GetSpellData(_R).level)
 
-  if mylevelpts ~= self.Levelpts then
+  if self.Levelup == false and mylevelpts ~= self.Levelpts then
     self.Levelpts = mylevelpts
     if self.Levelpts > 0 then
       self.Timer = Game.Timer()
@@ -177,7 +177,7 @@ function AutoLevelSpells:Tick()
   end
 
   if self.Levelup then
-  	if mylevelpts > 0 and LocalGameTimer() > self.Timer + self.Menu.Delay:Value() then
+  	if LocalGameTimer() > self.Timer + self.Menu.Delay:Value() then
       if self.Menu.ROnly:Value() then
       	local lv = mylevel + 1 - mylevelpts
         if lv ==  6 or lv == 11 or lv == 16 then

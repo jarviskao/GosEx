@@ -1,5 +1,5 @@
 @Created by Jarkao (GamingOnSteroids)
-#version 20180211
+#version 20180403
 #bulid from metasrc
 Aatrox		,	Top			wqeeerewewrwwqqrqq
 Aatrox		,	Jungle		wqewwrwewereeqqrqq
@@ -70,9 +70,11 @@ Jayce		,	Top			qewqqwqwqwqwweeeee
 Jayce		,	Mid			qewqqwqwqwqwweeeee
 Jinx		,	ADC			qwqeqrqwqwrwweeree
 Jhin		,	ADC			qweqqrqwqwrwweeree
+Kaisa		,	ADC			qweqqrqeqereewwrww
+Kaisa		,	Jungle		qewqqrqeqereewwrww
 Kalista		,	ADC			eqweereqeqrqqwwrww
 Karma		,	Support		qewqqrqeqereewwrww
-Karma		,	Mid			qewqqrqeqereewwrww		
+Karma		,	Mid			qewqqrqeqereewwrww
 Karthus		,	Mid			qeqwqrqeqereewwrww
 Karthus		,	Top			qeqwqrqeqereewwrww
 Kassadin	,	Mid			qweqqrqeqereewwrww
@@ -121,7 +123,7 @@ Olaf		,	Jungle		qweqqrqeqereewwrww
 Olaf		,	Top			qewqqrqeqereewwrww
 Orianna		,	Mid			qweqqrqwqwrwweeree
 Ornn 		,	Top			wqewwrwqwqrqqeeree
-Ornn 		,	Support		wqewwrwqwqrqqeeree		
+Ornn 		,	Support		wqewwrwqwqrqqeeree
 Pantheon	,	Top 		qweqqrqeqereewwrww
 Pantheon	,	Jungle		qweqqrqeqereewwrww
 Pantheon	,	Mid			qweqqrqeqereewwrww
