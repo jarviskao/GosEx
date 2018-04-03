@@ -16,7 +16,6 @@ function AutoLevelSpells:__init()
   self.SkillOrder = {}
   self.OrderName = {}
   self.Levelup = false
-  self.Levelpts = 0
   self.Timer = 0
   self.Index = 0
 
@@ -128,7 +127,7 @@ function AutoLevelSpells:Menu()
   end
 
   self.Menu:MenuElement({id = "Start", name = "Start Above Level", value = 2, min = 1, max = 18, step = 1, leftIcon = self.Icons.lvl})
-  self.Menu:MenuElement({id = "Delay", name = "Level up Delay in Seconds", value = 0.5, min = 0, max = 1.5, step = 0.05, leftIcon = self.Icons.Humanizer})
+  self.Menu:MenuElement({id = "Delay", name = "Level up Delay in Seconds", value = 0.8, min = 0, max = 1.5, step = 0.05, leftIcon = self.Icons.Humanizer})
   self.Menu:MenuElement({id = "ROnly", name = "R Spell Only", value = false, leftIcon = self.Icons.KeyR, onclick = function() self:DisableCustomSpells() end})
 end
 
@@ -166,14 +165,13 @@ function AutoLevelSpells:Draw()
   local mylevel = myHero.levelData.lvl
   if mylevel < self.Menu.Start:Value() then return end
 
-  local mylevelpts = mylevel - (myHero:GetSpellData(_Q).level + myHero:GetSpellData(_W).level + myHero:GetSpellData(_E).level + myHero:GetSpellData(_R).level)
+  local mylevelpts = myHero.levelData.lvlPts
 
-  if self.Levelup == false and mylevelpts ~= self.Levelpts then
-    self.Levelpts = mylevelpts
-    if self.Levelpts > 0 then
-      self.Timer = Game.Timer()
-      self.Levelup = true
-    end
+  if mylevelpts > 0 then
+	if self.Levelup == false then
+		self.Timer = Game.Timer()
+		self.Levelup = true
+	end
   end
 
   if self.Levelup then
