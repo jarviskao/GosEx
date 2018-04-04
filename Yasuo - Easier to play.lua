@@ -2,15 +2,15 @@
 --Support All Patch version
 --Require Script: IC's OrbWalker
 --Require Common: Eternal Prediction, Collision
---Date: 20180403
+--Date: 20180404
 
 if myHero.charName ~= "Yasuo" then return end
 
-local VERSION = 2.0
-local LocalGameCanUseSpell	= Game.CanUseSpell
+local VERSION = 2.01
+local LocalGameCanUseSpell = Game.CanUseSpell
 local LocalControlCastSpell = Control.CastSpell
 local LocalGameMissileCount = Game.MissileCount
-local LocalGameMissile	= Game.Missile
+local LocalGameMissile = Game.Missile
 local LocalGameMinionCount = Game.MinionCount
 local LocalGameMinion = Game.Minion
 local LocalGameIsChatOpen = Game.IsChatOpen
@@ -18,8 +18,8 @@ local LocalGameIsOnTop = Game.IsOnTop
 local LocalDrawColor = Draw.Color
 local LocalDrawCircle = Draw.Circle
 local COLOR_WHITE = LocalDrawColor(255, 255, 255, 255)
-local LocalMathHuge	= math.huge
-local LocalMathMax	= math.max
+local LocalMathHuge = math.huge
+local LocalMathMax = math.max
 local LocalMathSqrt = math.sqrt
 local LocalGameTimer = Game.Timer
 
@@ -74,10 +74,8 @@ function Yasuo:Load()
 
 	self.Menu:MenuElement({id = "AutoW", name = "Auto Windwall", type = MENU})
 	self.Menu.AutoW:MenuElement({id = "blank", type = SPACE , name = "Use Evade (MeoBeo)"})
-	self.Menu.AutoW:MenuElement({id = "blank", type = SPACE , name = "Evade Spell -> Yasuo Windwall"})
-	self.Menu.AutoW:MenuElement({id = "blank", type = SPACE , name = "Set Danger level to 1"})
-	--self.Menu.AutoW:MenuElement({id = "blank", type = SPACE , name = "Settings"})
-	--self.Menu.AutoW:MenuElement({id = "W", name = "W", value = true, leftIcon = self.Icons.W})
+	self.Menu.AutoW:MenuElement({id = "blank", type = SPACE , name = "Evade Spells -> Yasuo Windwall"})
+	self.Menu.AutoW:MenuElement({id = "blank", type = SPACE , name = "Set Danger Level to 1"})
 
 	self.Menu:MenuElement({id = "AutoR", name = "Auto R Enemy", type = MENU})
 	self.Menu.AutoR:MenuElement({id = "R", name = "R", value = true, leftIcon = self.Icons.R})
@@ -173,12 +171,12 @@ function Yasuo:OnCombo()
 	--E Logic
 	if self.Menu.Mode.Combo.E:Value() and IsWindingUp(myHero) == false then
 		if LocalGameCanUseSpell(_E) == READY then
-			local target = _G.SDK.TargetSelector:GetTarget(self.E.range, _G.SDK.DAMAGE_TYPE_PHYSICAL)
-			if target then
-				if HasBuff(target, "YasuoDashWrapper") == false then
-					local posTo = target:GetPrediction(LocalMathHuge, self.E.delay)
-					local afterEPos = myHero.pos:Extended(posTo, 475)
-					if GetDistance(afterEPos, posTo) < _G.SDK.Utilities:GetAutoAttackRange(myHero, target) then
+			local target = _G.SDK.TargetSelector:GetTarget(600, _G.SDK.DAMAGE_TYPE_PHYSICAL)
+			if target and HasBuff(target, "YasuoDashWrapper") == false then
+				local posTo = target:GetPrediction(LocalMathHuge, 0.25)
+				local afterEPos = myHero.pos:Extended(posTo, 475)
+				if GetDistanceSqr(myHero.pos, posTo) < self.E.range ^ 2 then
+					if GetDistanceSqr(afterEPos, posTo) < (myHero.range + myHero.boundingRadius + target.boundingRadius - 30) ^ 2 then
 						LocalControlCastSpell(HK_E, target)
 					end
 				end
@@ -188,11 +186,12 @@ function Yasuo:OnCombo()
 					if HasBuff(target, "YasuoDashWrapper") then
 						local EnemyMinions = _G.SDK.ObjectManager:GetEnemyMinions(self.E.range * 2)
 						if #EnemyMinions > 0 then
-							for _, minion in pairs(EnemyMinions) do
-								if GetDistance(myHero.pos, minion.pos) < self.E.range and HasBuff(minion, "YasuoDashWrapper") == false then 
-									local posTo = minion:GetPrediction(LocalMathHuge, self.E.delay)
+							for i = 1, #EnemyMinions do
+								local minion = EnemyMinions[i];
+								if GetDistanceSqr(myHero.pos, minion.pos) < self.E.range ^ 2 and HasBuff(minion, "YasuoDashWrapper") == false then 
+									local posTo = minion:GetPrediction(LocalMathHuge, 0.25)
 									local afterEPos = myHero.pos:Extended(posTo, 475)
-									if GetDistance(afterEPos, target.pos) < _G.SDK.Utilities:GetAutoAttackRange(myHero,target) then
+									if GetDistanceSqr(afterEPos, target.pos) < (myHero.range + myHero.boundingRadius + target.boundingRadius - 30) ^ 2 then
 										LocalControlCastSpell(HK_E, minion)
 										return 
 									end
@@ -202,11 +201,12 @@ function Yasuo:OnCombo()
 					else
 						local EnemyMinions = _G.SDK.ObjectManager:GetEnemyMinions(self.E.range * 2)
 						if #EnemyMinions > 0 then
-							for _, minion in pairs(EnemyMinions) do
-								if GetDistance(myHero, minion) < self.E.range and HasBuff(minion, "YasuoDashWrapper") == false then 
-									local posTo = minion:GetPrediction(LocalMathHuge, self.E.delay)
+							for i = 1, #EnemyMinions do
+								local minion = EnemyMinions[i];
+								if GetDistanceSqr(myHero, minion) < self.E.range ^ 2 and HasBuff(minion, "YasuoDashWrapper") == false then 
+									local posTo = minion:GetPrediction(LocalMathHuge, 0.25)
 									local afterEPos = myHero.pos:Extended(posTo, 475)
-									if GetDistance(afterEPos, target.pos) < self.E.range then
+									if GetDistanceSqr(afterEPos, target.pos) < self.E.range ^ 2 then
 										LocalControlCastSpell(HK_E, minion)
 										return 
 									end
@@ -228,7 +228,8 @@ function Yasuo:OnClear()
 			if HasBuff(myHero, "YasuoQ3W") then	
 				local EnemyMinions = _G.SDK.ObjectManager:GetEnemyMinions(self.Q3.range)
 				if #EnemyMinions >= self.Menu.Mode.LaneClear.MinQ3:Value() then
-					for _, minion in pairs(EnemyMinions) do
+					for i = 1, #EnemyMinions do
+						local minion = EnemyMinions[i]
 						local costPos = minion:GetPrediction(self.Q3.speed, self.Q3.delay)
 						local Block, blockingUnits = self.QCollision:__GetMinionCollision(myHero, costPos, 3)
 						if #blockingUnits >= self.Menu.Mode.LaneClear.MinQ3:Value() then
@@ -241,13 +242,14 @@ function Yasuo:OnClear()
 			--Q1
 				local EnemyMinions = _G.SDK.ObjectManager:GetEnemyMinions(self.Q.range)
 				if #EnemyMinions > 0 then
-					for _, minion in pairs(EnemyMinions) do
+					for i = 1, #EnemyMinions do
+						local minion = EnemyMinions[i]
 						local hp = _G.SDK.HealthPrediction:GetPrediction(minion, self.Q.delay)
 						local Qdmg = ({20, 45, 70, 95, 120})[myHero:GetSpellData(_Q).level] + myHero.totalDamage
 						if  hp > 0 and hp <= _G.SDK.Damage:CalculateDamage(myHero, minion, _G.SDK.DAMAGE_TYPE_PHYSICAL, Qdmg) then
-							local pred = minion:GetPrediction(self.Q.speed,self.Q.delay)
-							if pred then
-								LocalControlCastSpell(HK_Q, pred)
+							local pred = self.QPred:GetPrediction(minion, myHero.pos)
+							if pred and pred.hitChance >= 0.15 then
+								LocalControlCastSpell(HK_Q, pred.castPos)
 								return
 							end
 						end
@@ -262,7 +264,8 @@ function Yasuo:OnClear()
 		if LocalGameCanUseSpell(_E) == READY then
 			local EnemyMinions = _G.SDK.ObjectManager:GetEnemyMinions(self.E.range)
 			if #EnemyMinions > 0 then
-				for _, minion in pairs(EnemyMinions) do
+				for i = 1, #EnemyMinions do
+					local minion = EnemyMinions[i]
 					if HasBuff(minion, "YasuoDashWrapper") == false then
 						--Last Hit
 						local hp = _G.SDK.HealthPrediction:GetPrediction(minion, GetDistance(myHero.pos, minion.pos) * 0.00005)
@@ -290,10 +293,11 @@ function Yasuo:OnClear()
 		if LocalGameCanUseSpell(_Q) == READY then
 			local Monsters = _G.SDK.ObjectManager:GetMonsters(self.Q.range)
 			if #Monsters > 0 then
-				for _, minion in pairs(Monsters) do
-					local pred = minion:GetPrediction(self.Q.speed,self.Q.delay)
-					if pred then
-						LocalControlCastSpell(HK_Q, pred)
+				for i = 1, #Monsters do
+					local minion = Monsters[i]
+					local pred = self.QPred:GetPrediction(minion, myHero.pos)
+					if pred and pred.hitChance >= 0.15 then
+						LocalControlCastSpell(HK_Q, pred.castPos)
 						return
 					end
 				end
@@ -306,7 +310,8 @@ function Yasuo:OnClear()
 		if LocalGameCanUseSpell(_E) == READY then
 			local Monsters = _G.SDK.ObjectManager:GetMonsters(self.E.range)
 			if #Monsters > 0 then
-				for _, minion in pairs(Monsters) do
+				for i = 1, #Monsters do
+					local minion = Monsters[i]
 					if HasBuff(minion, "YasuoDashWrapper") == false then 
 						--Last Hit
 						local hp = _G.SDK.HealthPrediction:GetPrediction(minion, self.E.delay)
@@ -317,7 +322,7 @@ function Yasuo:OnClear()
 						end
 						--After E can AA minion
 						local afterEPos = myHero.pos:Extended(minion.pos, 475)
-						if GetDistance(afterEPos, minion.pos) < _G.SDK.Utilities:GetAutoAttackRange(myHero,minion) then
+						if GetDistanceSqr(afterEPos, minion.pos) < (myHero.range + myHero.boundingRadius + minion.boundingRadius - 30) ^ 2 then
 							LocalControlCastSpell(HK_E, minion)
 							return
 						end
@@ -334,9 +339,10 @@ function Yasuo:OnFlee()
 	if self.Menu.Mode.Flee.E:Value() and LocalGameCanUseSpell(_E) == READY then
 		local EnemyMinions = _G.SDK.ObjectManager:GetEnemyMinions(self.E.range)
 		if #EnemyMinions > 0 then
-			for _, minion in pairs(EnemyMinions) do
+			for i = 1, #EnemyMinions do
+				local minion = EnemyMinions[i]
 				if HasBuff(minion, "YasuoDashWrapper") == false then
-					if  GetDistance(minion.pos, mousePos) < GetDistance(myHero.pos, mousePos) then
+					if  GetDistanceSqr(minion.pos, mousePos) < GetDistanceSqr(myHero.pos, mousePos) then
 						LocalControlCastSpell(HK_E, minion)
 						return
 					end
@@ -351,7 +357,8 @@ function Yasuo:AutoR()
 		local EnemyHeroes = _G.SDK.ObjectManager:GetEnemyHeroes(self.R.range + 150)
 		if #EnemyHeroes >= self.Menu.AutoR.MinR:Value() then
 			local count = 0
-			for _, hero in pairs(EnemyHeroes) do
+			for i = 1, #EnemyHeroes do
+				local hero = EnemyHeroes[i]
 				if self:isKnockedUp(hero) then
 					count = count + 1
 				end
@@ -382,8 +389,9 @@ end
 function IsUnderTurret(pos)
 	local EnemyTurrets = _G.SDK.ObjectManager:GetEnemyTurrets(2000)
 	if #EnemyTurrets > 0 then
-		for _, turret in pairs(EnemyTurrets) do
-			if GetDistance(pos, turret.pos) <= (760 + turret.boundingRadius + myHero.boundingRadius) then
+		for i = 1, #EnemyTurrets do
+			local turret = EnemyTurrets[i]
+			if GetDistanceSqr(pos, turret.pos) <= (760 + turret.boundingRadius + myHero.boundingRadius)^2 then
 				return true
 			end
 		end
@@ -436,6 +444,22 @@ end
 
 function GetDistance(a, b)
 	return LocalMathSqrt(GetDistanceSqr(a, b))
+end
+
+function IsCastingSpell(unit)
+	if unit.activeSpell.valid then
+		return unit.isChanneling
+	end
+	return false
+end
+
+function IsAutoAttacking(unit)
+	if unit.activeSpell.valid then
+		if unit.activeSpell.target > 0 then
+			return unit.activeSpell.name:lower():find("attack") and false
+		end
+	end
+	return false
 end
 
 function IsWindingUp(unit)
