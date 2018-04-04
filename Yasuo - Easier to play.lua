@@ -171,7 +171,7 @@ function Yasuo:OnCombo()
 	--E Logic
 	if self.Menu.Mode.Combo.E:Value() and IsWindingUp(myHero) == false then
 		if LocalGameCanUseSpell(_E) == READY then
-			local target = _G.SDK.TargetSelector:GetTarget(600, _G.SDK.DAMAGE_TYPE_PHYSICAL)
+			local target = _G.SDK.TargetSelector:GetTarget(550, _G.SDK.DAMAGE_TYPE_PHYSICAL)
 			if target and HasBuff(target, "YasuoDashWrapper") == false then
 				local posTo = target:GetPrediction(LocalMathHuge, 0.25)
 				local afterEPos = myHero.pos:Extended(posTo, 475)
