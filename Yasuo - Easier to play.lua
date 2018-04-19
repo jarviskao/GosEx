@@ -135,6 +135,7 @@ function Yasuo:GetLib()
 	if self.PredictionMode == 1 then
 		self.Menu.Pred:MenuElement({ id = "EPredQ", name = "Q HitChance", value = 0.22, min = 0.15, max = 0.3, step = 0.005, leftIcon = self.Icons.Q})
 		require "Eternal Prediction"
+		self.Q = {range = 475, speed = 5000, width = 20, delay = 0.25}
 		self.QPred = Prediction:SetSpell(self.Q, TYPE_LINE, true)
 	elseif self.PredictionMode == 2 then
 		self.Menu.Pred:MenuElement({ id = "TPredQ", name = "Q HitChance", value = 2, min = 2, max = 5, step = 1, leftIcon = self.Icons.Q})
