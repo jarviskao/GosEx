@@ -32,7 +32,8 @@ local IncSpells = {}
 class "Yasuo"
 
 function Yasuo:__init()
-	self.Q = {range = 475, speed = 5000, width = 20, delay = function() return LocalMathMax(0.54 * ( 1 - (myHero.attackSpeed / 1.6725 * 0.55)), 0.175) end}
+	self.Qdelay = function() return LocalMathMax(0.54 * ( 1 - (myHero.attackSpeed / 1.6725 * 0.55)), 0.175) end
+	self.Q = {range = 475, speed = 5000, width = 20, delay = self.Qdelay()}
 	self.Q3 = {range = 900, speed = 5000, width = 90, delay = 0.25}
 	self.W = {range = 400, speed = 500, width = 0, delay = 0.25}
 	self.E = {range = 475, speed = 20, width = 0, delay = 0.05}
@@ -331,7 +332,7 @@ function Yasuo:OnClear()
 				local EnemyMinions = GetEnemyMinions(self.Q.range)
 				for i = 1, #EnemyMinions do
 					local minion = EnemyMinions[i]
-					local hp = _G.SDK.HealthPrediction:GetPrediction(minion, self.Q.delay())
+					local hp = _G.SDK.HealthPrediction:GetPrediction(minion, self.Q.delay)
 					local Qdmg = ({20, 45, 70, 95, 120})[myHero:GetSpellData(_Q).level] + myHero.totalDamage
 					if  hp > 0 and hp <= _G.SDK.Damage:CalculateDamage(myHero, minion, _G.SDK.DAMAGE_TYPE_PHYSICAL, Qdmg) then
 						self:CastQ(myHero, minion)
@@ -416,7 +417,7 @@ function Yasuo:OnLastHit()
 				local EnemyMinions = GetEnemyMinions(self.Q.range)
 				for i = 1, #EnemyMinions do
 					local minion = EnemyMinions[i]
-					local hp = _G.SDK.HealthPrediction:GetPrediction(minion, self.Q.delay())
+					local hp = _G.SDK.HealthPrediction:GetPrediction(minion, self.Q.delay)
 					local Qdmg = ({20, 45, 70, 95, 120})[myHero:GetSpellData(_Q).level] + myHero.totalDamage
 					if  hp > 0 and hp <= _G.SDK.Damage:CalculateDamage(myHero, minion, _G.SDK.DAMAGE_TYPE_PHYSICAL, Qdmg) then
 						self:CastQ(myHero, minion)
@@ -589,12 +590,12 @@ function Yasuo:CastQ(source, target)
 			LocalControlCastSpell(HK_Q, pred.castPos)
 		end
 	elseif self.PredictionMode == 2 then
-		local castpos,HitChance, pos = TPred:GetBestCastPosition(target, self.Q.delay(), self.Q.width, self.Q.range, self.Q.speed, source.pos, false, "line")
+		local castpos,HitChance, pos = TPred:GetBestCastPosition(target, self.Q.delay, self.Q.width, self.Q.range, self.Q.speed, source.pos, false, "line")
 		if HitChance >= self.Menu.Pred.TPredQ:Value() then
 			LocalControlCastSpell(HK_Q, castpos)
 		end
 	elseif self.PredictionMode == 3 then
-		local hitChance, aimPosition = HPred:GetHitchance(source.pos, target, self.Q.range, self.Q.delay(), self.Q.speed, self.Q.width, false)
+		local hitChance, aimPosition = HPred:GetHitchance(source.pos, target, self.Q.range, self.Q.delay, self.Q.speed, self.Q.width, false)
 		if hitChance >= self.Menu.Pred.HPredQ:Value() then
 			LocalControlCastSpell(HK_Q, aimPosition)
 		end
