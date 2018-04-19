@@ -2,7 +2,7 @@
 --Support All Patch version
 --Require Script: IC's OrbWalker
 --Require Common: Collision, Eternal Prediction or TPred or HPred
---Date: 20180419
+--Date: 20180414
 
 if myHero.charName ~= "Yasuo" then return end
 
@@ -37,6 +37,7 @@ function Yasuo:__init()
 	self.W = {range = 400, speed = 500, width = 0, delay = 0.25}
 	self.E = {range = 475, speed = 20, width = 0, delay = 0.05}
 	self.R = {range = 1400, speed = 20, width = 0, delay = 0.25}
+	self.Qdelay = function () return LocalMathMax(0.54 * ( 1 - (myHero.attackSpeed / 1.6725 * 0.55)), 0.175) end
 	Callback.Add("Load", function() self:Load() end)
 	PrintChat("JarKao's Yasuo v" .. VERSION .. " loaded.")
 end
@@ -135,7 +136,6 @@ function Yasuo:GetLib()
 	if self.PredictionMode == 1 then
 		self.Menu.Pred:MenuElement({ id = "EPredQ", name = "Q HitChance", value = 0.22, min = 0.15, max = 0.3, step = 0.005, leftIcon = self.Icons.Q})
 		require "Eternal Prediction"
-		self.Q = {range = 475, speed = 5000, width = 20, delay = 0.25}
 		self.QPred = Prediction:SetSpell(self.Q, TYPE_LINE, true)
 	elseif self.PredictionMode == 2 then
 		self.Menu.Pred:MenuElement({ id = "TPredQ", name = "Q HitChance", value = 2, min = 2, max = 5, step = 1, leftIcon = self.Icons.Q})
@@ -331,7 +331,7 @@ function Yasuo:OnClear()
 				local EnemyMinions = GetEnemyMinions(self.Q.range)
 				for i = 1, #EnemyMinions do
 					local minion = EnemyMinions[i]
-					local hp = _G.SDK.HealthPrediction:GetPrediction(minion, self.Q.delay)
+					local hp = _G.SDK.HealthPrediction:GetPrediction(minion, self.Qdelay())
 					local Qdmg = ({20, 45, 70, 95, 120})[myHero:GetSpellData(_Q).level] + myHero.totalDamage
 					if  hp > 0 and hp <= _G.SDK.Damage:CalculateDamage(myHero, minion, _G.SDK.DAMAGE_TYPE_PHYSICAL, Qdmg) then
 						self:CastQ(myHero, minion)
@@ -416,7 +416,7 @@ function Yasuo:OnLastHit()
 				local EnemyMinions = GetEnemyMinions(self.Q.range)
 				for i = 1, #EnemyMinions do
 					local minion = EnemyMinions[i]
-					local hp = _G.SDK.HealthPrediction:GetPrediction(minion, self.Q.delay)
+					local hp = _G.SDK.HealthPrediction:GetPrediction(minion, self.Qdelay())
 					local Qdmg = ({20, 45, 70, 95, 120})[myHero:GetSpellData(_Q).level] + myHero.totalDamage
 					if  hp > 0 and hp <= _G.SDK.Damage:CalculateDamage(myHero, minion, _G.SDK.DAMAGE_TYPE_PHYSICAL, Qdmg) then
 						self:CastQ(myHero, minion)
@@ -589,12 +589,12 @@ function Yasuo:CastQ(source, target)
 			LocalControlCastSpell(HK_Q, pred.castPos)
 		end
 	elseif self.PredictionMode == 2 then
-		local castpos,HitChance, pos = TPred:GetBestCastPosition(target, self.Q.delay, self.Q.width, self.Q.range, self.Q.speed, source.pos, false, "line")
+		local castpos,HitChance, pos = TPred:GetBestCastPosition(target, self.Qdelay(), self.Q.width, self.Q.range, self.Q.speed, source.pos, false, "line")
 		if HitChance >= self.Menu.Pred.TPredQ:Value() then
 			LocalControlCastSpell(HK_Q, castpos)
 		end
 	elseif self.PredictionMode == 3 then
-		local hitChance, aimPosition = HPred:GetHitchance(source.pos, target, self.Q.range, self.Q.delay, self.Q.speed, self.Q.width, false)
+		local hitChance, aimPosition = HPred:GetHitchance(source.pos, target, self.Q.range, self.Qdelay(), self.Q.speed, self.Q.width, false)
 		if hitChance >= self.Menu.Pred.HPredQ:Value() then
 			LocalControlCastSpell(HK_Q, aimPosition)
 		end
