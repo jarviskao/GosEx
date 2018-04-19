@@ -32,8 +32,7 @@ local IncSpells = {}
 class "Yasuo"
 
 function Yasuo:__init()
-	self.Qdelay = function() return LocalMathMax(0.54 * ( 1 - (myHero.attackSpeed / 1.6725 * 0.55)), 0.175) end
-	self.Q = {range = 475, speed = 5000, width = 20, delay = self.Qdelay()}
+	self.Q = {range = 475, speed = 5000, width = 20, delay = 0.25}
 	self.Q3 = {range = 900, speed = 5000, width = 90, delay = 0.25}
 	self.W = {range = 400, speed = 500, width = 0, delay = 0.25}
 	self.E = {range = 475, speed = 20, width = 0, delay = 0.05}
