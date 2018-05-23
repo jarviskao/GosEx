@@ -2,11 +2,11 @@
 --Support All Patch version
 --Require Script: IC's OrbWalker
 --Require Common: Collision, Eternal Prediction or TPred or HPred
---Date: 20180414
+--Date: 20180523
 
 if myHero.charName ~= "Yasuo" then return end
 
-local VERSION = 2.04
+local VERSION = 2.041
 local LocalGameCanUseSpell = Game.CanUseSpell
 local LocalControlCastSpell = Control.CastSpell
 local LocalGameHeroCount = Game.HeroCount
@@ -148,10 +148,7 @@ function Yasuo:GetLib()
 end
 
 function Yasuo:Draw()
-
 	if myHero.dead or LocalGameIsChatOpen() or LocalGameIsOnTop() == false then return end
-
-	self:AutoW()
 
 	if self.Menu.Drawing.Disable:Value() then return end
 
@@ -181,11 +178,13 @@ function Yasuo:Tick()
 
 	if ExtLibEvade and ExtLibEvade.Evading then return end
 
+	self:AutoW()
+
 	if self.Menu.Key.Combo:Value() == false then
 		self:AutoHarass()
 	end
 
-	if IsWindingUp(myHero) then return end
+	if IsAutoAttacking(myHero) then return end
 
 	if self.Menu.Key.Combo:Value() then
 		self:OnCombo()
@@ -204,7 +203,7 @@ end
 function Yasuo:OnCombo()
 	--Q Logic
 	if LocalGameCanUseSpell(_Q) == READY then
-		if self.Menu.Mode.Combo.Q:Value() and IsWindingUp(myHero) == false then
+		if self.Menu.Mode.Combo.Q:Value() and IsAutoAttacking(myHero) == false then
 			--Q3
 			if self.Menu.Mode.Combo.Q3:Value() and HasBuff(myHero, "YasuoQ3W") then	
 				local target = _G.SDK.TargetSelector:GetTarget(self.Q3.range, _G.SDK.DAMAGE_TYPE_PHYSICAL)
@@ -214,7 +213,7 @@ function Yasuo:OnCombo()
 				end
 			else
 			--Q1
-     			local target = _G.SDK.TargetSelector:GetTarget(self.Q.range, _G.SDK.DAMAGE_TYPE_PHYSICAL)
+     			local target = _G.SDK.TargetSelector:GetTarget(self.Q.range + 35, _G.SDK.DAMAGE_TYPE_PHYSICAL)
       			if target then
       				self:CastQ(myHero, target)
 				end
@@ -224,7 +223,7 @@ function Yasuo:OnCombo()
 
 	--E Logic
 	if LocalGameCanUseSpell(_E) == READY then
-		if self.Menu.Mode.Combo.E:Value() and IsWindingUp(myHero) == false then
+		if self.Menu.Mode.Combo.E:Value() and IsAutoAttacking(myHero) == false then
 			local target = _G.SDK.TargetSelector:GetTarget(475, _G.SDK.DAMAGE_TYPE_PHYSICAL)
 			if target then
 				if HasBuff(target, "YasuoDashWrapper") then
@@ -287,7 +286,7 @@ end
 function Yasuo:OnHarass()
 	--Q Logic
 	if LocalGameCanUseSpell(_Q) == READY then
-		if self.Menu.Mode.Harass.Q:Value() and IsWindingUp(myHero) == false then
+		if self.Menu.Mode.Harass.Q:Value() and IsAutoAttacking(myHero) == false then
 			--Q3
 			if HasBuff(myHero, "YasuoQ3W") then	
 				local target = _G.SDK.TargetSelector:GetTarget(self.Q3.range, _G.SDK.DAMAGE_TYPE_PHYSICAL)
@@ -297,7 +296,7 @@ function Yasuo:OnHarass()
 				end
 			else
 			--Q1
-     			local target = _G.SDK.TargetSelector:GetTarget(self.Q.range, _G.SDK.DAMAGE_TYPE_PHYSICAL)
+     			local target = _G.SDK.TargetSelector:GetTarget(self.Q.range + 35, _G.SDK.DAMAGE_TYPE_PHYSICAL)
       			if target then
       				self:CastQ(myHero, target)
 				end
@@ -309,9 +308,8 @@ end
 function Yasuo:OnClear()
 	
 	if LocalGameCanUseSpell(_Q) == READY then
-
 		--Lane Q Logic
-		if self.Menu.Mode.LaneClear.Q:Value() and IsWindingUp(myHero) == false then
+		if self.Menu.Mode.LaneClear.Q:Value() and IsAutoAttacking(myHero) == false then
 			--Q3
 			if HasBuff(myHero, "YasuoQ3W") then	
 				local EnemyMinions = GetEnemyMinions(self.Q3.range)
@@ -328,7 +326,7 @@ function Yasuo:OnClear()
 				end
 			else
 			--Q1
-				local EnemyMinions = GetEnemyMinions(self.Q.range)
+				local EnemyMinions = GetEnemyMinions(self.Q.range + 35)
 				for i = 1, #EnemyMinions do
 					local minion = EnemyMinions[i]
 					local hp = _G.SDK.HealthPrediction:GetPrediction(minion, self.Qdelay())
@@ -342,8 +340,8 @@ function Yasuo:OnClear()
 		end
 
 		--Jungle Q Logic
-		if self.Menu.Mode.JungleClear.Q:Value() and IsWindingUp(myHero) == false then
-			local Monsters = GetMonsters(self.Q.range)
+		if self.Menu.Mode.JungleClear.Q:Value() and IsAutoAttacking(myHero) == false then
+			local Monsters = GetMonsters(self.Q.range + 35)
 			for i = 1, #Monsters do
 				local minion = Monsters[i]
 				self:CastQ(myHero, minion)
@@ -352,11 +350,9 @@ function Yasuo:OnClear()
 		end
 	end
 
-	
 	if LocalGameCanUseSpell(_E) == READY then
-
 		--Lane E Logic
-		if self.Menu.Mode.LaneClear.E:Value() and IsWindingUp(myHero) == false then
+		if self.Menu.Mode.LaneClear.E:Value() and IsAutoAttacking(myHero) == false then
 			local EnemyMinions = GetEnemyMinions(self.E.range)
 			for i = 1, #EnemyMinions do
 				local minion = EnemyMinions[i]
@@ -381,7 +377,7 @@ function Yasuo:OnClear()
 		end
 
 		--Jungle E Logic
-		if self.Menu.Mode.JungleClear.E:Value() and IsWindingUp(myHero) == false then
+		if self.Menu.Mode.JungleClear.E:Value() and IsAutoAttacking(myHero) == false then
 			local Monsters = GetMonsters(self.E.range)
 			for i = 1, #Monsters do
 				local minion = Monsters[i]
@@ -410,10 +406,10 @@ function Yasuo:OnLastHit()
 
 	if LocalGameCanUseSpell(_Q) == READY then
 		--Lane Q Logic
-		if self.Menu.Mode.LastHit.Q:Value() and IsWindingUp(myHero) == false then
+		if self.Menu.Mode.LastHit.Q:Value() and IsAutoAttacking(myHero) == false then
 			--Q1
 			if HasBuff(myHero, "YasuoQ3W") == false then	
-				local EnemyMinions = GetEnemyMinions(self.Q.range)
+				local EnemyMinions = GetEnemyMinions(self.Q.range + 35)
 				for i = 1, #EnemyMinions do
 					local minion = EnemyMinions[i]
 					local hp = _G.SDK.HealthPrediction:GetPrediction(minion, self.Qdelay())
@@ -429,7 +425,7 @@ function Yasuo:OnLastHit()
 
 	if LocalGameCanUseSpell(_E) == READY then
 		--Lane E Logic
-		if self.Menu.Mode.LastHit.E:Value() and IsWindingUp(myHero) == false then
+		if self.Menu.Mode.LastHit.E:Value() and IsAutoAttacking(myHero) == false then
 			local EnemyMinions = GetEnemyMinions(self.E.range)
 			for i = 1, #EnemyMinions do
 				local minion = EnemyMinions[i]
@@ -469,7 +465,7 @@ end
 
 function Yasuo:AutoHarass()
 	if self.Menu.AutoHarass.Q:Value() and LocalGameCanUseSpell(_Q) == READY then
-		local EnemyHeroes = GetEnemyHeroes(self.Q.range)
+		local EnemyHeroes = GetEnemyHeroes(self.Q.range + 35)
 		for i = 1, #EnemyHeroes do
 			local hero = EnemyHeroes[i]
 			if HasBuff(myHero, "YasuoQ3W") == false then
@@ -516,22 +512,119 @@ function Yasuo:isKnockedUp(unit)
 	return false
 end
 
-local SkillshotDatabase = {
-	["Amumu"]			= { "BandageToss" },
-	["Ashe"]			= { "EnchantedCrystalArrow" },
-	["Blitzcrank"]		= { "RocketGrab" },
-	["Caitlyn"]			= { "CaitlynPiltoverPeacemaker", "CaitlynEntrapmentMissile","CaitlynAceintheHole"},
-	["Ezreal"]			= { "EzrealMysticShot", "EzrealEssenceFlux", "EzrealArcaneShift" },
-	["Diana"]			= { "DianaArc"},
-	["Morgana"]			= { "DarkBinding"},
-	["Ezreal"]			= { "EzrealMysticShot"},
-	["Sivir"]			= { "SivirQ"},
-	["Lux"]				= { "LuxLightBinding"},
-	["Thresh"]			= { "ThreshQ"},
-	["Varus"]			= { "VarusQ"},
-	["Yasuo"]			= { "YasuoQ3"},
-	["Zyra"]			= { "ZyraE"},
-
+local SpellsDatabase = {
+	["Aatrox"] = {"AatroxE"},
+	["Ahri"] = {"AhriOrbofDeception", "AhriFoxFire", "AhriSeduce", "AhriTumble"},
+	["Akali"] = {"AkaliMota"},
+	["Amumu"] = {"BandageToss"},
+	["Anivia"] = {"FlashFrost", "Frostbite"},
+	["Annie"] = {"Disintegrate"},
+	["Ashe"] = {"Volley", "EnchantedCrystalArrow"},
+	["AurelionSol"] = {"AurelionSolQ"},
+	["Bard"] = {"BardQ"},
+	["Blitzcrank"] = {"RocketGrab"},
+	["Brand"] = {"BrandQ", "BrandR"},
+	["Braum"] = {"BraumQ", "BraumR"},
+	["Caitlyn"] = {"CaitlynPiltoverPeacemaker", "CaitlynEntrapmentMissile", "CaitlynAceintheHole"},
+	["Cassiopeia"] = {"CassiopeiaW", "CassiopeiaTwinFang"},
+	["Corki"] = {"PhosphorusBomb", "MissileBarrageMissile", "MissileBarrageMissile2"},
+	["Diana"] = {"DianaArc", "DianaOrbs"},
+	["DrMundo"] = {"InfectedCleaverMissileCast"},
+	["Draven"] = {"DravenDoubleShot", "DravenRCast"},
+	["Ekko"] = {"EkkoQ"},
+	["Elise"] = {"EliseHumanQ", "EliseHumanE"},
+	["Evelynn"] = {"EvelynnQ"},
+	["Ezreal"] = {"EzrealMysticShot", "EzrealEssenceFlux", "EzrealArcaneShift", "EzrealTrueshotBarrage"},
+	["Fiddlesticks"] = {"FiddlesticksDarkWind"},
+	["Fiora"] = {"FioraW"},
+	["Fizz"] = {"FizzR"},
+	["Galio"] = {"GalioQ"},
+	["Gangplank"] = {"GangplankQ"},
+	["Gnar"] = {"GnarQ", "GnarBigQ"},
+	["Gragas"] = {"GragasQ", "GragasR"},
+	["Graves"] = {"GravesQLineSpell", "GravesSmokeGrenade", "GravesChargeShot"},
+	["Hecarim"] = {"HecarimUlt"},
+	["Heimerdinger"] = {"HeimerdingerQ", "HeimerdingerW", "HeimerdingerE", "HeimerdingerEUlt"},
+	["Illaoi"] = {"IllaoiE"},
+	["IreliaR"] = {"IreliaR"},
+	["Ivern"] = {"IvernQ"},
+	["Janna"] = {"HowlingGale", "SowTheWind"},
+	["Jayce"] = {"JayceShockBlast", "JayceShockBlastWallMis"},
+	["Jhin"] = {"JhinQ", "JhinW", "JhinR"},
+	["Jinx"] = {"JinxW", "JinxE", "JinxR"},
+	["Kaisa"] = {"KaisaQ", "KaisaW"},
+	["Kalista"] = {"KalistaMysticShot"},
+	["Karma"] = {"KarmaQ", "KarmaQMantra"},
+	["Kassadin"] = {"NullLance"},
+	["Katarina"] = {"KatarinaQ", "KatarinaR"},
+	["Kayle"] = {"JudicatorReckoning"},
+	["Kennen"] = {"KennenShurikenHurlMissile1"},
+	["Khazix"] = {"KhazixW", "KhazixWLong"},
+	["Kindred"] = {"KindredQ", "KindredE"},
+	["Kled"] = {"KledQ", "KledQRider"},
+	["KogMaw"] = {"KogMawQ", "KogMawVoidOoze"},
+	["Leblanc"] = {"LeblancQ", "LeblancE", "LeblancRQ", "LeblancRE"},
+	["Leesin"] = {"BlinkMonkQOne"},
+	["Leona"] = {"LeonaZenithBlade"},
+	["Lissandra"] = {"LissandraQ", "LissandraE"},
+	["Lucian"] = {"LucianW", "LucianRMis"},
+	["Lulu"] = {"LuluQ", "LuluW"},
+	["Lux"] = {"LuxLightBinding", "LuxPrismaticWave", "LuxLightStrikeKugel"},
+	["Malphite"] = {"SeismicShard"},
+	["Maokai"] = {"MaokaiQ", "MaokaiR"},
+	["MissFortune"] = {"MissFortuneRicochetShot", "MissFortuneBulletTime"},
+	["Morgana"] = {"DarkBindingMissile"},
+	["Nami"] = {"NamiQ", "NamiW", "NamiR"},
+	["Nautilus"] = {"NautilusAnchorDrag"},
+	["Nidalee"] = {"JavelinToss"},
+	["Nocturne"] = {"NocturneDuskbringer"},
+	["Nunu"] = {"IceBlast"},
+	["Olaf"] = {"OlafAxeThrowCast"},
+	["Orianna"] = {"OrianaIzunaCommand", "OrianaRedactCommand"},
+	["Ornn"] = {"OrnnQ", "OrnnR"},
+	["Pantheon"] = {"PantheonQ"},
+	["Poppy"] = {"PoppyRSpell"},
+	["Quinn"] = {"QuinnQ"},
+	["Rakan"] = {"RakanQ"},
+	["Reksai"] = {"RekSaiQBurrowed"},
+	["Rengar"] = {"RengarE"},
+	["Riven"] = {"RivenIzunaBlade"},
+	["Rumble"] = {"RumbleGrenade"},
+	["Ryze"] = {"RyzeQ", "RyzeE"},
+	["Sejuani"] = {"SejuaniE", "SejuaniR"},
+	["Shaco"] = {"TwoShivPoison"},
+	["Shyvana"] = {"ShyvanaFireball", "ShyvanaFireballDragon2"},
+	["Sion"] = {"SionE"},
+	["Sivir"] = {"SivirQ"},
+	["Skarner"] = {"SkarnerFracture"},
+	["Sona"] = {"SonaQ", "SonaR"},
+	["Swain"] = {"SwainE"},
+	["Syndra"] = {"SyndraR"},
+	["TahmKench"] = {"TahmKenchQ"},
+	["Taliyah"] = {"TaliyahQ"},
+	["Talon"] = {"TalonW", "TalonR"},
+	["Teemo"] = {"BlindingDart", "TeemoRCast"},
+	["Thresh"] = {"ThreshQ"},
+	["Tristana"] = {"TristanaE", "TristanaR"},
+	["TwistedFate"] = {"WildCards"},
+	["Twitch"] = {"TwitchVenomCask"},
+	["Urgot"] = {"UrgotQ", "UrgotR"},
+	["Varus"] = {"VarusQ", "VarusR"},
+	["Vayne"] = {"VayneCondemn", "VayneCondemnMissile"},
+	["Veigar"] = {"VeigarBalefulStrike", "VeigarR"},
+	["VelKoz"] = {"VelKozQ", "VelkozQMissileSplit", "VelKozW", "VelKozE"},
+	["Viktor"] = {"ViktorPowerTransfer", "ViktorDeathRay"},
+	["Vladimir"] = {"VladimirE"},
+	["Xayah"] = {"XayahQ", "XayahE", "XayahR"},
+	["Xerath"] = {"XerathMageSpear"},
+	["Yasuo"] = {"YasuoQ3W"},
+	["Yorick"] = {"YorickE"},
+	["Zac"] = {"ZacQ"},
+	["Zed"] = {"ZedQ"},
+	["Ziggs"] = {"ZiggsQ", "ZiggsW", "ZiggsE"},
+	["Zilean"] = {"ZileanQ", "ZileanQAttachAudio"},
+	["Zoe"] = {"ZoeQ", "ZoeQRecast", "ZoeE"},
+	["Zyra"] = {"ZyraE"},
 }
 
 function OnTick()
@@ -539,7 +632,7 @@ function OnTick()
 		local hero = LocalGameHero(i);
 		if hero.isEnemy then
 			if hero.activeSpell.valid and hero.activeSpell.width > 0 and hero.activeSpell.range > 0  and hero.activeSpell.speed > 0 then
-				local t = SkillshotDatabase[hero.charName]
+				local t = SpellsDatabase[hero.charName]
 				if t then
 					for j = 1, #t do
 						if hero.activeSpell.name == t[j] then
@@ -659,8 +752,17 @@ function GetDistance(a, b)
 	return LocalMathSqrt(GetDistanceSqr(a, b))
 end
 
-function IsWindingUp(unit)
-	return unit.activeSpell.valid
+function IsAutoAttack(name)
+	return name:lower():find("attack") and false
+end
+
+function IsAutoAttacking(unit)
+	if unit.activeSpell.valid then
+		if unit.activeSpell.target > 0 then
+			return IsAutoAttack(unit.activeSpell.name);
+		end
+	end
+	return false;
 end
 
 function GetEnemyTurrets(range)
