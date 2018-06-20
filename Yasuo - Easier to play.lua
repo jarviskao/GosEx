@@ -2,11 +2,9 @@
 --Support All Patch version
 --Require Script: IC's OrbWalker
 --Require Common: Collision, Eternal Prediction or TPred or HPred
---Date: 20180523
+--Date: 20180620
 
-if myHero.charName ~= "Yasuo" then return end
-
-local VERSION = 2.041
+local VERSION = 2.05
 local LocalGameCanUseSpell = Game.CanUseSpell
 local LocalControlCastSpell = Control.CastSpell
 local LocalGameHeroCount = Game.HeroCount
@@ -27,22 +25,26 @@ local LocalMathHuge = math.huge
 local LocalMathMax = math.max
 local LocalMathSqrt = math.sqrt
 local LocalGameTimer = Game.Timer
+local TargetSelector = nil
+local DAMAGE_TYPE_PHYSICAL = nil
+local DAMAGE_TYPE_MAGICAL = nil
+local HealthPrediction = nil
+local Damage = 	nil
 local IncSpells = {}
 
 class "Yasuo"
 
 function Yasuo:__init()
-	self.Q = {range = 475, speed = 5000, width = 20, delay = 0.25}
-	self.Q3 = {range = 900, speed = 5000, width = 90, delay = 0.25}
+	self.Q = {range = 475, speed = LocalMathHuge, width = 45, delay = 0.25}
+	self.Q3 = {range = 900, speed = 1500, width = 75, delay = 0.25}
 	self.W = {range = 400, speed = 500, width = 0, delay = 0.25}
 	self.E = {range = 475, speed = 20, width = 0, delay = 0.05}
 	self.R = {range = 1400, speed = 20, width = 0, delay = 0.25}
 	self.Qdelay = function () return LocalMathMax(0.54 * ( 1 - (myHero.attackSpeed / 1.6725 * 0.55)), 0.175) end
-	Callback.Add("Load", function() self:Load() end)
-	PrintChat("JarKao's Yasuo v" .. VERSION .. " loaded.")
+	self:Menu()
 end
 
-function Yasuo:Load()
+function Yasuo:Menu()
 	self.Icons = {	Menu = "http://static.lolskill.net/img/champions/64/yasuo.png",
 					Q = "https://vignette4.wikia.nocookie.net/leagueoflegends/images/e/e5/Steel_Tempest.png",
 					W = "https://vignette3.wikia.nocookie.net/leagueoflegends/images/6/61/Wind_Wall.png",
@@ -87,11 +89,13 @@ function Yasuo:Load()
 	self.Menu:MenuElement({type = MENU, id = "Pred", name = "Prediction Settings"})
 	self.Menu.Pred:MenuElement({ id = "PredSelected", name = "Prediction", value = 1, drop = { "Eternal Pred", "TPred", "HPred"}, onclick = function() PrintChat("[Yasuo] Reload if you have changed the Prediction.") end})
 	
+	self.Menu:MenuElement({id = "KillSteal", name = "Auto KillSteal", type = MENU})
+	self.Menu.KillSteal:MenuElement({id = "Q", name = "Use Q", value = true, leftIcon = self.Icons.Q})
+	self.Menu.KillSteal:MenuElement({id = "E", name = "Use E", value = true, leftIcon = self.Icons.E})
+
 	self.Menu:MenuElement({id = "AutoW", name = "Auto Windwall", type = MENU})
 	self.Menu.AutoW:MenuElement({id = "W", name = "Use W", value = true, leftIcon = self.Icons.W})
 	self.Menu.AutoW:MenuElement({id = "blank", type = SPACE , name = "Compatible with Evade"})
-	self.Menu.AutoW:MenuElement({id = "blank", type = SPACE , name = "Evade Spells -> Yasuo Windwall"})
-	self.Menu.AutoW:MenuElement({id = "blank", type = SPACE , name = "Set Danger Level to 1"})
 
 	self.Menu:MenuElement({id = "AutoHarass", name = "Auto Harass", type = MENU})
 	self.Menu.AutoHarass:MenuElement({id = "Q", name = "Use Q on Enemy", value = true, leftIcon = self.Icons.Q})
@@ -148,7 +152,8 @@ function Yasuo:GetLib()
 end
 
 function Yasuo:Draw()
-	if myHero.dead or LocalGameIsChatOpen() or LocalGameIsOnTop() == false then return end
+	--PrintChat(self.Q.delay)
+	if myHero.dead or LocalGameIsChatOpen() or not LocalGameIsOnTop() then return end
 
 	if self.Menu.Drawing.Disable:Value() then return end
 
@@ -172,9 +177,11 @@ end
 
 function Yasuo:Tick()
 
-	if myHero.dead or LocalGameIsChatOpen() or LocalGameIsOnTop() == false then return end
+	if myHero.dead or LocalGameIsChatOpen() or not LocalGameIsOnTop() then return end
 
 	self:AutoR()
+
+	self:KillSteal()
 
 	if ExtLibEvade and ExtLibEvade.Evading then return end
 
@@ -184,7 +191,7 @@ function Yasuo:Tick()
 		self:AutoHarass()
 	end
 
-	if IsAutoAttacking(myHero) then return end
+	if IsAutoAttacking(myHero) or IsCastingSpell(myHero) then return end
 
 	if self.Menu.Key.Combo:Value() then
 		self:OnCombo()
@@ -203,17 +210,17 @@ end
 function Yasuo:OnCombo()
 	--Q Logic
 	if LocalGameCanUseSpell(_Q) == READY then
-		if self.Menu.Mode.Combo.Q:Value() and IsAutoAttacking(myHero) == false then
+		if self.Menu.Mode.Combo.Q:Value() and not IsAutoAttacking(myHero) then
 			--Q3
 			if self.Menu.Mode.Combo.Q3:Value() and HasBuff(myHero, "YasuoQ3W") then	
-				local target = _G.SDK.TargetSelector:GetTarget(self.Q3.range, _G.SDK.DAMAGE_TYPE_PHYSICAL)
+				local target = TargetSelector:GetTarget(self.Q3.range, DAMAGE_TYPE_PHYSICAL)
 				if target then
 					local costPos = target:GetPrediction(self.Q3.speed, self.Q3.delay)
 					LocalControlCastSpell(HK_Q, costPos)
 				end
 			else
 			--Q1
-     			local target = _G.SDK.TargetSelector:GetTarget(self.Q.range + 35, _G.SDK.DAMAGE_TYPE_PHYSICAL)
+     			local target = TargetSelector:GetTarget(self.Q.range + 35, DAMAGE_TYPE_PHYSICAL)
       			if target then
       				self:CastQ(myHero, target)
 				end
@@ -223,8 +230,8 @@ function Yasuo:OnCombo()
 
 	--E Logic
 	if LocalGameCanUseSpell(_E) == READY then
-		if self.Menu.Mode.Combo.E:Value() and IsAutoAttacking(myHero) == false then
-			local target = _G.SDK.TargetSelector:GetTarget(475, _G.SDK.DAMAGE_TYPE_PHYSICAL)
+		if self.Menu.Mode.Combo.E:Value() and not IsAutoAttacking(myHero) then
+			local target = TargetSelector:GetTarget(475, DAMAGE_TYPE_PHYSICAL)
 			if target then
 				if HasBuff(target, "YasuoDashWrapper") then
 					local EnemyMinions = GetEnemyMinions(self.E.range)
@@ -233,7 +240,7 @@ function Yasuo:OnCombo()
 						if HasBuff(minion, "YasuoDashWrapper") == false then 
 							local posTo = GetPosTo(minion)
 							local afterEPos = myHero.pos + Vector(myHero.pos, posTo):Normalized() * 475
-							if GetDistanceSqr(afterEPos, target.pos) < (myHero.range + myHero.boundingRadius + target.boundingRadius - 30) ^ 2 then
+							if GetDistanceSqr(afterEPos, target.pos) < (myHero.range + myHero.boundingRadius + target.boundingRadius - 35) ^ 2 then
 								LocalControlCastSpell(HK_E, minion)
 								break 
 							end
@@ -242,12 +249,12 @@ function Yasuo:OnCombo()
 				else
 					local posTo = GetPosTo(target)
 					local afterEPos = myHero.pos + Vector(myHero.pos, posTo):Normalized() * 475
-					if GetDistanceSqr(afterEPos, posTo) < (myHero.range + myHero.boundingRadius + target.boundingRadius - 30) ^ 2 then
+					if GetDistanceSqr(afterEPos, posTo) < (myHero.range + myHero.boundingRadius + target.boundingRadius - 35) ^ 2 then
 						LocalControlCastSpell(HK_E, target)
 					end
 				end
 			else
-				target = _G.SDK.TargetSelector:GetTarget(self.E.range * 2 , _G.SDK.DAMAGE_TYPE_PHYSICAL)
+				target = TargetSelector:GetTarget(self.E.range * 2 , DAMAGE_TYPE_PHYSICAL)
 				if target then
 					if HasBuff(target, "YasuoDashWrapper") then
 						local EnemyMinions = GetEnemyMinions(self.E.range * 2)
@@ -256,7 +263,7 @@ function Yasuo:OnCombo()
 							if GetDistanceSqr(myHero.pos, minion.pos) < self.E.range ^ 2 and HasBuff(minion, "YasuoDashWrapper") == false then 
 								local posTo = GetPosTo(minion)
 								local afterEPos = myHero.pos + Vector(myHero.pos, posTo):Normalized() * 475
-								if GetDistanceSqr(afterEPos, target.pos) < (myHero.range + myHero.boundingRadius + target.boundingRadius - 30) ^ 2 then
+								if GetDistanceSqr(afterEPos, target.pos) < (myHero.range + myHero.boundingRadius + target.boundingRadius - 35) ^ 2 then
 									LocalControlCastSpell(HK_E, minion)
 									break 
 								end
@@ -286,17 +293,17 @@ end
 function Yasuo:OnHarass()
 	--Q Logic
 	if LocalGameCanUseSpell(_Q) == READY then
-		if self.Menu.Mode.Harass.Q:Value() and IsAutoAttacking(myHero) == false then
+		if self.Menu.Mode.Harass.Q:Value() and not IsAutoAttacking(myHero) then
 			--Q3
 			if HasBuff(myHero, "YasuoQ3W") then	
-				local target = _G.SDK.TargetSelector:GetTarget(self.Q3.range, _G.SDK.DAMAGE_TYPE_PHYSICAL)
+				local target = TargetSelector:GetTarget(self.Q3.range, DAMAGE_TYPE_PHYSICAL)
 				if target then
 					local costPos = target:GetPrediction(self.Q3.speed, self.Q3.delay)
 					LocalControlCastSpell(HK_Q, costPos)
 				end
 			else
 			--Q1
-     			local target = _G.SDK.TargetSelector:GetTarget(self.Q.range + 35, _G.SDK.DAMAGE_TYPE_PHYSICAL)
+     			local target = TargetSelector:GetTarget(self.Q.range + 35, DAMAGE_TYPE_PHYSICAL)
       			if target then
       				self:CastQ(myHero, target)
 				end
@@ -309,7 +316,7 @@ function Yasuo:OnClear()
 	
 	if LocalGameCanUseSpell(_Q) == READY then
 		--Lane Q Logic
-		if self.Menu.Mode.LaneClear.Q:Value() and IsAutoAttacking(myHero) == false then
+		if self.Menu.Mode.LaneClear.Q:Value() and not IsAutoAttacking(myHero) then
 			--Q3
 			if HasBuff(myHero, "YasuoQ3W") then	
 				local EnemyMinions = GetEnemyMinions(self.Q3.range)
@@ -329,9 +336,9 @@ function Yasuo:OnClear()
 				local EnemyMinions = GetEnemyMinions(self.Q.range + 35)
 				for i = 1, #EnemyMinions do
 					local minion = EnemyMinions[i]
-					local hp = _G.SDK.HealthPrediction:GetPrediction(minion, self.Qdelay())
+					local hp = HealthPrediction:GetPrediction(minion, self.Qdelay())
 					local Qdmg = ({20, 45, 70, 95, 120})[myHero:GetSpellData(_Q).level] + myHero.totalDamage
-					if  hp > 0 and hp <= _G.SDK.Damage:CalculateDamage(myHero, minion, _G.SDK.DAMAGE_TYPE_PHYSICAL, Qdmg) then
+					if  hp > 0 and hp <= Damage:CalculateDamage(myHero, minion, DAMAGE_TYPE_PHYSICAL, Qdmg) then
 						self:CastQ(myHero, minion)
 						break
 					end
@@ -340,7 +347,7 @@ function Yasuo:OnClear()
 		end
 
 		--Jungle Q Logic
-		if self.Menu.Mode.JungleClear.Q:Value() and IsAutoAttacking(myHero) == false then
+		if self.Menu.Mode.JungleClear.Q:Value() and not IsAutoAttacking(myHero) then
 			local Monsters = GetMonsters(self.Q.range + 35)
 			for i = 1, #Monsters do
 				local minion = Monsters[i]
@@ -352,15 +359,15 @@ function Yasuo:OnClear()
 
 	if LocalGameCanUseSpell(_E) == READY then
 		--Lane E Logic
-		if self.Menu.Mode.LaneClear.E:Value() and IsAutoAttacking(myHero) == false then
+		if self.Menu.Mode.LaneClear.E:Value() and not IsAutoAttacking(myHero) then
 			local EnemyMinions = GetEnemyMinions(self.E.range)
 			for i = 1, #EnemyMinions do
 				local minion = EnemyMinions[i]
 				if HasBuff(minion, "YasuoDashWrapper") == false then
 					--Last Hit
-					local hp = _G.SDK.HealthPrediction:GetPrediction(minion, GetDistance(myHero.pos, minion.pos) * 0.00005)
+					local hp = HealthPrediction:GetPrediction(minion, GetDistance(myHero.pos, minion.pos) * 0.00005)
 					local Edmg = ({60, 70, 80, 90, 100})[myHero:GetSpellData(_E).level] + 0.2 * myHero.bonusDamage + 0.6 * myHero.ap
-					if  hp > 0 and hp <= _G.SDK.Damage:CalculateDamage(myHero, minion, _G.SDK.DAMAGE_TYPE_MAGICAL, Edmg) then
+					if  hp > 0 and hp <= Damage:CalculateDamage(myHero, minion, DAMAGE_TYPE_MAGICAL, Edmg) then
 						if self.Menu.Mode.LaneClear.EUnderTurret:Value() then
 							LocalControlCastSpell(HK_E, minion)
 							break
@@ -377,15 +384,15 @@ function Yasuo:OnClear()
 		end
 
 		--Jungle E Logic
-		if self.Menu.Mode.JungleClear.E:Value() and IsAutoAttacking(myHero) == false then
+		if self.Menu.Mode.JungleClear.E:Value() and not IsAutoAttacking(myHero) then
 			local Monsters = GetMonsters(self.E.range)
 			for i = 1, #Monsters do
 				local minion = Monsters[i]
 				if HasBuff(minion, "YasuoDashWrapper") == false then 
 					--Last Hit
-					local hp = _G.SDK.HealthPrediction:GetPrediction(minion, GetDistance(myHero.pos, minion.pos) * 0.00005)
+					local hp = HealthPrediction:GetPrediction(minion, GetDistance(myHero.pos, minion.pos) * 0.00005)
 					local Edmg = ({60, 70, 80, 90, 100})[myHero:GetSpellData(_E).level] + 0.2 * myHero.bonusDamage + 0.6 * myHero.ap
-					if  hp > 0 and hp <= _G.SDK.Damage:CalculateDamage(myHero, minion, _G.SDK.DAMAGE_TYPE_MAGICAL, Edmg) then
+					if  hp > 0 and hp <= Damage:CalculateDamage(myHero, minion, DAMAGE_TYPE_MAGICAL, Edmg) then
 						LocalControlCastSpell(HK_E, minion)
 						break
 					end
@@ -406,15 +413,15 @@ function Yasuo:OnLastHit()
 
 	if LocalGameCanUseSpell(_Q) == READY then
 		--Lane Q Logic
-		if self.Menu.Mode.LastHit.Q:Value() and IsAutoAttacking(myHero) == false then
+		if self.Menu.Mode.LastHit.Q:Value() and not IsAutoAttacking(myHero) then
 			--Q1
 			if HasBuff(myHero, "YasuoQ3W") == false then	
 				local EnemyMinions = GetEnemyMinions(self.Q.range + 35)
 				for i = 1, #EnemyMinions do
 					local minion = EnemyMinions[i]
-					local hp = _G.SDK.HealthPrediction:GetPrediction(minion, self.Qdelay())
+					local hp = HealthPrediction:GetPrediction(minion, self.Qdelay())
 					local Qdmg = ({20, 45, 70, 95, 120})[myHero:GetSpellData(_Q).level] + myHero.totalDamage
-					if  hp > 0 and hp <= _G.SDK.Damage:CalculateDamage(myHero, minion, _G.SDK.DAMAGE_TYPE_PHYSICAL, Qdmg) then
+					if  hp > 0 and hp <= Damage:CalculateDamage(myHero, minion, DAMAGE_TYPE_PHYSICAL, Qdmg) then
 						self:CastQ(myHero, minion)
 						break
 					end
@@ -425,15 +432,15 @@ function Yasuo:OnLastHit()
 
 	if LocalGameCanUseSpell(_E) == READY then
 		--Lane E Logic
-		if self.Menu.Mode.LastHit.E:Value() and IsAutoAttacking(myHero) == false then
+		if self.Menu.Mode.LastHit.E:Value() and not IsAutoAttacking(myHero) then
 			local EnemyMinions = GetEnemyMinions(self.E.range)
 			for i = 1, #EnemyMinions do
 				local minion = EnemyMinions[i]
 				if HasBuff(minion, "YasuoDashWrapper") == false then
 					--Last Hit
-					local hp = _G.SDK.HealthPrediction:GetPrediction(minion, GetDistance(myHero.pos, minion.pos) * 0.00005)
+					local hp = HealthPrediction:GetPrediction(minion, GetDistance(myHero.pos, minion.pos) * 0.00005)
 					local Edmg = ({60, 70, 80, 90, 100})[myHero:GetSpellData(_E).level] + 0.2 * myHero.bonusDamage + 0.6 * myHero.ap
-					if  hp > 0 and hp <= _G.SDK.Damage:CalculateDamage(myHero, minion, _G.SDK.DAMAGE_TYPE_MAGICAL, Edmg) then
+					if  hp > 0 and hp <= Damage:CalculateDamage(myHero, minion, DAMAGE_TYPE_MAGICAL, Edmg) then
 						local afterEPos = myHero.pos + Vector(myHero.pos, minion.pos):Normalized() * 475
 						if IsUnderTurret(afterEPos) == false then
 							LocalControlCastSpell(HK_E, minion)
@@ -478,6 +485,37 @@ function Yasuo:AutoHarass()
 	end
 end
 
+function Yasuo:KillSteal()
+
+	if self.Menu.KillSteal.Q:Value() and LocalGameCanUseSpell(_Q) == READY then
+		local EnemyHeroes = GetEnemyHeroes(self.Q.range + 35)
+		for i = 1, #EnemyHeroes do
+			local hero = EnemyHeroes[i]
+			if HasBuff(myHero, "YasuoQ3W") == false then
+				local hp = HealthPrediction:GetPrediction(hero, self.Qdelay())
+				local Qdmg = ({20, 45, 70, 95, 120})[myHero:GetSpellData(_Q).level] + myHero.totalDamage
+				if hp > 0 and hp <= Damage:CalculateDamage(myHero, hero, DAMAGE_TYPE_PHYSICAL, Qdmg) then
+					self:CastQ(myHero, hero)
+				end
+			end
+		end
+	end
+
+	if self.Menu.KillSteal.E:Value() and LocalGameCanUseSpell(_E) == READY then
+		local EnemyHeroes = GetEnemyHeroes(self.E.range)
+		for i = 1, #EnemyHeroes do
+			local hero = EnemyHeroes[i]
+			if HasBuff(hero, "YasuoDashWrapper") == false then
+				local Edmg = ({60, 70, 80, 90, 100})[myHero:GetSpellData(_E).level] + 0.2 * myHero.bonusDamage + 0.6 * myHero.ap
+				if hero.health <= Damage:CalculateDamage(myHero, hero, DAMAGE_TYPE_MAGICAL, Edmg) then
+					LocalControlCastSpell(HK_E, hero)
+				end
+			end
+		end
+	end
+
+end
+
 function Yasuo:AutoR()
 	if self.Menu.AutoR.R:Value() and LocalGameCanUseSpell(_R) == READY then
 		local EnemyHeroes = GetEnemyHeroes(self.R.range + 150)
@@ -512,139 +550,20 @@ function Yasuo:isKnockedUp(unit)
 	return false
 end
 
-local SpellsDatabase = {
-	["Aatrox"] = {"AatroxE"},
-	["Ahri"] = {"AhriOrbofDeception", "AhriFoxFire", "AhriSeduce", "AhriTumble"},
-	["Akali"] = {"AkaliMota"},
-	["Amumu"] = {"BandageToss"},
-	["Anivia"] = {"FlashFrost", "Frostbite"},
-	["Annie"] = {"Disintegrate"},
-	["Ashe"] = {"Volley", "EnchantedCrystalArrow"},
-	["AurelionSol"] = {"AurelionSolQ"},
-	["Bard"] = {"BardQ"},
-	["Blitzcrank"] = {"RocketGrab"},
-	["Brand"] = {"BrandQ", "BrandR"},
-	["Braum"] = {"BraumQ", "BraumR"},
-	["Caitlyn"] = {"CaitlynPiltoverPeacemaker", "CaitlynEntrapmentMissile", "CaitlynAceintheHole"},
-	["Cassiopeia"] = {"CassiopeiaW", "CassiopeiaTwinFang"},
-	["Corki"] = {"PhosphorusBomb", "MissileBarrageMissile", "MissileBarrageMissile2"},
-	["Diana"] = {"DianaArc", "DianaOrbs"},
-	["DrMundo"] = {"InfectedCleaverMissileCast"},
-	["Draven"] = {"DravenDoubleShot", "DravenRCast"},
-	["Ekko"] = {"EkkoQ"},
-	["Elise"] = {"EliseHumanQ", "EliseHumanE"},
-	["Evelynn"] = {"EvelynnQ"},
-	["Ezreal"] = {"EzrealMysticShot", "EzrealEssenceFlux", "EzrealArcaneShift", "EzrealTrueshotBarrage"},
-	["Fiddlesticks"] = {"FiddlesticksDarkWind"},
-	["Fiora"] = {"FioraW"},
-	["Fizz"] = {"FizzR"},
-	["Galio"] = {"GalioQ"},
-	["Gangplank"] = {"GangplankQ"},
-	["Gnar"] = {"GnarQ", "GnarBigQ"},
-	["Gragas"] = {"GragasQ", "GragasR"},
-	["Graves"] = {"GravesQLineSpell", "GravesSmokeGrenade", "GravesChargeShot"},
-	["Hecarim"] = {"HecarimUlt"},
-	["Heimerdinger"] = {"HeimerdingerQ", "HeimerdingerW", "HeimerdingerE", "HeimerdingerEUlt"},
-	["Illaoi"] = {"IllaoiE"},
-	["IreliaR"] = {"IreliaR"},
-	["Ivern"] = {"IvernQ"},
-	["Janna"] = {"HowlingGale", "SowTheWind"},
-	["Jayce"] = {"JayceShockBlast", "JayceShockBlastWallMis"},
-	["Jhin"] = {"JhinQ", "JhinW", "JhinR"},
-	["Jinx"] = {"JinxW", "JinxE", "JinxR"},
-	["Kaisa"] = {"KaisaQ", "KaisaW"},
-	["Kalista"] = {"KalistaMysticShot"},
-	["Karma"] = {"KarmaQ", "KarmaQMantra"},
-	["Kassadin"] = {"NullLance"},
-	["Katarina"] = {"KatarinaQ", "KatarinaR"},
-	["Kayle"] = {"JudicatorReckoning"},
-	["Kennen"] = {"KennenShurikenHurlMissile1"},
-	["Khazix"] = {"KhazixW", "KhazixWLong"},
-	["Kindred"] = {"KindredQ", "KindredE"},
-	["Kled"] = {"KledQ", "KledQRider"},
-	["KogMaw"] = {"KogMawQ", "KogMawVoidOoze"},
-	["Leblanc"] = {"LeblancQ", "LeblancE", "LeblancRQ", "LeblancRE"},
-	["Leesin"] = {"BlinkMonkQOne"},
-	["Leona"] = {"LeonaZenithBlade"},
-	["Lissandra"] = {"LissandraQ", "LissandraE"},
-	["Lucian"] = {"LucianW", "LucianRMis"},
-	["Lulu"] = {"LuluQ", "LuluW"},
-	["Lux"] = {"LuxLightBinding", "LuxPrismaticWave", "LuxLightStrikeKugel"},
-	["Malphite"] = {"SeismicShard"},
-	["Maokai"] = {"MaokaiQ", "MaokaiR"},
-	["MissFortune"] = {"MissFortuneRicochetShot", "MissFortuneBulletTime"},
-	["Morgana"] = {"DarkBindingMissile"},
-	["Nami"] = {"NamiQ", "NamiW", "NamiR"},
-	["Nautilus"] = {"NautilusAnchorDrag"},
-	["Nidalee"] = {"JavelinToss"},
-	["Nocturne"] = {"NocturneDuskbringer"},
-	["Nunu"] = {"IceBlast"},
-	["Olaf"] = {"OlafAxeThrowCast"},
-	["Orianna"] = {"OrianaIzunaCommand", "OrianaRedactCommand"},
-	["Ornn"] = {"OrnnQ", "OrnnR"},
-	["Pantheon"] = {"PantheonQ"},
-	["Poppy"] = {"PoppyRSpell"},
-	["Quinn"] = {"QuinnQ"},
-	["Rakan"] = {"RakanQ"},
-	["Reksai"] = {"RekSaiQBurrowed"},
-	["Rengar"] = {"RengarE"},
-	["Riven"] = {"RivenIzunaBlade"},
-	["Rumble"] = {"RumbleGrenade"},
-	["Ryze"] = {"RyzeQ", "RyzeE"},
-	["Sejuani"] = {"SejuaniE", "SejuaniR"},
-	["Shaco"] = {"TwoShivPoison"},
-	["Shyvana"] = {"ShyvanaFireball", "ShyvanaFireballDragon2"},
-	["Sion"] = {"SionE"},
-	["Sivir"] = {"SivirQ"},
-	["Skarner"] = {"SkarnerFracture"},
-	["Sona"] = {"SonaQ", "SonaR"},
-	["Swain"] = {"SwainE"},
-	["Syndra"] = {"SyndraR"},
-	["TahmKench"] = {"TahmKenchQ"},
-	["Taliyah"] = {"TaliyahQ"},
-	["Talon"] = {"TalonW", "TalonR"},
-	["Teemo"] = {"BlindingDart", "TeemoRCast"},
-	["Thresh"] = {"ThreshQ"},
-	["Tristana"] = {"TristanaE", "TristanaR"},
-	["TwistedFate"] = {"WildCards"},
-	["Twitch"] = {"TwitchVenomCask"},
-	["Urgot"] = {"UrgotQ", "UrgotR"},
-	["Varus"] = {"VarusQ", "VarusR"},
-	["Vayne"] = {"VayneCondemn", "VayneCondemnMissile"},
-	["Veigar"] = {"VeigarBalefulStrike", "VeigarR"},
-	["VelKoz"] = {"VelKozQ", "VelkozQMissileSplit", "VelKozW", "VelKozE"},
-	["Viktor"] = {"ViktorPowerTransfer", "ViktorDeathRay"},
-	["Vladimir"] = {"VladimirE"},
-	["Xayah"] = {"XayahQ", "XayahE", "XayahR"},
-	["Xerath"] = {"XerathMageSpear"},
-	["Yasuo"] = {"YasuoQ3W"},
-	["Yorick"] = {"YorickE"},
-	["Zac"] = {"ZacQ"},
-	["Zed"] = {"ZedQ"},
-	["Ziggs"] = {"ZiggsQ", "ZiggsW", "ZiggsE"},
-	["Zilean"] = {"ZileanQ", "ZileanQAttachAudio"},
-	["Zoe"] = {"ZoeQ", "ZoeQRecast", "ZoeE"},
-	["Zyra"] = {"ZyraE"},
-}
-
 function OnTick()
 	for i = 1, LocalGameHeroCount() do
 		local hero = LocalGameHero(i);
 		if hero.isEnemy then
-			if hero.activeSpell.valid and hero.activeSpell.width > 0 and hero.activeSpell.range > 0  and hero.activeSpell.speed > 0 then
-				local t = SpellsDatabase[hero.charName]
-				if t then
-					for j = 1, #t do
-						if hero.activeSpell.name == t[j] then
-							if IncSpells[hero.networkID] == nil then
-								IncSpells[hero.networkID] = {	sPos = hero.activeSpell.startPos, 
-																ePos = hero.activeSpell.startPos + Vector(hero.activeSpell.startPos, hero.activeSpell.placementPos):Normalized() * hero.activeSpell.range, 
-																radius = hero.activeSpell.width, 
-																speed = hero.activeSpell.speed, 
-																startTime = hero.activeSpell.startTime
-															}
-							end
-						end
+			if hero.activeSpell.valid and hero.isChanneling then
+				if hero.activeSpell.width > 0 and hero.activeSpell.range > 0  and hero.activeSpell.speed > 0 then
+					if IncSpells[hero.networkID] == nil then
+						IncSpells[hero.networkID] = {	sPos 		= 	hero.activeSpell.startPos, 
+														ePos 		= 	hero.activeSpell.startPos + Vector(hero.activeSpell.startPos, hero.activeSpell.placementPos):Normalized() * hero.activeSpell.range, 
+														radius 		= 	hero.activeSpell.width, 
+														speed 		= 	hero.activeSpell.speed, 
+														castEndTime = 	hero.activeSpell.castEndTime,
+														endTime 	= 	hero.activeSpell.endTime,
+													}
 					end
 				end
 			end
@@ -656,21 +575,22 @@ end
 function Yasuo:AutoW()
 
 	for key, v in pairs(IncSpells) do
-		local spellOnMe = v.sPos + Vector(v.sPos,v.ePos):Normalized() * GetDistance(myHero.pos,v.sPos)
-		local spellPos = v.sPos + Vector(v.sPos,v.ePos):Normalized() * (v.speed * (LocalGameTimer() - v.startTime) * 3)
-		local dodgeHere = spellPos + Vector(v.sPos,v.ePos):Normalized() * (v.speed * 0.1)
-		if GetDistanceSqr(spellOnMe,spellPos) <= GetDistanceSqr(dodgeHere,spellPos) and GetDistance(spellOnMe,v.sPos) - v.radius - myHero.boundingRadius <= GetDistance(v.sPos,v.ePos) then
-			if GetDistanceSqr(myHero.pos,spellOnMe) < (v.radius + myHero.boundingRadius) ^ 2 then
-				if LocalGameCanUseSpell(_W) == READY and self.Menu.AutoW.W:Value() then
-					local castPos = myHero.pos + Vector(myHero.pos,v.sPos):Normalized() * 100
-					LocalControlCastSpell(HK_W, castPos)
+		if LocalGameTimer() >= v.endTime then IncSpells[key] = nil break end
+
+		if LocalGameTimer() >= v.castEndTime then
+			local spellOnMe = v.sPos + Vector(v.sPos,v.ePos):Normalized() * GetDistance(myHero.pos,v.sPos)
+			local spellPos = v.sPos + Vector(v.sPos,v.ePos):Normalized() * (v.speed * (LocalGameTimer() - v.castEndTime) * 3)
+			local dodgeHere = spellPos + Vector(v.sPos,v.ePos):Normalized() * (v.speed * 0.15)
+			if GetDistanceSqr(spellOnMe,spellPos) <= GetDistanceSqr(dodgeHere,spellPos) and GetDistance(spellOnMe,v.sPos) - v.radius - myHero.boundingRadius <= GetDistance(v.sPos,v.ePos) then
+				if GetDistanceSqr(myHero.pos,spellOnMe) < (v.radius + myHero.boundingRadius) ^ 2 then
+					if LocalGameCanUseSpell(_W) == READY and self.Menu.AutoW.W:Value() then
+						local castPos = myHero.pos + Vector(myHero.pos,v.sPos):Normalized() * 100
+						LocalControlCastSpell(HK_W, castPos)
+					end
 				end
 			end
 		end
 
-		if (GetDistanceSqr(spellPos,v.sPos) >= GetDistanceSqr(v.sPos,v.ePos)) then
-			IncSpells[key] = nil
-		end
 	end
 
 end
@@ -753,7 +673,7 @@ function GetDistance(a, b)
 end
 
 function IsAutoAttack(name)
-	return name:lower():find("attack") and false
+	return name:lower():find("attack")
 end
 
 function IsAutoAttacking(unit)
@@ -761,6 +681,13 @@ function IsAutoAttacking(unit)
 		if unit.activeSpell.target > 0 then
 			return IsAutoAttack(unit.activeSpell.name);
 		end
+	end
+	return false;
+end
+
+function IsCastingSpell(unit)
+	if unit.activeSpell.valid then
+		return unit.isChanneling;
 	end
 	return false;
 end
@@ -831,4 +758,19 @@ function GetPosTo(unit)
 	return Waypoint == Origin and Origin or Origin + Vector(Origin, Waypoint):Normalized() * (GetDistance(myHero.pos, Origin) * 0.00005 + LocalGameLatency() * 0.002) * unit.ms
 end
 
-Yasuo()
+function OnLoad()
+	if myHero.charName ~= "Yasuo" then return end
+	DelayAction(function ()
+		OnGameStart()
+		PrintChat("JarKao's Yasuo v" .. VERSION .. " is loading.")
+	end, 5)
+end
+
+function OnGameStart()
+	TargetSelector 			= 	_G.SDK.TargetSelector
+	DAMAGE_TYPE_PHYSICAL	=	_G.SDK.DAMAGE_TYPE_PHYSICAL
+	DAMAGE_TYPE_MAGICAL 	= 	_G.SDK.DAMAGE_TYPE_MAGICAL
+	HealthPrediction 		= 	_G.SDK.HealthPrediction
+	Damage 					= 	_G.SDK.Damage
+	Yasuo()
+end
